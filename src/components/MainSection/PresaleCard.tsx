@@ -16,10 +16,11 @@ const PresaleCard = () => {
                 linear-gradient(0deg, #242424, #242424) border-box
             `,
             position: "relative",
+            overflow: "hidden",
         }}>
-            <Image src={vector1} alt="vector1" width={200} height={200} style={{ position: "absolute", bottom: 0, left: 0 }} />
-            <Image src={vector2} alt="vector2" width={100} height={100} style={{ position: "absolute", bottom: 0, left: 0, marginBottom: -5, marginLeft: -5 }} />
-            <Image src={vector3} alt="vector3" width={200} height={200} style={{ position: "absolute", top: 0, right: 0 }} />
+            <Image src={vector1} alt="vector1" width={230} height={230} style={{ position: "absolute", bottom: 0, left: 0, zIndex: 0 }} />
+            <Image src={vector2} alt="vector2" width={100} height={100} style={{ position: "absolute", bottom: 0, left: 0, zIndex: 0, opacity: 0.8, marginBottom: -5, marginLeft: -5 }} />
+            <Image src={vector3} alt="vector3" width={230} height={230} style={{ position: "absolute", top: 0, right: 0, zIndex: 0 }} />
             <Typography variant="h5" sx={{
                 fontWeight: 600,
                 fontSize: "1.5rem",
@@ -86,11 +87,12 @@ const PresaleCard = () => {
                 </Stack>
 
             </Stack>
-            <Stack width={"100%"} gap={1}>
-                <Typography variant="subtitle2" sx={{
+            <Stack width={"100%"} gap={1} position={"relative"} zIndex={5}>
+                <Typography variant="subtitle1" sx={{
                     fontWeight: 400,
                     fontSize: "0.875rem",
-                    color: theme.palette.text.secondary,
+                    color: theme.palette.text.primary,
+                    fontStyle: "italic",
                 }}>
                     Status
                 </Typography>
