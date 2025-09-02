@@ -52,10 +52,6 @@ const Registration = () => {
                 borderRadius: 2,
                 padding: 1,
                 border: `1px solid ${theme.palette.headerBorder.main}`,
-                cursor: "pointer",
-                "&:hover": {
-                    border: `1px solid ${theme.palette.uranoGreen1.main}`,
-                },
             }}>
                 <Box sx={{
                     display: "flex",
