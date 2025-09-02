@@ -2,6 +2,7 @@
 import { Typography, Stack } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import Registration from "./Registration";
+import PresaleCard from "./PresaleCard";
 
 const MainSection = () => {
     const theme = useTheme();
@@ -58,7 +59,7 @@ const MainSection = () => {
             </Stack>
             <Stack width={"40%"} flexGrow={1} gap={4}>
                 <Registration />
-                
+                <PresaleCard />
             </Stack>
         </Stack>
     )
