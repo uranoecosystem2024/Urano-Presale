@@ -1,4 +1,5 @@
 'use client';
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 
 import * as React from 'react';
 import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
