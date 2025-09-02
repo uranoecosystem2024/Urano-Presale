@@ -1,8 +1,9 @@
 "use client"
 
-import { Stack, Typography } from "@mui/material"
+import { Stack, Typography, Box, Link } from "@mui/material"
 import { useTheme, type Theme } from "@mui/material/styles"
 import Union from "@/assets/images/Union.png"
+import img1 from "@/assets/images/img1.webp"
 import Image from "next/image"
 
 const HowItWorks = () => {
@@ -42,7 +43,7 @@ const HowItWorks = () => {
                 position: "relative",
                 zIndex: 2,
             }}>
-                <Stack width={"20%"} gap={1}>
+                <Stack width={"22%"} gap={1}>
                     <Typography variant="subtitle1" color={"#fff"} sx={{
                         fontWeight: 500,
                         fontSize: 16,
@@ -54,7 +55,7 @@ const HowItWorks = () => {
                     }}>Real-world assets are digitized into secure, compliant tokens.</Typography>
                 </Stack>
 
-                <Stack width={"20%"} gap={1}>
+                <Stack width={"22%"} gap={1}>
                     <Typography variant="subtitle1" sx={{
                         fontWeight: 500,
                         fontSize: 16,
@@ -66,7 +67,7 @@ const HowItWorks = () => {
                     }}>Access fractional ownership with low entry barriers</Typography>
                 </Stack>
 
-                <Stack width={"20%"} gap={1}>
+                <Stack width={"22%"} gap={1}>
                     <Typography variant="subtitle1" sx={{
                         fontWeight: 500,
                         fontSize: 16,
@@ -78,16 +79,31 @@ const HowItWorks = () => {
                     }}>Receive returns and settlements instantly via blockchain.</Typography>
                 </Stack>
 
-                <Stack width={"20%"} gap={1}>
-                    <Typography variant="subtitle1" sx={{
-                        fontWeight: 500,
-                        fontSize: 16,
-                    }}>Tokenisation</Typography>
-                    <Typography variant="body2" sx={{
-                        fontWeight: 400,
-                        fontSize: 14,
-                        color: theme.palette.text.secondary,
-                    }}>Real-world assets are digitized into secure, compliant tokens.</Typography>
+                <Stack width={"22%"} alignItems={"center"} justifyContent={"end"}marginTop={-2}>
+                    <Image src={img1} alt="img1" width={220} height={150} />
+                    <Link href="/" underline="none">
+                        <Box sx={{
+                            marginTop: -4,
+                            backgroundColor: theme.palette.secondary.main,
+                            border: `1px solid ${theme.palette.headerBorder.main}`,
+                            borderRadius: 2,
+                            boxShadow: 2,
+                            paddingX: 3,
+                            paddingY: 1,
+                            marginLeft: 1,
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            "&:hover": {
+                                background: theme.palette.uranoGradient,
+                                "&:hover .connectWalletLink": {
+                                    color: theme.palette.info.main,
+                                },
+                            },
+                        }}>
+                            <Typography variant="body1" fontWeight={400} color={theme.palette.text.disabled} className="connectWalletLink">Compliance Note</Typography>
+                        </Box>
+                    </Link>
                 </Stack>
             </Stack>
         </Stack>
