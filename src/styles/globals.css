@@ -1,4 +1,11 @@
 
+html, body {
+  background-color: #131313;
+  max-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
+}
+
 .main-gradient {
   background: linear-gradient(90deg, #5EBBC3 0%, #6DE7C2 100%);
 }

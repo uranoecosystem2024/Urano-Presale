@@ -6,7 +6,7 @@ import { Host_Grotesk } from "next/font/google";
 import { Providers } from "@/app/providers"
 
 import { Container } from "@mui/material";
-
+import BottomGradient from "@/components/BottomGradient";
 export const metadata: Metadata = {
   title: "Urano - Presale",
   description: "Urano Ecosystem - $URANO Token Presale",
@@ -27,6 +27,7 @@ export default function RootLayout({
           <Container maxWidth="xl">
             {children}
           </Container>
+          <BottomGradient />
         </Providers>
       </body>
     </html>
