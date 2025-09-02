@@ -3,7 +3,9 @@ import "@/styles/globals.css";
 import { type Metadata } from "next";
 import { Host_Grotesk } from "next/font/google";
 
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v15-appRouter';
+import { Providers } from "@/app/providers"
+
+import { Container } from "@mui/material";
 
 export const metadata: Metadata = {
   title: "Urano - Presale",
@@ -21,9 +23,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={hostGrotesk.className}>
-        <AppRouterCacheProvider>
-          {children}
-        </AppRouterCacheProvider>
+        <Providers>
+          <Container maxWidth="xl">
+            {children}
+          </Container>
+        </Providers>
       </body>
     </html>
   );
