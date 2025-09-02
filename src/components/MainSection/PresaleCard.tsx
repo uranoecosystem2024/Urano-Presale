@@ -1,15 +1,18 @@
-import { Stack, Typography, Box } from "@mui/material";
+
+"use client"
+
+import { Stack, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import Image from "next/image";
 import vector1 from "@/assets/images/Vector1.webp";
 import vector2 from "@/assets/images/Vector2.webp";
 import vector3 from "@/assets/images/Vector3.webp";
-
+import StatusBar from "@/components/MainSection/statusBar";
 const PresaleCard = () => {
     const theme = useTheme();
     return (
         <Stack width={"100%"} alignItems={"center"} borderRadius={2} padding={2} gap={2} sx={{
-            border: "1px solid transparent", // needed for the border area
+            border: "1px solid transparent",
             background: `
                 linear-gradient(${theme.palette.presaleCardBg.main}, ${theme.palette.presaleCardBg.main}) padding-box,
                 linear-gradient(260.63deg, rgba(107, 226, 194, 0.82) 2.15%, rgba(0, 0, 0, 0) 52.96%, #6BE2C2 100%) border-box,
@@ -96,11 +99,8 @@ const PresaleCard = () => {
                 }}>
                     Status
                 </Typography>
-                <Stack width={"100%"} height={20} direction={"row"} justifyContent={"space-between"} alignItems={"center"} sx={{
-                    background: "green",
-                    borderRadius: 2,
-                    padding: 1,
-                }}>
+                <Stack width={"100%"}>
+                    <StatusBar />
                 </Stack>
             </Stack>
         </Stack>
