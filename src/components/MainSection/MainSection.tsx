@@ -1,12 +1,13 @@
 "use client"
 import { Typography, Stack } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
+import Registration from "./Registration";
 
 const MainSection = () => {
     const theme = useTheme();
     return (
-        <Stack width={"100%"} flex={1} direction={"row"} justifyContent={"space-between"} alignItems={"center"} paddingY={4}>
-            <Stack width={"45%"} height={"100%"} gap={4}>
+        <Stack width={"100%"} flex={1} direction={"row"} justifyContent={"space-between"} alignItems={"stretch"} paddingY={4}>
+            <Stack width={"60%"} flexGrow={1} gap={4}>
                 <Typography variant="h3" sx={{
                     fontSize: "2.85rem",
                     fontWeight: 700,
@@ -54,6 +55,10 @@ const MainSection = () => {
                         Instant Settlement – <span style={{ fontWeight: 300 }}>Blockchain-powered transactions, fast and transparent</span>
                     </Typography>
                 </Stack>
+            </Stack>
+            <Stack width={"40%"} flexGrow={1} gap={4}>
+                <Registration />
+                
             </Stack>
         </Stack>
     )
