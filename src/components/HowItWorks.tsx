@@ -24,8 +24,8 @@ const HowItWorks = () => {
                 position: "absolute",
                 top: 0,
                 left: 0,
-                marginTop: 1.5,
-                marginLeft: 5.5,
+                marginTop: "1%",
+                marginLeft: "3.75%",
                 zIndex: 2,
 
             }}>How it works</Typography>
