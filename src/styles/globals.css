@@ -1,9 +1,7 @@
-
 html, body {
   background-color: #131313;
-  max-height: 100vh;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100dvh;  /* or 100% */
+  /* remove height: fit-content !important; */
 }
 
 .main-gradient {

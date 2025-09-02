@@ -79,6 +79,9 @@ const themeOptions: ThemeOptions = {
       tonalOffset: 0.2,
       contrastThreshold: 3,
     },
+    typography: {
+      fontFamily: 'Host Grotesk',
+    },
   };
 
 const theme: Theme = createTheme(themeOptions);
