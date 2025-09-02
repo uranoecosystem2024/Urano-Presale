@@ -13,7 +13,7 @@ export default function Home() {
       py={3}
     >
       <Header />
-      <Stack flex={1} px={5} py={2} justifyContent="end" gap={4}>
+      <Stack flex={1} px={5} py={4} justifyContent="end" gap={4}>
         <MainSection />
         <HowItWorks />
       </Stack>

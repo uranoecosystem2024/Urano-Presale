@@ -3,11 +3,11 @@ import { Typography, Stack } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import Registration from "./Registration";
 import PresaleCard from "./PresaleCard";
-
+import TokensSelection from "./TokensSelection";
 const MainSection = () => {
     const theme = useTheme();
     return (
-        <Stack width={"100%"} flex={1} direction={"row"} justifyContent={"space-between"} alignItems={"stretch"} paddingY={4}>
+        <Stack width={"100%"} flex={1} direction={"row"} justifyContent={"space-between"} alignItems={"stretch"} paddingTop={2} paddingBottom={4}>
             <Stack width={"60%"} flexGrow={1} gap={4}>
                 <Typography variant="h3" sx={{
                     fontSize: "2.85rem",
@@ -60,6 +60,7 @@ const MainSection = () => {
             <Stack width={"40%"} flexGrow={1} gap={3}>
                 <Registration />
                 <PresaleCard />
+                <TokensSelection />
             </Stack>
         </Stack>
     )
