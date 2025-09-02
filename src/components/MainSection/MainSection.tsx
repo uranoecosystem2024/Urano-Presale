@@ -57,7 +57,7 @@ const MainSection = () => {
                     </Typography>
                 </Stack>
             </Stack>
-            <Stack width={"40%"} flexGrow={1} gap={4}>
+            <Stack width={"40%"} flexGrow={1} gap={3}>
                 <Registration />
                 <PresaleCard />
             </Stack>

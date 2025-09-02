@@ -23,6 +23,9 @@ declare module "@mui/material/styles" {
       footerBorder: {
         main: string
       }
+      presaleCardBg: {
+        main: string
+      }
     }
   
     interface PaletteOptions {
@@ -46,6 +49,9 @@ declare module "@mui/material/styles" {
       footerBorder: {
         main: string
       }
+      presaleCardBg: {
+        main: string
+      }
     }
   }
 
@@ -60,6 +66,7 @@ const themeOptions: ThemeOptions = {
       footerBorder: { main: '#2E2E2E' },
       cardBorder1: { main: '#242424' },
       cardBorder2: 'linear-gradient(0deg, #242424, #242424), linear-gradient(260.63deg, rgba(107, 226, 194, 0.82) 2.15%, rgba(0, 0, 0, 0) 52.96%, #6BE2C2 100%)',
+      presaleCardBg: { main: 'rgba(24, 24, 24, 1)' },
       primary: { main: '#000000' },
       secondary: { main: '#2D2D2D' },
       background: { default: '#131313', paper: '#151515' },
