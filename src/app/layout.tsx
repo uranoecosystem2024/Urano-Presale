@@ -24,7 +24,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={hostGrotesk.className}>
         <Providers>
-          <Container maxWidth="xl">
+          <Container maxWidth="xl" sx={{ position: 'relative', zIndex: 5 }}>
             {children}
           </Container>
           <BottomGradient />
