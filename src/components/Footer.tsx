@@ -17,7 +17,9 @@ const Footer = () => {
             paddingX: 5,
         }}>
             <Link href="/">
-                <Image src={logo} alt="Logo" width={100} height={65} />
+                <Image src={logo} alt="Logo" width={100} height={65} style={{
+                    scale: 1.2,
+                }} />
             </Link>
             <Stack direction="row" justifyContent="center" alignItems="center" gap={2}>
                 <Link href="/" underline="none">
