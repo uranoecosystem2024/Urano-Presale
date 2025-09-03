@@ -30,7 +30,7 @@ const MainSection = () => {
                         fontWeight: 500,
                         color: theme.palette.text.primary,
                     }}>
-                        A compliant platform for tokenizing Real World Assets
+                        The gateway to Real World Assets tokenization
                     </Typography>
                 </Stack>
                 <Stack gap={1.5}>
