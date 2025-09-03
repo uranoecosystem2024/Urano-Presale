@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Paper, Typography, Button, IconButton, Stack } from '@mui/material';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import CookieRoundedIcon from '@mui/icons-material/CookieRounded';
@@ -27,26 +27,48 @@ const CookieBot = () => {
 
 export default function CookieConsent() {
     const theme = useTheme<Theme>();
+    const [showBanner, setShowBanner] = useState<boolean>(false);
 
-    // Check if consent is already given from localStorage
+    // Check if consent has already been given on previous visits
     useEffect(() => {
         const consentGiven = localStorage.getItem('cookieConsent');
-        if (consentGiven) {
-            return; // If consent is already given, no need to show the banner
+        if (!consentGiven) {
+            setShowBanner(true); // Show the banner if no consent is stored
         }
     }, []);
 
     // Handle Accept and Decline actions
     const handleAccept = () => {
+        // Set the consent in localStorage as 'true'
         localStorage.setItem('cookieConsent', 'true');
-        // You can close or hide the banner here
-        // E.g., use some state to hide it or remove from the DOM
+        setShowBanner(false); // Hide the banner after acceptance
+        // Here you can also activate non-essential cookies like analytics
+        enableNonEssentialCookies(); // A function you might create to load analytics, etc.
     };
 
     const handleDecline = () => {
+        // Set the consent in localStorage as 'false'
         localStorage.setItem('cookieConsent', 'false');
-        // Close or hide the banner here
+        setShowBanner(false); // Hide the banner after decline
+        // Ensure non-essential cookies are not set
+        disableNonEssentialCookies(); // A function you might create to block analytics, etc.
     };
+
+    // Function to handle non-essential cookies activation (e.g. analytics)
+    const enableNonEssentialCookies = () => {
+        // Example: Add script or cookies for analytics/advertising
+        console.log('Non-essential cookies enabled.');
+    };
+
+    // Function to block non-essential cookies if declined
+    const disableNonEssentialCookies = () => {
+        // Example: Remove or block analytics/advertising cookies
+        console.log('Non-essential cookies disabled.');
+    };
+
+    if (!showBanner) {
+        return null; // Don't show the banner if it's not necessary
+    }
 
     return (
         <>
@@ -95,6 +117,7 @@ export default function CookieConsent() {
                                     color: 'text.secondary',
                                     '&:hover': { bgcolor: 'rgba(255,255,255,0.06)' },
                                 }}
+                                onClick={() => setShowBanner(false)} // Close the banner manually if clicked
                             >
                                 <CloseRoundedIcon />
                             </IconButton>
@@ -120,7 +143,7 @@ export default function CookieConsent() {
                                         '&:hover': { bgcolor: '#3A3A3A' },
                                         height: 'fit-content',
                                     }}
-                                    onClick={handleDecline}
+                                    onClick={handleDecline} // Decline the cookies
                                 >
                                     Decline
                                 </Button>
@@ -138,7 +161,7 @@ export default function CookieConsent() {
                                         '&:hover': { filter: 'brightness(1.05)' },
                                         height: 'fit-content',
                                     }}
-                                    onClick={handleAccept}
+                                    onClick={handleAccept} // Accept the cookies
                                 >
                                     Accept cookies
                                 </Button>
