@@ -1,12 +1,16 @@
+"use client"
+
+import { useState } from "react";
 import { Stack, Typography, Box } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { IoChevronForward } from "react-icons/io5";
-
-
+import SubscriptionModal from "../SubscriptionModal";
 
 const Registration = () => {
     const theme = useTheme();
+    const [open, setOpen] = useState(false);
     return (
+        <>
         <Stack width={"100%"} direction={"row"} justifyContent={"space-between"} alignItems={"center"}>
             <Stack width={"40%"} direction={"row"} alignItems={"center"} gap={4} sx={{
                 background: theme.palette.background.paper,
@@ -17,7 +21,9 @@ const Registration = () => {
                 "&:hover": {
                     border: `1px solid ${theme.palette.uranoGreen1.main}`,
                 },
-            }}>
+            }}
+                onClick={() => setOpen(true)}
+            >
                 <Box sx={{
                     display: "flex",
                     justifyContent: "center",
@@ -89,6 +95,9 @@ const Registration = () => {
             </Stack>
 
         </Stack>
+        <SubscriptionModal open={open} onClose={() => setOpen(false)} />
+        
+        </>
     )
 }
 
