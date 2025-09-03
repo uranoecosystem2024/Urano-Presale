@@ -106,6 +106,21 @@ const HowItWorks = () => {
                     </Link>
                 </Stack>
             </Stack>
+            <Box sx={{
+                width: "100%",
+                height: 5,
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                zIndex: 5,
+                paddingX: 5,
+            }} >
+                <Box sx={{
+                    width: "calc(66% + 8rem)",
+                    height: "100%",
+                    borderBottom: `3px solid ${theme.palette.uranoGreen1.main}`,
+                }} />
+            </Box>
         </Stack>
     )
 }
