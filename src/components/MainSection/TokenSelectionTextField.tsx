@@ -52,7 +52,7 @@ export default function StablecoinField({
               disableRipple
               sx={{
                 px: 1,
-                py: 0.5,
+                py: 1,
                 minWidth: 0,
                 gap: 1,
                 borderRadius: 1,
@@ -67,7 +67,7 @@ export default function StablecoinField({
                 sx={{ width: 24, height: 24 }}
                 imgProps={{ draggable: false }}
               />
-              <Box component="span" sx={{ fontWeight: 600, fontSize: 16 }}>
+              <Box component="span" sx={{ fontWeight: 400, fontSize: 16 }}>
                 {tokenSymbol}
               </Box>
               <ExpandMoreRoundedIcon fontSize="small" />
