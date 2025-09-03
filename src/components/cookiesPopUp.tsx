@@ -17,6 +17,7 @@ const CookieBot = () => {
             script.setAttribute('data-cbid', 'a3097d16-9acc-4908-a8f0-b9d08617da92');
             script.setAttribute('data-blockingmode', 'auto');
             script.setAttribute('data-language', 'en');
+            script.setAttribute('data-no-banner', 'true'); // Disable CookieBot's default banner
             document.body.appendChild(script);
         }
     }, []);
@@ -26,6 +27,27 @@ const CookieBot = () => {
 
 export default function CookieConsent() {
     const theme = useTheme<Theme>();
+
+    // Check if consent is already given from localStorage
+    useEffect(() => {
+        const consentGiven = localStorage.getItem('cookieConsent');
+        if (consentGiven) {
+            return; // If consent is already given, no need to show the banner
+        }
+    }, []);
+
+    // Handle Accept and Decline actions
+    const handleAccept = () => {
+        localStorage.setItem('cookieConsent', 'true');
+        // You can close or hide the banner here
+        // E.g., use some state to hide it or remove from the DOM
+    };
+
+    const handleDecline = () => {
+        localStorage.setItem('cookieConsent', 'false');
+        // Close or hide the banner here
+    };
+
     return (
         <>
             <CookieBot />
@@ -69,7 +91,7 @@ export default function CookieConsent() {
                                 sx={{
                                     ml: 1,
                                     alignSelf: 'flex-start',
-                                    bgcolor: "transparent",
+                                    bgcolor: 'transparent',
                                     color: 'text.secondary',
                                     '&:hover': { bgcolor: 'rgba(255,255,255,0.06)' },
                                 }}
@@ -78,7 +100,7 @@ export default function CookieConsent() {
                             </IconButton>
                         </Stack>
                         <Stack width="100%" direction="row" alignItems="end" justifyContent="space-between" gap={2}>
-                            <Typography variant="body1" color="text.secondary" sx={{ width: "70%" }}>
+                            <Typography variant="body1" color="text.secondary" sx={{ width: '70%' }}>
                                 This site uses strictly necessary cookies to ensure secure and optimal navigation.
                                 By continuing, you confirm that you are at least 18 years old, are not a resident or citizen
                                 of the USA, the UK, or any other restricted jurisdiction, including but not limited to those
@@ -96,8 +118,9 @@ export default function CookieConsent() {
                                         px: 3,
                                         py: 1.25,
                                         '&:hover': { bgcolor: '#3A3A3A' },
-                                        height: "fit-content",
+                                        height: 'fit-content',
                                     }}
+                                    onClick={handleDecline}
                                 >
                                     Decline
                                 </Button>
@@ -113,10 +136,9 @@ export default function CookieConsent() {
                                         py: 1.25,
                                         boxShadow: 'none',
                                         '&:hover': { filter: 'brightness(1.05)' },
-                                        height: "fit-content",
-                                        width: "fit-content",
-                                        whiteSpace: "nowrap",
+                                        height: 'fit-content',
                                     }}
+                                    onClick={handleAccept}
                                 >
                                     Accept cookies
                                 </Button>
