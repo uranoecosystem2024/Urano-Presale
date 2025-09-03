@@ -4,8 +4,6 @@ import {
     Stack,
     Typography,
     Button,
-    IconButton,
-    TextField,
     Box,
     useTheme,
     type Theme,
@@ -14,7 +12,6 @@ import {
     FormControl,
     OutlinedInput
 } from '@mui/material';
-import CloseIcon from '@mui/icons-material/Close';
 import Image from 'next/image';
 import popupbg from "@/assets/images/pop-up-bg.webp";
 
@@ -44,8 +41,15 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose }) 
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        // Handle form submission here
-        console.log('Email submitted:', email);
+
+        // Prevent submission if email is invalid
+        if (emailError) {
+            return;
+        }
+
+        // Perform Web3Forms submission programmatically after validation
+        const form = e.target as HTMLFormElement;
+        form.submit(); // This will trigger the form submission to Web3Forms API
     };
 
     return (
@@ -141,6 +145,8 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose }) 
                                 Just enter your email to get started.
                             </Typography>
                         </Stack>
+                        <form action="https://api.web3forms.com/submit" method="POST" style={{ width: "100%" }} onSubmit={handleSubmit}>
+                        <input type="hidden" name="access_key" value="5e98fa64-78e9-4400-815c-9c742cb8d35b" />
                         <Stack width={"100%"} alignItems={"center"} gap={2}>
                             <Stack width={"100%"} gap={1}>
                                 <FormControl fullWidth variant="outlined">
@@ -185,6 +191,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose }) 
                             </Stack>
                             <Button
                                 variant="contained"
+                                type="submit"
                                 sx={{
                                     background: theme.palette.secondary.main,
                                     borderRadius: '8px',
@@ -209,6 +216,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose }) 
                                 </Typography>
                             </Button>
                         </Stack>
+                        </form>
                     </Stack>
 
                 </Box>
