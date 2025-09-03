@@ -4,7 +4,7 @@ import { Host_Grotesk } from "next/font/google";
 import { Providers } from "@/app/providers";
 import { Box, Container } from "@mui/material";
 import BottomGradient from "@/components/BottomGradient";
-
+import CookieConsent from "@/components/cookiesPopUp";
 export const metadata: Metadata = {
   title: "Urano - Presale",
   description: "Urano Ecosystem - $URANO Token Presale",
@@ -25,6 +25,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               sx={{ position: "relative", zIndex: 1, height: "fit-content" }}
             >
               {children}
+              <CookieConsent />
             </Container>
             <BottomGradient />
           </Box>
