@@ -7,10 +7,10 @@ import TokensSelection from "./TokensSelection";
 const MainSection = () => {
     const theme = useTheme();
     return (
-        <Stack width={"100%"} flex={1} direction={"row"} justifyContent={"space-between"} alignItems={"stretch"} paddingTop={2} paddingBottom={4}>
-            <Stack width={"60%"} flexGrow={1} gap={4}>
+        <Stack width={"100%"} flex={1} direction={{ xs: "column", lg: "row" }} justifyContent={"space-between"} alignItems={"stretch"} paddingTop={2} paddingBottom={4}>
+            <Stack width={{ xs: "100%", lg: "60%" }} flexGrow={1} gap={4}>
                 <Typography variant="h3" sx={{
-                    fontSize: "2.85rem",
+                    fontSize: { xs: "2rem", lg: "2.85rem" },
                     fontWeight: 700,
                     background: theme.palette.uranoGradient,
                     backgroundClip: 'text',
@@ -19,21 +19,21 @@ const MainSection = () => {
                 }}>Unlocking the power<br /> of on-chain tokenization</Typography>
                 <Stack>
                     <Typography variant="h6" sx={{
-                        fontSize: "1.857rem",
+                        fontSize: { xs: "1.5rem", lg: "1.75rem" },
                         fontWeight: 600,
                         color: theme.palette.text.primary,
                     }}>
                         Welcome to Urano Ecosystem
                     </Typography>
                     <Typography variant="h6" sx={{
-                        fontSize: "1.15rem",
-                        fontWeight: 500,
+                        fontSize: { xs: "1.125rem", lg: "1.5rem" },
+                        fontWeight: { xs: 400, lg: 500 },
                         color: theme.palette.text.primary,
                     }}>
                         The gateway to Real World Assets tokenization
                     </Typography>
                 </Stack>
-                <Stack gap={1.5}>
+                <Stack gap={1.5} display={{ xs: "none", lg: "flex" }}>
                     <Typography variant="h6" sx={{
                         fontSize: "1rem",
                         fontWeight: 500,
@@ -56,8 +56,73 @@ const MainSection = () => {
                         Instant Settlement – <span style={{ fontWeight: 300 }}>Blockchain-powered transactions, fast and transparent</span>
                     </Typography>
                 </Stack>
+                <Stack gap={1.5} display={{ xs: "flex", lg: "none" }}>
+                    <Stack gap={1} sx={{
+                        background: theme.palette.transparentPaper.main,
+                        border: `1px solid ${theme.palette.headerBorder.main}`,
+                        borderRadius: 2,
+                        padding: 2,
+                    }}>
+                        <Typography variant="h6" sx={{
+                            fontSize: "1.15rem",
+                            fontWeight: 500,
+                            color: theme.palette.text.primary,
+                        }}>
+                            Compliant RWA
+                        </Typography>
+                        <Typography variant="h6" sx={{
+                            fontSize: "1rem",
+                            fontWeight: 300,
+                            color: theme.palette.text.primary,
+                        }}>
+                            Full regulatory alignment for secure investments
+                        </Typography>
+                    </Stack>
+                    <Stack gap={1} sx={{
+                        background: theme.palette.transparentPaper.main,
+                        border: `1px solid ${theme.palette.headerBorder.main}`,
+                        borderRadius: 2,
+                        padding: 2,
+                    }}>
+                        <Typography variant="h6" sx={{
+                            fontSize: "1.15rem",
+                            fontWeight: 500,
+                            color: theme.palette.text.primary,
+                        }}>
+                            Fractional Access
+                        </Typography>
+                        <Typography variant="h6" sx={{
+                            fontSize: "1rem",
+                            fontWeight: 300,
+                            color: theme.palette.text.primary,
+                        }}>
+                            Invest in real estate, SMEs, art & more
+                        </Typography>
+                    </Stack>
+                    <Stack gap={1} sx={{
+                        background: theme.palette.transparentPaper.main,
+                        border: `1px solid ${theme.palette.headerBorder.main}`,
+                        borderRadius: 2,
+                        padding: 2,
+                    }}>
+                        <Typography variant="h6" sx={{
+                            fontSize: "1.15rem",
+                            fontWeight: 500,
+                            color: theme.palette.text.primary,
+                        }}>
+                            Instant Settlement
+                        </Typography>
+                        <Typography variant="h6" sx={{
+                            fontSize: "1rem",
+                            fontWeight: 300,
+                            color: theme.palette.text.primary,
+                        }}>
+                            Blockchain-powered transactions, fast and transparent
+                        </Typography>
+                    </Stack>
+                </Stack>
             </Stack>
-            <Stack width={"40%"} flexGrow={1} gap={3}>
+            <Stack width={{ xs: "100%", lg: "40%" }} flexGrow={1} gap={{xs: 3, lg: 3}} marginTop={{ xs: 4, lg: 0 }}>
                 <Registration />
                 <PresaleCard />
                 <TokensSelection />

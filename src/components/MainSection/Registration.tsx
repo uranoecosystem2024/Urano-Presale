@@ -12,7 +12,7 @@ const Registration = () => {
     return (
         <>
         <Stack width={"100%"} direction={"row"} justifyContent={"space-between"} alignItems={"center"}>
-            <Stack width={"40%"} direction={"row"} alignItems={"center"} gap={4} sx={{
+            <Stack width={{xs:"48%",lg:"40%"}} direction={"row"} alignItems={"center"} gap={{xs: 1, lg: 4}} sx={{
                 background: theme.palette.background.paper,
                 borderRadius: 2,
                 padding: 1,
@@ -36,7 +36,7 @@ const Registration = () => {
                 }}>
                     <Typography variant="body1" sx={{
                         fontWeight: 500,
-                        fontSize: "1.5rem",
+                        fontSize: {xs: "1rem", lg: "1.5rem"},
                         lineHeight: 1,
                         color: "#2A6A69",
                     }}>
@@ -45,6 +45,7 @@ const Registration = () => {
                 </Box>
                 <Typography variant="subtitle2" sx={{
                     fontWeight: 500,
+                    fontSize: {xs: "0.75rem", lg: "0.875rem"},
                     color: theme.palette.text.primary,
                     width: "40%",
                 }}>
@@ -53,7 +54,7 @@ const Registration = () => {
 
             </Stack>
             <IoChevronForward size={24} color={theme.palette.text.primary} />
-            <Stack width={"40%"} direction={"row"} alignItems={"center"} gap={4} sx={{
+            <Stack width={{xs:"48%",lg:"40%"}} direction={"row"} alignItems={"center"} gap={{xs: 1, lg: 4}} sx={{
                 background: theme.palette.background.paper,
                 borderRadius: 2,
                 padding: 1,
@@ -71,7 +72,7 @@ const Registration = () => {
                 }}>
                     <Typography variant="body1" sx={{
                         fontWeight: 500,
-                        fontSize: "1.5rem",
+                        fontSize: {xs: "1rem", lg: "1.5rem"},
                         lineHeight: 1,
                         color: "#2A6A69",
                     }}>
@@ -81,12 +82,14 @@ const Registration = () => {
                 <Stack width={"100%"}>
                     <Typography variant="subtitle2" sx={{
                         fontWeight: 500,
+                        fontSize: {xs: "0.75rem", lg: "0.875rem"},
                         color: theme.palette.text.primary,
                     }}>
                         Verify Identity
                     </Typography>
                     <Typography variant="subtitle2" sx={{
                         fontWeight: 400,
+                        fontSize: {xs: "0.65rem", lg: "0.75rem"},
                         color: theme.palette.text.secondary,
                     }}>
                         Coming Soon

@@ -12,3 +12,9 @@ html, body {
   display: none !important;
   visibility: hidden !important;
 }
+
+@media (max-width: 1024px) {
+  .howItWorksUnion {
+    display: none !important;
+  }
+}

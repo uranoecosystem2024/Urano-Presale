@@ -9,11 +9,12 @@ export default function Home() {
       direction="column"
       minHeight="100dvh"
       height={"fit-content"}
-      px={6}
+      width={"100%"}
+      px={{ xs: 0, lg: 6 }}
       py={3}
     >
       <Header />
-      <Stack flex={1} px={5} py={4} justifyContent="end" gap={4}>
+      <Stack flex={1} px={{ xs: 2, lg: 5 }} py={4} justifyContent="end" gap={4}>
         <MainSection />
         <HowItWorks />
       </Stack>

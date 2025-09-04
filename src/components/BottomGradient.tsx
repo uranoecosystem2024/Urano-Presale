@@ -11,7 +11,7 @@ const BottomGradient = () => {
         right: 0,
         bottom: 0,
         width: "100%",
-        height: "50%",          // or "50vh" if you want a fixed visual size
+        height: "50%",
         pointerEvents: "none",
         zIndex: 0,
       }}

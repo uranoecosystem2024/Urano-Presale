@@ -12,8 +12,11 @@ const HowItWorks = () => {
         <Stack height={"50%"} width={"100%"} sx={{
             borderRadius: 2,
             position: 'relative',
+            paddingX: {xs: 2, lg: 0},
+            paddingY: {xs: 2, lg: 0},
+            backgroundColor: theme.palette.background.paper,
         }}>
-            <Image src={Union} alt="Union" fill style={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }} />
+            <Image className="howItWorksUnion" src={Union} alt="Union" fill style={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }} />
             <Typography variant="h5" sx={{
                 background: theme.palette.uranoGradient,
                 backgroundClip: 'text',
@@ -27,23 +30,32 @@ const HowItWorks = () => {
                 marginTop: "1%",
                 marginLeft: "3.75%",
                 zIndex: 2,
+                display: {xs: "none", lg: "block"},
 
+            }}>How it works</Typography>
+            <Typography variant="h5" sx={{
+                background: theme.palette.uranoGradient,
+                backgroundClip: 'text',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                fontWeight: 500,
+                fontSize: 22,
             }}>How it works</Typography>
             <Stack width={"100%"} height={"100%"} sx={{
                 minHeight: 220,
                 width: "100%",
                 display: "flex",
-                flexDirection: "row",
+                flexDirection: {xs: "column", lg: "row"},
                 justifyContent: "space-between",
                 alignItems: "center",
-                paddingX: 5,
-                paddingTop: 6,
+                paddingX: {xs: 0, lg: 5},
+                paddingTop: {xs: 2, lg: 6},
                 paddingBottom: 2,
                 gap: 4,
                 position: "relative",
                 zIndex: 2,
             }}>
-                <Stack width={"22%"} gap={1}>
+                <Stack width={{xs:"100%",lg:"22%"}} gap={1}>
                     <Typography variant="subtitle1" color={"#fff"} sx={{
                         fontWeight: 500,
                         fontSize: 16,
@@ -55,7 +67,7 @@ const HowItWorks = () => {
                     }}>Real-world assets are digitized into secure, compliant tokens.</Typography>
                 </Stack>
 
-                <Stack width={"22%"} gap={1}>
+                <Stack width={{xs:"100%",lg:"22%"}} gap={1}>
                     <Typography variant="subtitle1" sx={{
                         fontWeight: 500,
                         fontSize: 16,
@@ -67,7 +79,7 @@ const HowItWorks = () => {
                     }}>Access fractional ownership with low entry barriers</Typography>
                 </Stack>
 
-                <Stack width={"22%"} gap={1}>
+                <Stack width={{xs:"100%",lg:"22%"}} gap={1}>
                     <Typography variant="subtitle1" sx={{
                         fontWeight: 500,
                         fontSize: 16,
@@ -79,7 +91,7 @@ const HowItWorks = () => {
                     }}>Receive returns and settlements instantly via blockchain.</Typography>
                 </Stack>
 
-                <Stack width={"22%"} alignItems={"center"} justifyContent={"end"}marginTop={-2}>
+                <Stack width={{xs:"100%",lg:"22%"}} alignItems={"center"} justifyContent={"end"}marginTop={-2}>
                     <Image src={img1} alt="img1" width={220} height={150} />
                     <Link href="/" underline="none">
                         <Box sx={{
@@ -114,6 +126,7 @@ const HowItWorks = () => {
                 left: 0,
                 zIndex: 5,
                 paddingX: 5,
+                display: {xs: "none", lg: "block"},
             }} >
                 <Box sx={{
                     width: "calc(66% + 8rem)",

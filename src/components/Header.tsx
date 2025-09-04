@@ -21,7 +21,10 @@ const Header = () => {
                     scale: 1.2,
                 }} />
             </Link>
-            <Stack direction="row" justifyContent="center" alignItems="center" gap={2}>
+            <Stack display={{
+                xs: "none",
+                lg: "flex",
+            }} direction="row" justifyContent="center" alignItems="center" gap={2}>
                 <Link href="/" underline="none">
                     <Box
                         sx={{
@@ -114,7 +117,10 @@ const Header = () => {
                 </Link>
             </Stack>
             <Stack direction="row" justifyContent="end" alignItems="center" gap={1}>
-                <Link href="/" underline="none">
+                <Link display={{
+                    xs: "none",
+                    lg: "flex",
+                }} href="/" underline="none">
                     <Box sx={{
                         backgroundColor: theme.palette.secondary.main,
                         border: `1px solid ${theme.palette.headerBorder.main}`,
@@ -134,7 +140,10 @@ const Header = () => {
                         <PiXLogo size={24} color={theme.palette.text.disabled} className="navIcon" />
                     </Box>
                 </Link>
-                <Link href="/" underline="none">
+                <Link display={{
+                    xs: "none",
+                    lg: "flex",
+                }} href="/" underline="none">
                     <Box sx={{
                         backgroundColor: theme.palette.secondary.main,
                         border: `1px solid ${theme.palette.headerBorder.main}`,
