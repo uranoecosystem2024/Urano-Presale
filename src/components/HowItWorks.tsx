@@ -12,9 +12,9 @@ const HowItWorks = () => {
         <Stack height={"50%"} width={"100%"} sx={{
             borderRadius: 2,
             position: 'relative',
-            paddingY: {xs: 2, lg: 0},
-            backgroundColor: {xs: theme.palette.transparentPaper.main, lg: "transparent"},
-            border: {xs: `1px solid ${theme.palette.headerBorder.main}`, lg: "none"},
+            paddingY: { xs: 2, lg: 0 },
+            backgroundColor: { xs: theme.palette.transparentPaper.main, lg: "transparent" },
+            border: { xs: `1px solid ${theme.palette.headerBorder.main}`, lg: "none" },
         }}>
             <Image className="howItWorksUnion" src={Union} alt="Union" fill style={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }} />
             <Typography variant="h5" sx={{
@@ -30,7 +30,7 @@ const HowItWorks = () => {
                 marginTop: "1%",
                 marginLeft: "3.75%",
                 zIndex: 2,
-                display: {xs: "none", lg: "block"},
+                display: { xs: "none", lg: "block" },
 
             }}>How it works</Typography>
             <Typography variant="h5" sx={{
@@ -40,7 +40,7 @@ const HowItWorks = () => {
                 WebkitTextFillColor: 'transparent',
                 fontWeight: 500,
                 fontSize: 22,
-                display: {xs: "block", lg: "none"},
+                display: { xs: "block", lg: "none" },
                 marginBottom: 1,
                 paddingX: 2,
             }}>How it works</Typography>
@@ -48,17 +48,33 @@ const HowItWorks = () => {
                 minHeight: 220,
                 width: "100%",
                 display: "flex",
-                flexDirection: {xs: "column", lg: "row"},
+                flexDirection: { xs: "column", lg: "row" },
                 justifyContent: "space-between",
                 alignItems: "center",
-                paddingX: {xs: 0, lg: 5},
-                paddingTop: {xs: 2, lg: 6},
+                paddingX: { xs: 0, lg: 5 },
+                paddingTop: { xs: 2, lg: 6 },
                 paddingBottom: 2,
-                gap: {xs: 2, lg: 4},
+                gap: { xs: 2, lg: 4 },
                 position: "relative",
                 zIndex: 2,
             }}>
-                <Stack paddingX={2} width={{xs:"100%",lg:"22%"}} gap={1}>
+                <Box sx={{
+                    height: "60%",
+                    width: 5,
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    zIndex: 5,
+                    marginTop: 1,
+                    display: { xs: "block", lg: "none" },
+                }} >
+                    <Box sx={{
+                        width: "calc(66% + 8rem)",
+                        height: "100%",
+                        borderLeft: `3px solid ${theme.palette.uranoGreen1.main}`,
+                    }} />
+                </Box>
+                <Stack paddingX={2} width={{ xs: "100%", lg: "22%" }} gap={1}>
                     <Typography variant="subtitle1" color={"#fff"} sx={{
                         fontWeight: 500,
                         fontSize: 16,
@@ -70,7 +86,7 @@ const HowItWorks = () => {
                     }}>Real-world assets are digitized into secure, compliant tokens.</Typography>
                 </Stack>
 
-                <Stack paddingX={2} width={{xs:"100%",lg:"22%"}} gap={1}>
+                <Stack paddingX={2} width={{ xs: "100%", lg: "22%" }} gap={1}>
                     <Typography variant="subtitle1" sx={{
                         fontWeight: 500,
                         fontSize: 16,
@@ -82,7 +98,7 @@ const HowItWorks = () => {
                     }}>Access fractional ownership with low entry barriers</Typography>
                 </Stack>
 
-                <Stack paddingX={2} width={{xs:"100%",lg:"22%"}} gap={1}>
+                <Stack paddingX={2} width={{ xs: "100%", lg: "22%" }} gap={1}>
                     <Typography variant="subtitle1" sx={{
                         fontWeight: 500,
                         fontSize: 16,
@@ -94,16 +110,16 @@ const HowItWorks = () => {
                     }}>Receive returns and settlements instantly via blockchain.</Typography>
                 </Stack>
 
-                <Stack paddingX={2} width={{xs:"100%",lg:"22%"}} alignItems={"center"} justifyContent={"end"}marginTop={-2}>
+                <Stack paddingX={2} width={{ xs: "100%", lg: "22%" }} alignItems={"center"} justifyContent={"end"} marginTop={-2}>
                     <Image className="howItWorksImgDesktop" src={img1} alt="img1" width={220} height={150} />
                     <Image className="howItWorksImgMobile" src={img1} alt="img1" width={190} height={150} />
                     <Link href="/" underline="none" sx={{
-                        width: {xs: "95%", lg: "fit-content"},
+                        width: { xs: "95%", lg: "fit-content" },
                     }}>
                         <Box sx={{
-                            width: {xs: "100%", lg: "fit-content"},
+                            width: { xs: "100%", lg: "fit-content" },
                             marginTop: -4,
-                            background: {xs: theme.palette.uranoGreen1.main, lg: theme.palette.secondary.main},
+                            background: { xs: theme.palette.uranoGreen1.main, lg: theme.palette.secondary.main },
                             border: `1px solid ${theme.palette.headerBorder.main}`,
                             borderRadius: 2,
                             boxShadow: 2,
@@ -133,7 +149,7 @@ const HowItWorks = () => {
                 left: 0,
                 zIndex: 5,
                 paddingX: 5,
-                display: {xs: "none", lg: "block"},
+                display: { xs: "none", lg: "block" },
             }} >
                 <Box sx={{
                     width: "calc(66% + 8rem)",
