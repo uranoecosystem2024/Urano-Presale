@@ -93,8 +93,11 @@ const HowItWorks = () => {
 
                 <Stack width={{xs:"100%",lg:"22%"}} alignItems={"center"} justifyContent={"end"}marginTop={-2}>
                     <Image src={img1} alt="img1" width={220} height={150} />
-                    <Link href="/" underline="none">
+                    <Link href="/" underline="none" sx={{
+                        width: {xs: "95%", lg: "fit-content"},
+                    }}>
                         <Box sx={{
+                            width: {xs: "100%", lg: "fit-content"},
                             marginTop: -4,
                             backgroundColor: theme.palette.secondary.main,
                             border: `1px solid ${theme.palette.headerBorder.main}`,
