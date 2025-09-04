@@ -14,6 +14,7 @@ const BottomGradient = () => {
         height: "50%",
         pointerEvents: "none",
         zIndex: 0,
+        display: {xs: "none", lg: "block"},
       }}
     >
       <Image

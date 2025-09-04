@@ -104,6 +104,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose }) 
                     height: '65%',
                     minHeight: '400px',
                     maxHeight: '90%',
+                    border: `1px solid ${theme.palette.headerBorder.main}`,
                 }}
             >
 

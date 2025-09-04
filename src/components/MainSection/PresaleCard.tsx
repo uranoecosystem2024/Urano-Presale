@@ -24,9 +24,9 @@ const PresaleCard = () => {
             <Image src={vector1} alt="vector1" width={230} height={230} style={{ position: "absolute", bottom: 0, left: 0, zIndex: 0 }} />
             <Image src={vector2} alt="vector2" width={100} height={100} style={{ position: "absolute", bottom: 0, left: 0, zIndex: 0, opacity: 0.8, marginBottom: -5, marginLeft: -5 }} />
             <Image src={vector3} alt="vector3" width={230} height={230} style={{ position: "absolute", top: 0, right: 0, zIndex: 0 }} />
-            <Typography variant="h5" sx={{
+            <Typography className="conthrax" variant="h5" sx={{
                 fontWeight: 600,
-                fontSize: "1.5rem",
+                fontSize: {xs: "1.25rem", lg: "1.5rem"},
                 background: theme.palette.uranoGradient,
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',

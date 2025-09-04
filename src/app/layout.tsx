@@ -5,6 +5,7 @@ import { Providers } from "@/app/providers";
 import { Box, Container } from "@mui/material";
 import BottomGradient from "@/components/BottomGradient";
 import CookieConsent from "@/components/cookiesPopUp";
+import MobileGradient from "@/components/mobileGradient";
 export const metadata: Metadata = {
   title: "Urano - Presale",
   description: "Urano Ecosystem - $URANO Token Presale",
@@ -27,7 +28,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               {children}
               <CookieConsent />
             </Container>
+            <MobileGradient height={"40%"} top={"25vh"} type="bottom" opacity={0.75} />
+            <MobileGradient height={"30%"} bottom={"10vh"} type="bottom" opacity={0.75} />
             <BottomGradient />
+            
           </Box>
         </Providers>
       </body>

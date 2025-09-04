@@ -9,8 +9,8 @@ const MainSection = () => {
     return (
         <Stack width={"100%"} flex={1} direction={{ xs: "column", lg: "row" }} justifyContent={"space-between"} alignItems={"stretch"} paddingTop={2} paddingBottom={4}>
             <Stack width={{ xs: "100%", lg: "60%" }} flexGrow={1} gap={4}>
-                <Typography variant="h3" sx={{
-                    fontSize: { xs: "2rem", lg: "2.85rem" },
+                <Typography className="conthrax" variant="h3" sx={{
+                    fontSize: { xs: "1.4rem", lg: "2.85rem" },
                     fontWeight: 700,
                     background: theme.palette.uranoGradient,
                     backgroundClip: 'text',
@@ -18,15 +18,15 @@ const MainSection = () => {
                     WebkitTextFillColor: 'transparent',
                 }}>Unlocking the power<br /> of on-chain tokenization</Typography>
                 <Stack>
-                    <Typography variant="h6" sx={{
-                        fontSize: { xs: "1.5rem", lg: "1.75rem" },
+                    <Typography className="conthrax" variant="h6" sx={{
+                        fontSize: { xs: "1rem", lg: "1.75rem" },
                         fontWeight: 600,
                         color: theme.palette.text.primary,
                     }}>
                         Welcome to Urano Ecosystem
                     </Typography>
                     <Typography variant="h6" sx={{
-                        fontSize: { xs: "1.125rem", lg: "1.5rem" },
+                        fontSize: { xs: "1rem", lg: "1.5rem" },
                         fontWeight: { xs: 400, lg: 500 },
                         color: theme.palette.text.primary,
                     }}>

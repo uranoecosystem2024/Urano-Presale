@@ -18,6 +18,8 @@ const Footer = () => {
             borderLeft: {xs: "none", lg: `1px solid ${theme.palette.footerBorder.main}`},
             borderRight: {xs: "none", lg: `1px solid ${theme.palette.footerBorder.main}`},
             borderRadius: 2,
+            borderBottomLeftRadius: {xs: 0, lg: 2},
+            borderBottomRightRadius: {xs: 0, lg: 2},
             paddingX: 5,
             paddingBottom: {xs: 3, lg: 0},
             marginLeft: {xs: -2, lg: 0},
