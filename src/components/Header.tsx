@@ -60,7 +60,7 @@ const Header = () => {
                         </Typography>
                     </Box>
                 </Link>
-                <Link href="/" underline="none">
+                <Link href="https://docs.uranoecosystem.com/" underline="none">
                     <Box
                         sx={{
                             display: 'flex',
@@ -90,7 +90,7 @@ const Header = () => {
                         </Typography>
                     </Box>
                 </Link>
-                <Link href="/" underline="none">
+                <Link href="https://docs.uranoecosystem.com/ecosystem/interactive-blocks/tokenomics" underline="none">
                     <Box
                         sx={{
                             display: 'flex',
@@ -125,7 +125,7 @@ const Header = () => {
                 <Link display={{
                     xs: "none",
                     lg: "flex",
-                }} href="/" underline="none">
+                }} href="https://x.com/uranoecosystem" underline="none" target="_blank">
                     <Box sx={{
                         backgroundColor: theme.palette.secondary.main,
                         border: `1px solid ${theme.palette.headerBorder.main}`,
@@ -148,7 +148,7 @@ const Header = () => {
                 <Link display={{
                     xs: "none",
                     lg: "flex",
-                }} href="/" underline="none">
+                }} href="https://t.me/urano_ecosystem" underline="none" target="_blank">
                     <Box sx={{
                         backgroundColor: theme.palette.secondary.main,
                         border: `1px solid ${theme.palette.headerBorder.main}`,
@@ -168,7 +168,9 @@ const Header = () => {
                         <PiTelegramLogoDuotone size={24} color={theme.palette.text.disabled} className="navIcon" />
                     </Box>
                 </Link>
-                <Link href="/" underline="none">
+                <Link href="/" underline="none" onClick={(e) => {
+                    e.preventDefault();
+                }}>
                     <Box sx={{
                         background: {xs: theme.palette.uranoGradient, lg: theme.palette.secondary.main},
                         border: `1px solid ${theme.palette.headerBorder.main}`,

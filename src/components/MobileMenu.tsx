@@ -76,7 +76,9 @@ const MobileMenu = () => {
                         </Link>
                     </Box>
                     <Stack direction="row" alignItems="center" justifyContent="end" gap={1}>
-                        <Link href="/" underline="none">
+                        <Link href="/" underline="none" onClick={(e) => {
+                            e.preventDefault();
+                        }}>
                             <Box sx={{
                                 background: theme.palette.secondary.main,
                                 border: `1px solid ${theme.palette.headerBorder.main}`,
@@ -146,10 +148,11 @@ const MobileMenu = () => {
                     </Stack>
                     <Stack width={"100%"} alignItems={"center"} gap={2.5}>
                         <Link
-                            href={"/"}
+                            href={"https://docs.uranoecosystem.com/"}
                             width={"100%"}
                             display={"flex"}
                             underline="none"
+                            target="_blank"
                         >
                             <Stack width={"100%"} direction="row" alignItems={"center"} justifyContent={"space-between"} gap={1} sx={{
                                 paddingX: 2,
@@ -172,10 +175,11 @@ const MobileMenu = () => {
                     </Stack>
                     <Stack width={"100%"} alignItems={"center"} gap={2.5}>
                         <Link
-                            href={"/"}
+                            href={"https://docs.uranoecosystem.com/ecosystem/interactive-blocks/tokenomics"}
                             width={"100%"}
                             display={"flex"}
                             underline="none"
+                            target="_blank"
                         >
                             <Stack width={"100%"} direction="row" alignItems={"center"} justifyContent={"space-between"} gap={1} sx={{
                                 paddingX: 2,
@@ -217,7 +221,7 @@ const MobileMenu = () => {
                         width={"100%"}
                         justifyContent={"center"}
                     >
-                        <Link href="/" underline="none">
+                        <Link href="https://x.com/uranoecosystem" underline="none" target="_blank">
                             <Box sx={{
                                 backgroundColor: theme.palette.secondary.main,
                                 border: `1px solid ${theme.palette.headerBorder.main}`,
@@ -237,7 +241,7 @@ const MobileMenu = () => {
                                 <PiXLogo size={32} color={theme.palette.text.disabled} className="navIcon" />
                             </Box>
                         </Link>
-                        <Link href="/" underline="none">
+                        <Link href="https://t.me/urano_ecosystem" underline="none" target="_blank">
                             <Box sx={{
                                 backgroundColor: theme.palette.secondary.main,
                                 border: `1px solid ${theme.palette.headerBorder.main}`,
@@ -265,7 +269,7 @@ const MobileMenu = () => {
                                     display: 'flex',
                                     justifyContent: 'center',
                                     alignItems: 'center',
-                                    
+
                                 }}
                             >
                                 <Typography

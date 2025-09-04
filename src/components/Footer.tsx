@@ -133,7 +133,7 @@ const Footer = () => {
             </Stack>
 
             <Stack direction="row" justifyContent="end" alignItems="center" gap={1} marginTop={{xs: 2, lg: 0}}>
-                <Link href="/" underline="none">
+                <Link href="https://x.com/uranoecosystem" underline="none" target="_blank">
                     <Box sx={{
                         backgroundColor: theme.palette.secondary.main,
                         border: `1px solid ${theme.palette.headerBorder.main}`,
@@ -153,7 +153,7 @@ const Footer = () => {
                         <PiXLogo size={24} color={theme.palette.text.disabled} className="navIcon" />
                     </Box>
                 </Link>
-                <Link href="/" underline="none">
+                <Link href="https://t.me/urano_ecosystem" underline="none" target="_blank">
                     <Box sx={{
                         backgroundColor: theme.palette.secondary.main,
                         border: `1px solid ${theme.palette.headerBorder.main}`,
