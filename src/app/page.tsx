@@ -3,6 +3,7 @@ import Header from '@/components/Header';
 import HowItWorks from '@/components/HowItWorks';
 import Footer from '@/components/Footer';
 import MainSection from '@/components/MainSection/MainSection';
+import MobileHowItWorks from '@/app/mobileHowItWorks';
 export default function Home() {
   return (
     <Stack
@@ -17,6 +18,7 @@ export default function Home() {
       <Stack flex={1} px={{ xs: 1, lg: 5 }} py={4} justifyContent="end" gap={{xs: 2, lg: 4}}>
         <MainSection />
         <HowItWorks />
+        <MobileHowItWorks />
       </Stack>
       <Footer />
     </Stack>

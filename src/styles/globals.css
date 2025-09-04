@@ -29,6 +29,14 @@ html, body {
   display: none;
 }
 
+#howItWorksDesktopLine {
+  display: block;
+}
+
+#howItWorksMobileLine {
+  display: none;
+}
+
 @media (max-width: 1024px) {
   .mobileGradient {
     display: block !important;
@@ -40,6 +48,12 @@ html, body {
     display: none !important;
   }
   .howItWorksImgMobile {
+    display: block !important;
+  }
+  #howItWorksDesktopLine {
+    display: none !important;
+  }
+  #howItWorksMobileLine {
     display: block !important;
   }
 
