@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Box, Paper, Typography, Button, IconButton, Stack } from '@mui/material';
+import { Box, Paper, Typography, Button, IconButton, Stack, Divider } from '@mui/material';
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded';
 import CookieRoundedIcon from '@mui/icons-material/CookieRounded';
 import { useTheme, type Theme } from '@mui/material/styles';
@@ -112,16 +112,17 @@ export default function CookieConsent() {
                                 <CloseRoundedIcon />
                             </IconButton>
                         </Stack>
-                        <Stack width="100%" direction="row" alignItems="end" justifyContent="space-between" gap={2}>
-                            <Typography variant="body1" color="text.secondary" sx={{ width: '70%' }}>
+                        <Stack width="100%" direction={{xs: "column", lg: "row"}} alignItems={{xs: "center", lg: "end"}} justifyContent="space-between" gap={{xs: 3, lg: 2}}>
+                            <Typography variant="body1" color="text.secondary" sx={{ width: {xs: "100%", lg: '70%'} }}>
                                 This site uses strictly necessary cookies to ensure secure and optimal navigation.
                                 By continuing, you confirm that you are at least 18 years old, are not a resident or citizen
                                 of the USA, the UK, or any other restricted jurisdiction, including but not limited to those
                                 where such access is unlawful, and that your access complies with applicable laws. For
                                 more details, please review our Privacy Policy and Terms & Conditions.
                             </Typography>
+                            <Divider sx={{width: {xs: "100%", lg: "1px"}, height: "100%", borderColor: theme.palette.secondary.main}} />
 
-                            <Stack direction="row" alignItems="end" gap={2}>
+                            <Stack width={{xs: "100%", lg: "30%"}} direction={{xs: "column-reverse", lg: "row"}} alignItems={{xs: "center", lg: "end"}} gap={{xs: 1, lg: 2}}>
                                 <Button
                                     variant="contained"
                                     sx={{
@@ -132,6 +133,7 @@ export default function CookieConsent() {
                                         py: 1.25,
                                         '&:hover': { bgcolor: '#3A3A3A' },
                                         height: 'fit-content',
+                                        width: {xs: "100%", lg: "fit-content"},
                                     }}
                                     onClick={handleDecline}
                                 >
@@ -150,6 +152,7 @@ export default function CookieConsent() {
                                         boxShadow: 'none',
                                         '&:hover': { filter: 'brightness(1.05)' },
                                         height: 'fit-content',
+                                        width: {xs: "100%", lg: "fit-content"},
                                     }}
                                     onClick={handleAccept}
                                 >
