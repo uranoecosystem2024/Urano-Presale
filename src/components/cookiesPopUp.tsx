@@ -120,9 +120,9 @@ export default function CookieConsent() {
                                 where such access is unlawful, and that your access complies with applicable laws. For
                                 more details, please review our Privacy Policy and Terms & Conditions.
                             </Typography>
-                            <Divider sx={{width: {xs: "100%", lg: "1px"}, height: "100%", borderColor: theme.palette.secondary.main}} />
+                            <Divider sx={{width: {xs: "100%", lg: "1px", display: {xs: "flex", lg: "none"}}, height: "100%", borderColor: theme.palette.secondary.main}} />
 
-                            <Stack width={{xs: "100%", lg: "30%"}} direction={{xs: "column-reverse", lg: "row"}} alignItems={{xs: "center", lg: "end"}} gap={{xs: 1, lg: 2}}>
+                            <Stack width={{xs: "100%", lg: "25%"}} direction={{xs: "column-reverse", lg: "row"}} alignItems={{xs: "center", lg: "end"}} gap={{xs: 1, lg: 2}}>
                                 <Button
                                     variant="contained"
                                     sx={{
