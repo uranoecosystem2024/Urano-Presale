@@ -43,6 +43,7 @@ const MainSection = () => {
                         className="mobileCoin1"
                         alt="coins urano"
                         style={{ width: "100%", height: "auto" }}
+                        priority
                     />
                 </Stack>
                 <Stack gap={1.5} display={{ xs: "none", lg: "flex" }}>
