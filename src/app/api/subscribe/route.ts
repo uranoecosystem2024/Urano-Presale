@@ -8,9 +8,8 @@ interface SubscribeRequestBody {
     email: string;
 }
 
-// Define the expected structure of the response from Brevo
 interface BrevoResponse {
-    id: number; // id field should exist in the response
+    id: number; 
 }
 
 export async function POST(request: Request) {
