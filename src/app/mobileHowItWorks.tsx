@@ -216,7 +216,7 @@ const MobileHowItWorks = () => {
                     >
                         <Image className="howItWorksImgMobile" src={img1} alt="img1" width={220} height={150} />
                     </motion.div>
-                    <Link href="/" underline="none" sx={{ width: { xs: "95%", lg: "fit-content" } }}>
+                    <Link href="https://docs.uranoecosystem.com/the-legal-and-compliant-structure-of-urano" underline="none" sx={{ width: { xs: "95%", lg: "fit-content" } }}>
                         <Box
                             sx={{
                                 width: { xs: "100%", lg: "fit-content" },
