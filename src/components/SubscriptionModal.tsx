@@ -67,6 +67,12 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose }) 
                 // Log success message
                 setIsSending(false);
                 setIsSent(true);
+                setTimeout(
+                    () => {
+                        window.location.reload();
+                    },
+                    2000
+                )
             } else {
                 setIsSending(false);
                 setIsError(true);
