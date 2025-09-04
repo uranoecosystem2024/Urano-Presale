@@ -11,7 +11,7 @@ export default function Home() {
       height={"fit-content"}
       width={"100%"}
       px={{ xs: 0, lg: 6 }}
-      py={3}
+      py={{xs: 0, lg: 3}}
     >
       <Header />
       <Stack flex={1} px={{ xs: 2, lg: 5 }} py={4} justifyContent="end" gap={{xs: 2, lg: 4}}>

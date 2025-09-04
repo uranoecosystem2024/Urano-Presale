@@ -12,7 +12,6 @@ const HowItWorks = () => {
         <Stack height={"50%"} width={"100%"} sx={{
             borderRadius: 2,
             position: 'relative',
-            paddingX: {xs: 2, lg: 0},
             paddingY: {xs: 2, lg: 0},
             backgroundColor: {xs: theme.palette.transparentPaper.main, lg: "transparent"},
             border: {xs: `1px solid ${theme.palette.headerBorder.main}`, lg: "none"},
@@ -43,6 +42,7 @@ const HowItWorks = () => {
                 fontSize: 22,
                 display: {xs: "block", lg: "none"},
                 marginBottom: 1,
+                paddingX: 2,
             }}>How it works</Typography>
             <Stack width={"100%"} height={"100%"} sx={{
                 minHeight: 220,
@@ -58,7 +58,7 @@ const HowItWorks = () => {
                 position: "relative",
                 zIndex: 2,
             }}>
-                <Stack width={{xs:"100%",lg:"22%"}} gap={1}>
+                <Stack paddingX={2} width={{xs:"100%",lg:"22%"}} gap={1}>
                     <Typography variant="subtitle1" color={"#fff"} sx={{
                         fontWeight: 500,
                         fontSize: 16,
@@ -70,7 +70,7 @@ const HowItWorks = () => {
                     }}>Real-world assets are digitized into secure, compliant tokens.</Typography>
                 </Stack>
 
-                <Stack width={{xs:"100%",lg:"22%"}} gap={1}>
+                <Stack paddingX={2} width={{xs:"100%",lg:"22%"}} gap={1}>
                     <Typography variant="subtitle1" sx={{
                         fontWeight: 500,
                         fontSize: 16,
@@ -82,7 +82,7 @@ const HowItWorks = () => {
                     }}>Access fractional ownership with low entry barriers</Typography>
                 </Stack>
 
-                <Stack width={{xs:"100%",lg:"22%"}} gap={1}>
+                <Stack paddingX={2} width={{xs:"100%",lg:"22%"}} gap={1}>
                     <Typography variant="subtitle1" sx={{
                         fontWeight: 500,
                         fontSize: 16,
@@ -94,7 +94,7 @@ const HowItWorks = () => {
                     }}>Receive returns and settlements instantly via blockchain.</Typography>
                 </Stack>
 
-                <Stack width={{xs:"100%",lg:"22%"}} alignItems={"center"} justifyContent={"end"}marginTop={-2}>
+                <Stack paddingX={2} width={{xs:"100%",lg:"22%"}} alignItems={"center"} justifyContent={"end"}marginTop={-2}>
                     <Image className="howItWorksImgDesktop" src={img1} alt="img1" width={220} height={150} />
                     <Image className="howItWorksImgMobile" src={img1} alt="img1" width={190} height={150} />
                     <Link href="/" underline="none" sx={{

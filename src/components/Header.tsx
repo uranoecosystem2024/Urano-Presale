@@ -10,11 +10,15 @@ import { PiTelegramLogoDuotone, PiXLogo } from "react-icons/pi";
 const Header = () => {
     const theme = useTheme<Theme>();
     return (
-        <Stack direction="row" justifyContent="space-between" alignItems="center" width="100%" sx={{
+        <Stack direction="row" justifyContent="space-between" alignItems="center" width={{xs: "100vw", lg: "100%"}} sx={{
             backgroundColor: theme.palette.background.paper,
-            border: `1px solid ${theme.palette.headerBorder.main}`,
+            borderTop: {xs: "none", lg: `1px solid ${theme.palette.headerBorder.main}`},
+            borderBottom: `1px solid ${theme.palette.headerBorder.main}`,
+            borderLeft: {xs: "none", lg: `1px solid ${theme.palette.headerBorder.main}`},
+            borderRight: {xs: "none", lg: `1px solid ${theme.palette.headerBorder.main}`},
             borderRadius: 2,
             paddingX: 5,
+            marginLeft: {xs: -2, lg: 0},
         }}>
             <Link href="/">
                 <Image src={logo} alt="Logo" width={100} height={65} style={{

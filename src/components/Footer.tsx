@@ -11,18 +11,23 @@ import { PiTelegramLogoDuotone, PiXLogo } from "react-icons/pi";
 const Footer = () => {
     const theme = useTheme<Theme>();
     return (
-        <Stack direction="row" justifyContent="space-between" alignItems="center" width="100%" sx={{
+        <Stack direction={{xs: "column", lg: "row"}} justifyContent="space-between" alignItems="center" width={{xs: "100vw", lg: "100%"}} sx={{
             backgroundColor: theme.palette.transparentPaper.main,
-            border: `1px solid ${theme.palette.footerBorder.main}`,
+            borderTop: `1px solid ${theme.palette.footerBorder.main}`,
+            borderBottom: {xs: "none", lg: `1px solid ${theme.palette.footerBorder.main}`},
+            borderLeft: {xs: "none", lg: `1px solid ${theme.palette.footerBorder.main}`},
+            borderRight: {xs: "none", lg: `1px solid ${theme.palette.footerBorder.main}`},
             borderRadius: 2,
             paddingX: 5,
+            paddingBottom: {xs: 3, lg: 0},
+            marginLeft: {xs: -2, lg: 0},
         }}>
             <Link href="/">
                 <Image src={logo} alt="Logo" width={100} height={65} style={{
                     scale: 1.2,
                 }} />
             </Link>
-            <Stack direction="row" justifyContent="center" alignItems="center" gap={2}>
+            <Stack direction={{xs: "column", lg: "row"}} justifyContent="center" alignItems="center" gap={2}>
                 <Link href="/" underline="none">
                     <Box
                         sx={{
@@ -114,7 +119,7 @@ const Footer = () => {
                     </Box>
                 </Link>
             </Stack>
-            <Stack direction="row" justifyContent="center" alignItems="center" gap={0}>
+            <Stack direction={"row"} justifyContent="center" alignItems="center" gap={0} marginTop={{xs: 2, lg: 0}}>
                 <Typography variant="body1" fontWeight={400} color={theme.palette.text.secondary}>
                     Powered by:
                 </Typography>
@@ -125,7 +130,7 @@ const Footer = () => {
                 </Link>
             </Stack>
 
-            <Stack direction="row" justifyContent="end" alignItems="center" gap={1}>
+            <Stack direction="row" justifyContent="end" alignItems="center" gap={1} marginTop={{xs: 2, lg: 0}}>
                 <Link href="/" underline="none">
                     <Box sx={{
                         backgroundColor: theme.palette.secondary.main,
