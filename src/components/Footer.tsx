@@ -49,7 +49,37 @@ const Footer = () => {
                             color={theme.palette.text.secondary}
                             className="navLink"
                         >
-                            Terms & Conditions
+                            Terms & Disclaimer
+                        </Typography>
+                    </Box>
+                </Link>
+                <Link href="/" underline="none">
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            paddingY: 1,
+                            paddingX: 2,
+                            borderRadius: 2,
+                            '&:hover': {
+                                backgroundColor: "#1A1A1A",
+                                "&:hover .navLink": {
+                                    background: theme.palette.uranoGradient,
+                                    backgroundClip: 'text',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent',
+                                },
+                            },
+                        }}
+                    >
+                        <Typography
+                            variant="body1"
+                            fontWeight={400}
+                            color={theme.palette.text.secondary}
+                            className="navLink"
+                        >
+                            Cookie Policy
                         </Typography>
                     </Box>
                 </Link>
