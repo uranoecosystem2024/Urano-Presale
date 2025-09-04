@@ -198,14 +198,9 @@ const MobileMenu = () => {
                     </Stack>
                 </Stack>
                 <Stack
-                    direction={"row"}
-                    gap={3}
-                    marginTop={{ xs: 8, lg: 0 }}
-                    marginBottom={{ xs: 2, lg: 0 }}
-                    paddingX={2}
                     position={"absolute"}
                     width={"100%"}
-                    justifyContent={"center"}
+                    gap={1}
                     sx={{
                         bottom: 0,
                         left: "50%",
@@ -213,46 +208,95 @@ const MobileMenu = () => {
                         zIndex: 1,
                     }}
                 >
-                    <Link href="/" underline="none">
-                    <Box sx={{
-                        backgroundColor: theme.palette.secondary.main,
-                        border: `1px solid ${theme.palette.headerBorder.main}`,
-                        borderRadius: 2,
-                        paddingX: 3,
-                        paddingY: 1,
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        "&:hover": {
-                            background: theme.palette.uranoGradient,
-                            "&:hover .navIcon": {
-                                filter: 'brightness(0)',
-                            },
-                        },
-                    }}>
-                        <PiXLogo size={32} color={theme.palette.text.disabled} className="navIcon" />
-                    </Box>
-                </Link>
-                <Link href="/" underline="none">
-                    <Box sx={{
-                        backgroundColor: theme.palette.secondary.main,
-                        border: `1px solid ${theme.palette.headerBorder.main}`,
-                        borderRadius: 2,
-                        paddingX: 3,
-                        paddingY: 1,
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        "&:hover": {
-                            background: theme.palette.uranoGradient,
-                            "&:hover .navIcon": {
-                                filter: 'brightness(0)',
-                            },
-                        },
-                    }}>
-                        <PiTelegramLogoDuotone size={32} color={theme.palette.text.disabled} className="navIcon" />
-                    </Box>
-                </Link>
+                    <Stack
+                        direction={"row"}
+                        gap={3}
+                        marginTop={{ xs: 8, lg: 0 }}
+                        marginBottom={{ xs: 2, lg: 0 }}
+                        paddingX={2}
+                        width={"100%"}
+                        justifyContent={"center"}
+                    >
+                        <Link href="/" underline="none">
+                            <Box sx={{
+                                backgroundColor: theme.palette.secondary.main,
+                                border: `1px solid ${theme.palette.headerBorder.main}`,
+                                borderRadius: 2,
+                                paddingX: 1,
+                                paddingY: 1,
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                "&:hover": {
+                                    background: theme.palette.uranoGradient,
+                                    "&:hover .navIcon": {
+                                        filter: 'brightness(0)',
+                                    },
+                                },
+                            }}>
+                                <PiXLogo size={32} color={theme.palette.text.disabled} className="navIcon" />
+                            </Box>
+                        </Link>
+                        <Link href="/" underline="none">
+                            <Box sx={{
+                                backgroundColor: theme.palette.secondary.main,
+                                border: `1px solid ${theme.palette.headerBorder.main}`,
+                                borderRadius: 2,
+                                paddingX: 1,
+                                paddingY: 1,
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                "&:hover": {
+                                    background: theme.palette.uranoGradient,
+                                    "&:hover .navIcon": {
+                                        filter: 'brightness(0)',
+                                    },
+                                },
+                            }}>
+                                <PiTelegramLogoDuotone size={32} color={theme.palette.text.disabled} className="navIcon" />
+                            </Box>
+                        </Link>
+                    </Stack>
+                    <Stack direction="row" justifyContent="center" alignItems="center" gap={2} marginBottom={2}>
+                        <Link href="/" underline="none">
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    
+                                }}
+                            >
+                                <Typography
+                                    variant="body1"
+                                    fontWeight={400}
+                                    color={theme.palette.text.secondary}
+                                    className="navLink"
+                                >
+                                    Terms & Disclaimers
+                                </Typography>
+                            </Box>
+                        </Link>
+                        <Link href="/" underline="none">
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <Typography
+                                    variant="body1"
+                                    fontWeight={400}
+                                    color={theme.palette.text.secondary}
+                                    className="navLink"
+                                >
+                                    Privacy Policy
+                                </Typography>
+                            </Box>
+                        </Link>
+                    </Stack>
                 </Stack>
             </Drawer>
             <IconButton onClick={() => setOpen(true)} sx={{
