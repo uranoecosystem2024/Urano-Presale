@@ -18,7 +18,7 @@ export default function CookiePolicy() {
     >
       <Header />
       <Stack flex={1} sx={{ p: { xs: 3, md: 9 } }} justifyContent="start" gap={{xs: 2, lg: 4}}>
-        <Stack sx={{ p: { xs: 2, md: 4 } }}>
+        <Stack sx={{ p: { xs: 0, md: 4 } }}>
           <Typography variant="h3" component="h1" gutterBottom sx={{ mb: 4 }}>
             Cookie Policy – Urano Ecosystem Presale
           </Typography>
