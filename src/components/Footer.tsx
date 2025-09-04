@@ -30,7 +30,7 @@ const Footer = () => {
                 }} />
             </Link>
             <Stack direction={{xs: "column", lg: "row"}} justifyContent="center" alignItems="center" gap={2}>
-                <Link href="/" underline="none">
+                <Link href="/terms-and-disclaimer" underline="none">
                     <Box
                         sx={{
                             display: 'flex',
