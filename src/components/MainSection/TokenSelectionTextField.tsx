@@ -41,7 +41,10 @@ export default function StablecoinField({
       inputProps={{
         inputMode: "decimal",
         pattern: "[0-9.]*",
-        style: { textAlign: {xs: "right", lg: "center"}, fontSize: 18, fontWeight: 500 },
+        style: { fontSize: 18, fontWeight: 500 },
+        sx: {
+          textAlign: {xs: "right", lg: "center"},
+        },
         "aria-label": label,
       }}
       InputProps={{
