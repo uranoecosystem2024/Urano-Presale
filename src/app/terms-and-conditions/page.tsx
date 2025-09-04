@@ -1,8 +1,12 @@
-import { Stack, Typography, Link, List, ListItem, Paper, Divider } from '@mui/material';
+'use client';
+
+import { Stack, Typography, Link, List, ListItem, Divider } from '@mui/material';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { useTheme, type Theme } from '@mui/material/styles';
 
 export default function Terms() {
+  const theme = useTheme<Theme>();
   return (
     <Stack
       direction="column"
@@ -14,7 +18,7 @@ export default function Terms() {
     >
       <Header />
       <Stack flex={1} sx={{ p: { xs: 3, md: 9 } }} justifyContent="start" gap={{xs: 2, lg: 4}}>
-        <Paper elevation={3} sx={{ p: { xs: 2, md: 4 } }}>
+        <Stack sx={{ p: { xs: 2, md: 4 } }}>
           <Typography variant="h3" component="h1" gutterBottom sx={{ mb: 4 }}>
             Terms and Conditions – $URANO Token Presale
           </Typography>
@@ -28,7 +32,7 @@ export default function Terms() {
           </Typography>
           
           <Typography variant="body1" paragraph>
-            This document regulates the access, navigation and participation in the presale (the &quot;Presale&quot;) of the $URANO token through the online platform reachable at the address https://www.uranoecosystempresale.com (the &quot;Platform&quot;), made available by Urano Ecosystem Sp. z o.o. (the &quot;Company&quot; or the &quot;Issuer&quot;). These terms and conditions (the &quot;Terms&quot;) apply to all Users who interact with the Platform during the Pre-sale phase.
+            This document regulates the access, navigation and participation in the presale (the &quot;Presale&quot;) of the $URANO token through the online platform reachable at the address <Link href="https://www.uranoecosystempresale.com" target="_blank" rel="noopener" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>https://www.uranoecosystempresale.com</Link> (the &quot;Platform&quot;), made available by Urano Ecosystem Sp. z o.o. (the &quot;Company&quot; or the &quot;Issuer&quot;). These terms and conditions (the &quot;Terms&quot;) apply to all Users who interact with the Platform during the Pre-sale phase.
           </Typography>
           
           <Typography variant="body1" paragraph>
@@ -77,7 +81,7 @@ export default function Terms() {
           
           <Typography variant="body1" paragraph>
             The Company is registered as Virtual Asset Service Provider (VASP) and is registered at Polish Register of Virtual Currency Activities, held by the Director of the Katowice Chamber of Tax Administration (Director of the Tax Administration Chamber in Katowice) and officially published on
-            <Link href="https://www.slaskie.kas.gov.pl/izba-administracji-skarbowej-w-katowicach/zalatwianie-spraw/rejestr-dzialalnosci-w-zakresie-walut-wirtualnych/-/asset_publisher/R7Yl/content/rejestr-dzialalnosci-w-zakresie-walut-wirtualnych" target="_blank" rel="noopener" sx={{ ml: 0.5 }}>
+            <Link href="https://www.slaskie.kas.gov.pl/izba-administracji-skarbowej-w-katowicach/zalatwianie-spraw/rejestr-dzialalnosci-w-zakresie-walut-wirtualnych/-/asset_publisher/R7Yl/content/rejestr-dzialalnosci-w-zakresie-walut-wirtualnych" target="_blank" rel="noopener" sx={{ ml: 0.5, textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
               https://www.slaskie.kas.gov.pl/izba-administracji-skarbowej-w-katowicach/zalatwianie-spraw/rejestr-dzialalnosci-w-zakresie-walut-wirtualnych/-/asset_publisher/R7Yl/content/rejestr-dzialalnosci-w-zakresie-walut-wirtualnych
             </Link>
             pursuant to national anti-money laundering legislation.
@@ -139,7 +143,12 @@ export default function Terms() {
             <ListItem>Technical Standard: ERC-20</ListItem>
             <ListItem>Emission Network: Decision One (Layer 2 on Ethereum)</ListItem>
             <ListItem>Supply Totale: $1,000,000,000 URANUS (Supply limited, deflation system)</ListItem>
-            <ListItem>Smart Contract: Audited by independent providers with reports available on https://www.uranoecosystem.com/audit</ListItem>
+            <ListItem>
+              Smart Contract: Audited by independent providers with reports available on{' '}
+              <Link href="https://www.uranoecosystem.com/audit" target="_blank" rel="noopener" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
+                https://www.uranoecosystem.com/audit
+              </Link>
+            </ListItem>
           </List>
           
           <Typography variant="body1" paragraph>
@@ -158,7 +167,11 @@ export default function Terms() {
           </List>
           
           <Typography variant="body1" paragraph>
-            The $URANO token contract address will be made public and verified on Arbiscan: www.arbiscan.io (The exact address will be communicated at the time of the official deployment and before the tokens are distributed).
+            The $URANO token contract address will be made public and verified on Arbiscan:{' '}
+            <Link href="https://www.arbiscan.io" target="_blank" rel="noopener" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
+              www.arbiscan.io
+            </Link>{' '}
+            (The exact address will be communicated at the time of the official deployment and before the tokens are distributed).
           </Typography>
 
           <Typography variant="h6" component="h2" gutterBottom>
@@ -262,7 +275,10 @@ export default function Terms() {
           </Typography>
           
           <Typography variant="body1" paragraph>
-            All tokens are managed via smart contracts programmed to apply automatically cliff, lock-up e vesting in a transparent manner. The contracts are audited by third parties and will be available on the page: https://www.uranoecosystem.com/audit
+            All tokens are managed via smart contracts programmed to apply automatically cliff, lock-up e vesting in a transparent manner. The contracts are audited by third parties and will be available on the page:{' '}
+            <Link href="https://www.uranoecosystem.com/audit" target="_blank" rel="noopener" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
+              https://www.uranoecosystem.com/audit
+            </Link>
           </Typography>
 
           <Typography variant="h6" component="h2" gutterBottom>
@@ -297,11 +313,10 @@ export default function Terms() {
           </List>
           
           <Typography variant="body1" paragraph>
-            All technical details, contractual terms, and operating procedures relating to staking will be made available in a dedicated section on the official website:
-          </Typography>
-          
-          <Typography variant="body1" paragraph>
-            https://www.uranoecosystem.com/staking
+            All technical details, contractual terms, and operating procedures relating to staking will be made available in a dedicated section on the official website:{' '}
+            <Link href="https://www.uranoecosystem.com/staking" target="_blank" rel="noopener" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
+              https://www.uranoecosystem.com/staking
+            </Link>
           </Typography>
           
           <Typography variant="body1" paragraph>
@@ -379,12 +394,12 @@ export default function Terms() {
 
           {/* Continue with the rest of the sections following the same pattern */}
 
-          <Divider sx={{ my: 4 }} />
+          <Divider sx={{ my: 4, borderColor: theme.palette.secondary.main }} />
           
           <Typography variant="body2" color="text.secondary" align="center">
             Last updated: July 2025
           </Typography>
-        </Paper>
+        </Stack>
       </Stack>
       <Footer />
     </Stack>
