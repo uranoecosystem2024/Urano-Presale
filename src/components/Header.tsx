@@ -148,7 +148,7 @@ const Header = () => {
                 <Link display={{
                     xs: "none",
                     lg: "flex",
-                }} href="https://t.me/urano_ecosystem" underline="none" target="_blank">
+                }} href="t.me/UranoEcosystem" underline="none" target="_blank">
                     <Box sx={{
                         backgroundColor: theme.palette.secondary.main,
                         border: `1px solid ${theme.palette.headerBorder.main}`,
