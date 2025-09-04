@@ -46,7 +46,7 @@ export default function StablecoinField({
       }}
       InputProps={{
         startAdornment: (
-          <InputAdornment position="start" sx={{ mr: 1 }}>
+          <InputAdornment position="start" sx={{ mr: 0.5 }}>
             <Button
               onClick={onPickToken}
               disableRipple
@@ -79,9 +79,10 @@ export default function StablecoinField({
         // container
         "& .MuiOutlinedInput-root": {
           bgcolor: "#151515",
+          width: "100%",
           borderRadius: 2,
           height: 56,
-          pr: 2,
+          pr: 1,
           // subtle border + focus color
           "& fieldset": { borderColor: "#2A2A2A" },
           "&:hover fieldset": { borderColor: "#3A3A3A" },
