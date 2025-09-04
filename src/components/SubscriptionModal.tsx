@@ -10,7 +10,8 @@ import {
     alpha,
     InputLabel,
     FormControl,
-    OutlinedInput
+    OutlinedInput,
+    CircularProgress
 } from '@mui/material';
 import Image from 'next/image';
 import popupbg from "@/assets/images/pop-up-bg.webp";
@@ -24,6 +25,9 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose }) 
     const theme = useTheme<Theme>();
     const [email, setEmail] = useState('');
     const [emailError, setEmailError] = useState('');
+    const [isSending, setIsSending] = useState(false);
+    const [isSent, setIsSent] = useState(false);
+    const [isError, setIsError] = useState(false);
 
     const validateEmail = (email: string) => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -39,17 +43,39 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose }) 
         validateEmail(e.target.value);
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setIsSending(true);
 
         // Don't submit if email is invalid
         if (emailError) {
             return;
         }
 
-        // Perform the form submission to FormBold after validation
+        // Get the form data
         const form = e.target as HTMLFormElement;
-        form.submit(); // This triggers the form submission to FormBold API
+        const formData = new FormData(form);
+
+        try {
+            // Use fetch to send the form data to FormBold without redirection
+            const response = await fetch(form.action, {
+                method: form.method,
+                body: formData,
+            });
+
+            if (response.ok) {
+                // Log success message
+                setIsSending(false);
+                setIsSent(true);
+                alert('Success: Email successfully submitted!');
+            } else {
+                setIsSending(false);
+                setIsError(true);
+                alert('Error: Something went wrong with the submission.');
+            }
+        } catch (error) {
+            alert('Error: Unable to submit the form.');
+        }
     };
 
     return (
@@ -124,7 +150,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose }) 
                             1
                         </Typography>
                     </Box>
-                    <Stack width={'100%'} height={'100%'} alignItems={'center'} paddingY={2} gap={4}>
+                    <Stack width={'100%'} height={'100%'} alignItems={'center'} justifyContent={'center'} paddingY={2} gap={4}>
                         <Stack width={'100%'} alignItems={'center'} gap={1}>
                             <Typography
                                 variant="h5"
@@ -137,103 +163,124 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose }) 
                                     backgroundClip: 'text',
                                 }}
                             >
-                                Register with email
+                                {isSent && !isError ? 'Thank you for registering!' : isError ? 'An error occurred!' : 'Register with email'}
                             </Typography>
-                            <Typography variant="body1" color="text.secondary" textAlign="center">
-                                Create your account in seconds.
-                                <br />
-                                Just enter your email to get started.
-                            </Typography>
+                            {
+                                isSent && !isError ? (
+                                    <Typography variant="body1" color="text.secondary" textAlign="center">
+                                        We will keep you updated on the latest news and developments.
+                                    </Typography>
+                                ) : isError ? (
+                                    <Typography variant="body1" color="text.secondary" textAlign="center">
+                                        Something went wrong. Please try again.
+                                    </Typography>
+                                ) : (
+                                    <Typography variant="body1" color="text.secondary" textAlign="center">
+                                        Create your account in seconds.
+                                        <br />
+                                        Just enter your email to get started.
+                                    </Typography>
+                                )
+                            }
                         </Stack>
-                        <form
-                            onSubmit={handleSubmit} // Use handleSubmit function to validate email
-                            action="https://formbold.com/s/91LpA" // FormBold form URL
-                            method="POST"
-                            style={{ width: '100%' }}
-                        >
-                            {/* Hidden Access Key */}
-                            <input
-                                type="hidden"
-                                name="New submission"
-                                value="New submission for Urano Presale page" // Replace with your FormBold access key
-                            />
-                            {/* Email Field */}
-                            <Stack width={'100%'} alignItems={'center'} gap={2}>
-                                <Stack width={'100%'} gap={1}>
-                                    <FormControl fullWidth variant="outlined">
-                                        <InputLabel
-                                            htmlFor="component-outlined"
+                        {
+                            !isSent && !isError && (
+                                <form
+                                    onSubmit={handleSubmit} // Use handleSubmit function to validate email
+                                    action="https://formbold.com/s/91LpA" // FormBold form URL
+                                    method="POST"
+                                    style={{ width: '100%' }}
+                                >
+                                    {/* Hidden Access Key */}
+                                    <input
+                                        type="hidden"
+                                        name="New submission"
+                                        value="New submission for Urano Presale page" // Replace with your FormBold access key
+                                    />
+                                    {/* Email Field */}
+                                    <Stack width={'100%'} alignItems={'center'} gap={2}>
+                                        <Stack width={'100%'} gap={1}>
+                                            <FormControl fullWidth variant="outlined">
+                                                <InputLabel
+                                                    htmlFor="component-outlined"
+                                                    sx={{
+                                                        color: emailError ? '#FF3665' : 'white',
+                                                        '&.Mui-focused': {
+                                                            color: emailError ? '#FF3665' : theme.palette.uranoGreen1.main,
+                                                        },
+                                                    }}
+                                                >
+                                                    E-mail
+                                                </InputLabel>
+                                                <OutlinedInput
+                                                    id="component-outlined"
+                                                    name="email" // Ensure name is "email" to match FormBold
+                                                    value={email} // Bind the email value to the state
+                                                    placeholder="Enter your e-mail"
+                                                    label="E-mail"
+                                                    type="email"
+                                                    onChange={handleEmailChange}
+                                                    sx={{
+                                                        '& .MuiOutlinedInput-notchedOutline': {
+                                                            borderColor: emailError ? '#FF3665' : alpha(theme.palette.common.white, 0.2),
+                                                        },
+                                                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                                                            borderColor: emailError ? '#FF3665' : alpha(theme.palette.common.white, 0.3),
+                                                        },
+                                                        '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                                                            borderColor: emailError ? '#FF3665' : theme.palette.uranoGreen1.main,
+                                                        },
+                                                    }}
+                                                />
+                                            </FormControl>
+                                            {emailError && (
+                                                <Typography variant="body2" color="#FF3665">
+                                                    {emailError}
+                                                </Typography>
+                                            )}
+                                        </Stack>
+
+                                        {/* Submit Button */}
+                                        <Button
+                                            variant="contained"
+                                            type="submit"
                                             sx={{
-                                                // Default label color
-                                                color: emailError ? '#FF3665' : 'white',
-                                                '&.Mui-focused': {
-                                                    color: emailError ? '#FF3665' : theme.palette.uranoGreen1.main,
+                                                background: theme.palette.secondary.main,
+                                                borderRadius: '8px',
+                                                py: 1.5,
+                                                width: '100%',
+                                                fontWeight: 500,
+                                                color: theme.palette.text.primary,
+                                                '&:hover': {
+                                                    background: theme.palette.uranoGreen1.main,
+                                                    '& .registerButtonText': {
+                                                        color: theme.palette.background.paper,
+                                                    },
                                                 },
                                             }}
                                         >
-                                            E-mail
-                                        </InputLabel>
-                                        <OutlinedInput
-                                            id="component-outlined"
-                                            name="email" // Ensure name is "email" to match FormBold
-                                            value={email} // Bind the email value to the state
-                                            placeholder="Enter your e-mail"
-                                            label="E-mail"
-                                            type="email"
-                                            onChange={handleEmailChange}
-                                            sx={{
-                                                '& .MuiOutlinedInput-notchedOutline': {
-                                                    borderColor: emailError ? '#FF3665' : alpha(theme.palette.common.white, 0.2),
-                                                },
-                                                '&:hover .MuiOutlinedInput-notchedOutline': {
-                                                    borderColor: emailError ? '#FF3665' : alpha(theme.palette.common.white, 0.3),
-                                                },
-                                                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                                                    borderColor: emailError ? '#FF3665' : theme.palette.uranoGreen1.main,
-                                                },
-                                            }}
-                                        />
-                                    </FormControl>
-                                    {emailError && (
-                                        <Typography variant="body2" color="#FF3665">
-                                            {emailError}
-                                        </Typography>
-                                    )}
-                                </Stack>
-
-                                {/* Submit Button */}
-                                <Button
-                                    variant="contained"
-                                    type="submit"
-                                    sx={{
-                                        background: theme.palette.secondary.main,
-                                        borderRadius: '8px',
-                                        py: 1.5,
-                                        width: '100%',
-                                        fontWeight: 500,
-                                        color: theme.palette.text.primary,
-                                        '&:hover': {
-                                            background: theme.palette.uranoGreen1.main,
-                                            '& .registerButtonText': {
-                                                color: theme.palette.background.paper,
-                                            },
-                                        },
-                                    }}
-                                >
-                                    <Typography
-                                        className="registerButtonText"
-                                        variant="body1"
-                                        sx={{
-                                            fontWeight: 400,
-                                            color: theme.palette.text.primary,
-                                            textTransform: 'none',
-                                        }}
-                                    >
-                                        Register
-                                    </Typography>
-                                </Button>
-                            </Stack>
-                        </form>
+                                            {
+                                                isSending ? (
+                                                    <CircularProgress size={24} />
+                                                ) : (
+                                                    <Typography
+                                                        className="registerButtonText"
+                                                        variant="body1"
+                                                        sx={{
+                                                            fontWeight: 400,
+                                                            color: theme.palette.text.primary,
+                                                            textTransform: 'none',
+                                                        }}
+                                                    >
+                                                        Register
+                                                    </Typography>
+                                                )
+                                            }
+                                        </Button>
+                                    </Stack>
+                                </form>
+                            )
+                        }
                     </Stack>
                 </Box>
             </Box>
