@@ -13,7 +13,7 @@ export default function Home() {
       py={{xs: 0, lg: 3}}
     >
       <Header />
-      <Stack flex={1} px={{ xs: 1, lg: 5 }} py={4} justifyContent="start" gap={{xs: 2, lg: 4}}>
+      <Stack flex={1} sx={{ p: { xs: 3, md: 9 } }} justifyContent="start" gap={{xs: 2, lg: 4}}>
         <Typography variant="h3" component="h1" gutterBottom sx={{ mb: 4 }}>
           Cookie Policy – Urano Ecosystem Presale
         </Typography>
