@@ -41,7 +41,7 @@ export default function StablecoinField({
       inputProps={{
         inputMode: "decimal",
         pattern: "[0-9.]*",
-        style: { textAlign: "center", fontSize: 18, fontWeight: 500 },
+        style: { textAlign: {xs: "right", lg: "center"}, fontSize: 18, fontWeight: 500 },
         "aria-label": label,
       }}
       InputProps={{
@@ -79,7 +79,7 @@ export default function StablecoinField({
         // container
         "& .MuiOutlinedInput-root": {
           bgcolor: "#151515",
-          width: "100%",
+          width: {xs: "unset", lg: "100%"},
           borderRadius: 2,
           height: 56,
           pr: 1,
