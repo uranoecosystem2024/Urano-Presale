@@ -10,4 +10,5 @@ html, body {
 
 #CybotCookiebotDialog{
   display: none !important;
+  visibility: hidden !important;
 }
