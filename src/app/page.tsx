@@ -4,6 +4,8 @@ import HowItWorks from '@/components/HowItWorks';
 import Footer from '@/components/Footer';
 import MainSection from '@/components/MainSection/MainSection';
 import MobileHowItWorks from '@/app/mobileHowItWorks';
+import Image from 'next/image';
+import coins from '@/assets/images/coins.webp';
 export default function Home() {
   return (
     <Stack
@@ -17,6 +19,14 @@ export default function Home() {
       <Header />
       <Stack flex={1} px={{ xs: 1, lg: 5 }} py={4} justifyContent="end" gap={{xs: 2, lg: 4}}>
         <MainSection />
+        <Image
+        className="coinsDesktop"
+        src={coins}
+        alt="coins urano"
+        width={250}
+        height={125}
+        style={{ position: "absolute", top: "55%", left: "24%", zIndex: 0 }}
+      />
         <HowItWorks />
         <MobileHowItWorks />
       </Stack>

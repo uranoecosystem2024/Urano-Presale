@@ -8,6 +8,7 @@ import { useEffect, useState } from "react"
 
 import Union from "@/assets/images/Union.png"
 import img1 from "@/assets/images/img1.webp"
+import coins from "@/assets/images/coins.webp"
 
 const HowItWorks = () => {
   const theme = useTheme<Theme>()
