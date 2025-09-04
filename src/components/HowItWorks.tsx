@@ -218,7 +218,7 @@ const HowItWorks = () => {
             <Image className="howItWorksImgDesktop" src={img1} alt="img1" width={220} height={150} />
           </motion.div>
           <Image className="howItWorksImgMobile" src={img1} alt="img1" width={190} height={150} />
-          <Link href="https://docs.uranoecosystem.com/the-legal-and-compliant-structure-of-urano" underline="none" sx={{ width: { xs: "95%", lg: "fit-content" } }}>
+          <Link href="https://docs.uranoecosystem.com/the-legal-and-compliant-structure-of-urano" target="_blank" underline="none" sx={{ width: { xs: "95%", lg: "fit-content" } }}>
             <Box
               sx={{
                 width: { xs: "100%", lg: "fit-content" },
