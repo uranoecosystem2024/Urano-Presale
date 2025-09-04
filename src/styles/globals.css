@@ -13,8 +13,21 @@ html, body {
   visibility: hidden !important;
 }
 
+.howItWorksImgDesktop {
+  display: block !important;
+}
+.howItWorksImgMobile {
+  display: none !important;
+}
+
 @media (max-width: 1024px) {
   .howItWorksUnion {
     display: none !important;
+  }
+  .howItWorksImgDesktop {
+    display: none !important;
+  }
+  .howItWorksImgMobile {
+    display: block !important;
   }
 }

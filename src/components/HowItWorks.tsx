@@ -14,7 +14,8 @@ const HowItWorks = () => {
             position: 'relative',
             paddingX: {xs: 2, lg: 0},
             paddingY: {xs: 2, lg: 0},
-            backgroundColor: theme.palette.background.paper,
+            backgroundColor: {xs: theme.palette.transparentPaper.main, lg: "transparent"},
+            border: {xs: `1px solid ${theme.palette.headerBorder.main}`, lg: "none"},
         }}>
             <Image className="howItWorksUnion" src={Union} alt="Union" fill style={{ position: 'absolute', top: 0, left: 0, zIndex: 1 }} />
             <Typography variant="h5" sx={{
@@ -40,6 +41,8 @@ const HowItWorks = () => {
                 WebkitTextFillColor: 'transparent',
                 fontWeight: 500,
                 fontSize: 22,
+                display: {xs: "block", lg: "none"},
+                marginBottom: 1,
             }}>How it works</Typography>
             <Stack width={"100%"} height={"100%"} sx={{
                 minHeight: 220,
@@ -51,7 +54,7 @@ const HowItWorks = () => {
                 paddingX: {xs: 0, lg: 5},
                 paddingTop: {xs: 2, lg: 6},
                 paddingBottom: 2,
-                gap: 4,
+                gap: {xs: 2, lg: 4},
                 position: "relative",
                 zIndex: 2,
             }}>
@@ -92,14 +95,15 @@ const HowItWorks = () => {
                 </Stack>
 
                 <Stack width={{xs:"100%",lg:"22%"}} alignItems={"center"} justifyContent={"end"}marginTop={-2}>
-                    <Image src={img1} alt="img1" width={220} height={150} />
+                    <Image className="howItWorksImgDesktop" src={img1} alt="img1" width={220} height={150} />
+                    <Image className="howItWorksImgMobile" src={img1} alt="img1" width={190} height={150} />
                     <Link href="/" underline="none" sx={{
                         width: {xs: "95%", lg: "fit-content"},
                     }}>
                         <Box sx={{
                             width: {xs: "100%", lg: "fit-content"},
                             marginTop: -4,
-                            backgroundColor: theme.palette.secondary.main,
+                            background: {xs: theme.palette.uranoGreen1.main, lg: theme.palette.secondary.main},
                             border: `1px solid ${theme.palette.headerBorder.main}`,
                             borderRadius: 2,
                             boxShadow: 2,
