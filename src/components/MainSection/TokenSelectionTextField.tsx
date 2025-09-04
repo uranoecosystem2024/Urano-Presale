@@ -79,7 +79,7 @@ export default function StablecoinField({
         // container
         "& .MuiOutlinedInput-root": {
           bgcolor: "#151515",
-          width: {"100%"},
+          width: "100%",
           borderRadius: 2,
           height: 56,
           pr: 1,
