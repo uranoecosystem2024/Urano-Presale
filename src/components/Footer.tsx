@@ -3,6 +3,7 @@
 import { Stack, Typography, Link, Box } from "@mui/material"
 import Image from "next/image"
 import logo from "@/assets/images/logos/logo-turquoise-1.webp"
+import arb from "@/assets/images/arbdao.webp"
 import { useTheme, type Theme } from '@mui/material/styles';
 import { PiTelegramLogoDuotone, PiXLogo } from "react-icons/pi";
 
@@ -83,6 +84,17 @@ const Footer = () => {
                     </Box>
                 </Link>
             </Stack>
+            <Stack direction="row" justifyContent="center" alignItems="center" gap={0}>
+                <Typography variant="body1" fontWeight={400} color={theme.palette.text.secondary}>
+                    Powered by:
+                </Typography>
+                <Link href="https://www.arbitrumhub.io/" target="_blank" underline="none">
+                    <Image src={arb} alt="Arb" width={120} height={40} style={{
+                        marginTop: 6,
+                    }} />
+                </Link>
+            </Stack>
+
             <Stack direction="row" justifyContent="end" alignItems="center" gap={1}>
                 <Link href="/" underline="none">
                     <Box sx={{
