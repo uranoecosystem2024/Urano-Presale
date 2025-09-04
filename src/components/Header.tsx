@@ -21,7 +21,7 @@ const Header = () => {
             paddingX: {xs: 2, lg: 5},
             marginLeft: {xs: -2, lg: 0},
         }}>
-            <Link href="/">
+            <Link href="https://www.uranoecosystem.com/">
                 <Image src={logo} alt="Logo" width={100} height={65} style={{
                     scale: 1.2,
                 }} />
@@ -56,7 +56,7 @@ const Header = () => {
                             color={theme.palette.text.secondary}
                             className="navLink"
                         >
-                            Home
+                            Homepage
                         </Typography>
                     </Box>
                 </Link>
