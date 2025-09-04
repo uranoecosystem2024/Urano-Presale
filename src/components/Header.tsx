@@ -60,7 +60,7 @@ const Header = () => {
                         </Typography>
                     </Box>
                 </Link>
-                <Link href="https://docs.uranoecosystem.com/" underline="none">
+                <Link href="https://docs.uranoecosystem.com/" underline="none" target="_blank">
                     <Box
                         sx={{
                             display: 'flex',
@@ -90,7 +90,7 @@ const Header = () => {
                         </Typography>
                     </Box>
                 </Link>
-                <Link href="https://docs.uranoecosystem.com/ecosystem/interactive-blocks/tokenomics" underline="none">
+                <Link href="https://docs.uranoecosystem.com/ecosystem/interactive-blocks/tokenomics" underline="none" target="_blank">
                     <Box
                         sx={{
                             display: 'flex',
