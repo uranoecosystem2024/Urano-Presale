@@ -60,7 +60,7 @@ const Footer = () => {
                         </Typography>
                     </Box>
                 </Link>
-                <Link href="/" underline="none">
+                <Link href="/privacy-policy" underline="none">
                     <Box
                         sx={{
                             display: 'flex',
@@ -90,7 +90,7 @@ const Footer = () => {
                         </Typography>
                     </Box>
                 </Link>
-                <Link href="/" underline="none">
+                <Link href="/privacy-policy" underline="none">
                     <Box
                         sx={{
                             display: 'flex',
