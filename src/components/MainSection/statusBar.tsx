@@ -4,7 +4,7 @@ import { Stack } from "@mui/material";
 
 const StatusBar = () => {
     return (
-        <Stack width={"100%"} direction={"row"} gap={1} alignItems={"center"} sx={{
+        <Stack width={"100%"} direction={"row"} gap={{ xs: 0.5, lg: 1 }} alignItems={"center"} sx={{
         }}>
             <svg xmlns="http://www.w3.org/2000/svg" width="85" height="18" viewBox="0 0 85 18" fill="none">
                 <path d="M82.5918 0C83.7838 0 84.7116 1.03606 84.5801 2.2207L83.0244 16.2207C82.9119 17.2336 82.0552 18 81.0361 18H2C0.829946 18 -0.090286 17 0.00683594 15.834L1.17383 1.83398C1.26021 0.7974 2.12681 0 3.16699 0H82.5918Z" fill="url(#paint0_linear_11671_115)" />
