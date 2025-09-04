@@ -262,7 +262,7 @@ const MobileMenu = () => {
                             </Box>
                         </Link>
                     </Stack>
-                    <Stack direction="row" justifyContent="center" alignItems="center" gap={2} marginBottom={2}>
+                    <Stack direction="row" justifyContent="center" alignItems="center" gap={1} marginBottom={2}>
                         <Link href="/terms-and-disclaimer" underline="none">
                             <Box
                                 sx={{
@@ -282,6 +282,9 @@ const MobileMenu = () => {
                                 </Typography>
                             </Box>
                         </Link>
+                        <Typography variant="body1" fontWeight={400} color={theme.palette.text.secondary} className="navLink">
+                            |
+                        </Typography>
                         <Link href="/privacy-policy" underline="none">
                             <Box
                                 sx={{
@@ -297,6 +300,27 @@ const MobileMenu = () => {
                                     className="navLink"
                                 >
                                     Privacy Policy
+                                </Typography>
+                            </Box>
+                        </Link>
+                        <Typography variant="body1" fontWeight={400} color={theme.palette.text.secondary} className="navLink">
+                            |
+                        </Typography>
+                        <Link href="/cookie-policy" underline="none">
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <Typography
+                                    variant="body1"
+                                    fontWeight={400}
+                                    color={theme.palette.text.secondary}
+                                    className="navLink"
+                                >
+                                    Cookie Policy
                                 </Typography>
                             </Box>
                         </Link>
