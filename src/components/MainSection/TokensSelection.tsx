@@ -1,7 +1,7 @@
 import { Stack } from "@mui/material";
 import TokenSelectionTextField from "@/components/MainSection/TokenSelectionTextField";
-import usdc from "@/assets/images/usdc.webp";
-import urano from "@/assets/images/uranoTokenIcon.webp";
+import usdc from "@/assets/images/usdc1.webp";
+import urano from "@/assets/images/urano1.webp";
 
 
 
