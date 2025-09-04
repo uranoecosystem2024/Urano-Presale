@@ -25,7 +25,14 @@ html, body {
   display: none !important;
 }
 
+.mobileGradient {
+  display: none;
+}
+
 @media (max-width: 1024px) {
+  .mobileGradient {
+    display: block !important;
+  }
   .howItWorksUnion {
     display: none !important;
   }
@@ -35,14 +42,9 @@ html, body {
   .howItWorksImgMobile {
     display: block !important;
   }
-  .mobileGradient {
-    display: block !important;
-  }
+
 }
 
-.mobileGradient {
-  display: none !important;
-}
 
 .conthrax {
   font-family: "Conthrax", sans-serif !important;
