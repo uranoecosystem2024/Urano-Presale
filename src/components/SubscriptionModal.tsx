@@ -15,6 +15,7 @@ import {
 } from '@mui/material';
 import Image from 'next/image';
 import popupbg from "@/assets/images/pop-up-bg.webp";
+import axios from 'axios';  // Import axios to make API calls
 
 interface SubscriptionModalProps {
     open: boolean;
@@ -48,31 +49,22 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose }) 
         setIsSending(true);
 
         // Don't submit if email is invalid
-        if (emailError) {
+        if (emailError || !email) {
             return;
         }
 
-        // Get the form data
-        const form = e.target as HTMLFormElement;
-        const formData = new FormData(form);
-
         try {
-            // Use fetch to send the form data to FormBold without redirection
-            const response = await fetch(form.action, {
-                method: form.method,
-                body: formData,
+            // Send the email to the Brevo API
+            const response = await axios.post('/api/subscribe', {
+                email: email,
             });
 
-            if (response.ok) {
-                // Log success message
+            if (response.status === 200) {
                 setIsSending(false);
                 setIsSent(true);
-                setTimeout(
-                    () => {
-                        window.location.reload();
-                    },
-                    2000
-                )
+                setTimeout(() => {
+                    onClose(); // Close the modal after 2 seconds
+                }, 2000);
             } else {
                 setIsSending(false);
                 setIsError(true);
@@ -107,7 +99,6 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose }) 
                     border: `1px solid ${theme.palette.headerBorder.main}`,
                 }}
             >
-
                 {/* Background Image */}
                 <Box sx={{ position: 'relative', width: '100%', height: '30%' }}>
                     <Image
@@ -158,6 +149,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose }) 
                             1
                         </Typography>
                     </Box>
+
                     <Stack width={'100%'} height={'100%'} alignItems={'center'} justifyContent={'center'} paddingY={2} gap={4}>
                         <Stack width={'100%'} alignItems={'center'} gap={1}>
                             <Typography
@@ -191,20 +183,14 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose }) 
                                 )
                             }
                         </Stack>
+
+                        {/* Subscription Form */}
                         {
                             !isSent && !isError && (
                                 <form
-                                    onSubmit={handleSubmit} // Use handleSubmit function to validate email
-                                    action="https://formbold.com/s/91LpA" // FormBold form URL
-                                    method="POST"
+                                    onSubmit={handleSubmit}
                                     style={{ width: '100%' }}
                                 >
-                                    {/* Hidden Access Key */}
-                                    <input
-                                        type="hidden"
-                                        name="New submission"
-                                        value="New submission for Urano Presale page" // Replace with your FormBold access key
-                                    />
                                     {/* Email Field */}
                                     <Stack width={'100%'} alignItems={'center'} gap={2}>
                                         <Stack width={'100%'} gap={1}>
@@ -222,8 +208,8 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose }) 
                                                 </InputLabel>
                                                 <OutlinedInput
                                                     id="component-outlined"
-                                                    name="email" // Ensure name is "email" to match FormBold
-                                                    value={email} // Bind the email value to the state
+                                                    name="email"
+                                                    value={email}
                                                     placeholder="Enter your e-mail"
                                                     label="E-mail"
                                                     type="email"
