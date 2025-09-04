@@ -5,11 +5,12 @@ import Image from "next/image"
 import logo from "@/assets/images/logos/logo-turquoise-1.webp"
 import { useTheme, type Theme } from '@mui/material/styles';
 import { PiTelegramLogoDuotone, PiXLogo } from "react-icons/pi";
-
+import MobileMenu from "./MobileMenu";
 
 const Header = () => {
     const theme = useTheme<Theme>();
     return (
+        <>
         <Stack direction="row" justifyContent="space-between" alignItems="center" width={{xs: "100vw", lg: "100%"}} sx={{
             backgroundColor: theme.palette.background.paper,
             borderTop: {xs: "none", lg: `1px solid ${theme.palette.headerBorder.main}`},
@@ -17,7 +18,7 @@ const Header = () => {
             borderLeft: {xs: "none", lg: `1px solid ${theme.palette.headerBorder.main}`},
             borderRight: {xs: "none", lg: `1px solid ${theme.palette.headerBorder.main}`},
             borderRadius: 2,
-            paddingX: 5,
+            paddingX: {xs: 2, lg: 5},
             marginLeft: {xs: -2, lg: 0},
         }}>
             <Link href="/">
@@ -169,11 +170,11 @@ const Header = () => {
                 </Link>
                 <Link href="/" underline="none">
                     <Box sx={{
-                        backgroundColor: theme.palette.secondary.main,
+                        background: {xs: theme.palette.uranoGradient, lg: theme.palette.secondary.main},
                         border: `1px solid ${theme.palette.headerBorder.main}`,
                         borderRadius: 2,
-                        paddingX: 2,
-                        paddingY: 1,
+                        paddingX: {xs: 1.5, lg: 2},
+                        paddingY: {xs: 1.5, lg: 1},
                         marginLeft: 1,
                         display: 'flex',
                         justifyContent: 'center',
@@ -185,11 +186,15 @@ const Header = () => {
                             },
                         },
                     }}>
-                        <Typography variant="body1" fontWeight={400} color={theme.palette.text.disabled} className="connectWalletLink">Connect Wallet</Typography>
+                        <Typography variant="body1" fontWeight={400} className="connectWalletLink" sx={{
+                            color: {xs: theme.palette.background.default, lg: theme.palette.text.disabled}
+                        }}>Connect Wallet</Typography>
                     </Box>
                 </Link>
+                <MobileMenu />
             </Stack>
         </Stack>
+        </>
     )
 }
 
