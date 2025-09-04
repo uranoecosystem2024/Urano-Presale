@@ -4,6 +4,8 @@ import { useTheme } from "@mui/material/styles";
 import Registration from "./Registration";
 import PresaleCard from "./PresaleCard";
 import TokensSelection from "./TokensSelection";
+import mobileCoin1 from "@/assets/images/mobileCoin1.webp"
+import Image from "next/image";
 const MainSection = () => {
     const theme = useTheme();
     return (
@@ -32,6 +34,16 @@ const MainSection = () => {
                     }}>
                         The gateway to Real World Assets tokenization
                     </Typography>
+                </Stack>
+                <Stack display={{ xs: "flex", lg: "none" }} width={"100%"} justifyContent={"center"} alignItems={"center"} sx={{
+                    marginY: -6
+                }}>
+                    <Image
+                        src={mobileCoin1}
+                        className="mobileCoin1"
+                        alt="coins urano"
+                        style={{ width: "100%", height: "auto" }}
+                    />
                 </Stack>
                 <Stack gap={1.5} display={{ xs: "none", lg: "flex" }}>
                     <Typography variant="h6" sx={{
@@ -122,7 +134,7 @@ const MainSection = () => {
                     </Stack>
                 </Stack>
             </Stack>
-            <Stack width={{ xs: "100%", lg: "40%" }} flexGrow={1} gap={{xs: 3, lg: 3}} marginTop={{ xs: 4, lg: 0 }}>
+            <Stack width={{ xs: "100%", lg: "40%" }} flexGrow={1} gap={{ xs: 3, lg: 3 }} marginTop={{ xs: 4, lg: 0 }}>
                 <Registration />
                 <PresaleCard />
                 <TokensSelection />

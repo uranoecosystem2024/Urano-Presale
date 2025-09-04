@@ -45,6 +45,10 @@ html, body {
   display: none !important;
 }
 
+.mobileCoin1 {
+  display: none !important;
+}
+
 @media (max-width: 1024px) {
   .mobileGradient {
     display: block !important;
@@ -70,6 +74,10 @@ html, body {
   .coinsMobile {
     display: block !important;
   }
+  .mobileCoin1 {
+    display: block !important;
+    animation: float 6s ease-in-out infinite;
+  }
 
 }
 
@@ -77,4 +85,17 @@ html, body {
 .conthrax {
   font-family: "Conthrax", sans-serif !important;
 }
+
+@keyframes float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
 
