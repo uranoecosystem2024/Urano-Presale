@@ -10,7 +10,7 @@ const MainSection = () => {
         <Stack width={"100%"} flex={1} direction={{ xs: "column", lg: "row" }} justifyContent={"space-between"} alignItems={"stretch"} paddingTop={2} paddingBottom={4}>
             <Stack width={{ xs: "100%", lg: "60%" }} flexGrow={1} gap={4}>
                 <Typography className="conthrax" variant="h3" sx={{
-                    fontSize: { xs: "1.4rem", lg: "2.85rem" },
+                    fontSize: { xs: "1.4rem", lg: "2.5rem" },
                     fontWeight: 700,
                     background: theme.palette.uranoGradient,
                     backgroundClip: 'text',
@@ -19,15 +19,15 @@ const MainSection = () => {
                 }}>Unlocking the power<br /> of on-chain tokenization</Typography>
                 <Stack>
                     <Typography className="conthrax" variant="h6" sx={{
-                        fontSize: { xs: "1rem", lg: "1.75rem" },
+                        fontSize: { xs: "1rem", lg: "1.5rem" },
                         fontWeight: 600,
                         color: theme.palette.text.primary,
                     }}>
                         Welcome to Urano Ecosystem
                     </Typography>
                     <Typography variant="h6" sx={{
-                        fontSize: { xs: "1rem", lg: "1.5rem" },
-                        fontWeight: { xs: 400, lg: 500 },
+                        fontSize: { xs: "1rem", lg: "1.25rem" },
+                        fontWeight: { xs: 400, lg: 400 },
                         color: theme.palette.text.primary,
                     }}>
                         The gateway to Real World Assets tokenization
