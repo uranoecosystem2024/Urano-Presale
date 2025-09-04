@@ -11,7 +11,7 @@ import {
     InputLabel,
     FormControl,
     OutlinedInput,
-    CircularProgress
+    CircularProgress,
 } from '@mui/material';
 import Image from 'next/image';
 import popupbg from "@/assets/images/pop-up-bg.webp";
@@ -82,7 +82,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose }) 
         <Modal open={open} onClose={onClose}>
             <Box
                 sx={{
-                    position: 'absolute',
+                    position: 'relative',
                     top: '50%',
                     left: '50%',
                     transform: 'translate(-50%, -50%)',
@@ -100,6 +100,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose }) 
                     maxHeight: '90%',
                 }}
             >
+
                 {/* Background Image */}
                 <Box sx={{ position: 'relative', width: '100%', height: '30%' }}>
                     <Image
