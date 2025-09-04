@@ -126,7 +126,7 @@ const Footer = () => {
                 </Stack>
                 <Stack direction={"row"} justifyContent="center" alignItems="center" gap={0} marginTop={{ xs: 2, lg: 0 }}>
                     <Typography variant="body1" fontWeight={400} color={theme.palette.text.secondary}>
-                        Powered by:
+                        Powered by
                     </Typography>
                     <Link href="https://www.arbitrumhub.io/" target="_blank" underline="none">
                         <Image src={arb} alt="Arb" width={120} height={40} style={{
