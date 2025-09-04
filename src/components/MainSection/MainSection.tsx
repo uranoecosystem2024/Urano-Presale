@@ -42,7 +42,7 @@ const MainSection = () => {
                         src={mobileCoin1}
                         className="mobileCoin1"
                         alt="coins urano"
-                        style={{ width: "100%", height: "auto" }}
+                        style={{ width: "100%", height: "auto", scale: 1.2 }}
                         priority
                     />
                 </Stack>
