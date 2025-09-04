@@ -7,3 +7,7 @@ html, body {
 .main-gradient {
   background: linear-gradient(90deg, #5EBBC3 0%, #6DE7C2 100%);
 }
+
+#CybotCookiebotDialog{
+  display: none !important;
+}
