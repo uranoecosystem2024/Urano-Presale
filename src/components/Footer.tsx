@@ -33,7 +33,7 @@ const Footer = () => {
                     }} />
                 </Link>
                 <Stack direction={{ xs: "column", lg: "row" }} justifyContent="center" alignItems="center" gap={2}>
-                    <Link href="/terms-and-disclaimer" underline="none">
+                    <Link href="/terms-and-conditions" underline="none">
                         <Box
                             sx={{
                                 display: 'flex',
@@ -59,7 +59,7 @@ const Footer = () => {
                                 color={theme.palette.text.secondary}
                                 className="navLink"
                             >
-                                Terms & Disclaimer
+                                Terms & Conditions
                             </Typography>
                         </Box>
                     </Link>

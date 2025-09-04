@@ -15,7 +15,7 @@ import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
 type StablecoinFieldProps = {
   label?: string;
   value: string | number;
-  onChange?: (v: string) => void;
+  onChange?: (v: number) => void;
   tokenSymbol?: string;
   tokenIconSrc?: string;
   onPickToken?: () => void;
@@ -37,7 +37,7 @@ export default function StablecoinField({
       variant="outlined"
       label={label}
       value={value}
-      onChange={(e) => onChange?.(e.target.value)}
+      onChange={(e) => onChange?.(Number(e.target.value))}
       inputProps={{
         inputMode: "decimal",
         pattern: "[0-9.]*",
