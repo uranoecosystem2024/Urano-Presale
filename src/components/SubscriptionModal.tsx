@@ -67,14 +67,14 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose }) 
                 // Log success message
                 setIsSending(false);
                 setIsSent(true);
-                alert('Success: Email successfully submitted!');
             } else {
                 setIsSending(false);
                 setIsError(true);
-                alert('Error: Something went wrong with the submission.');
             }
         } catch (error) {
-            alert('Error: Unable to submit the form.');
+            console.error('Error: Unable to submit the form.', error);
+            setIsSending(false);
+            setIsError(true);
         }
     };
 
