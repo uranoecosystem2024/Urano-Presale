@@ -14,7 +14,7 @@ const TokensSelection = () => {
     const [convertedValue, setConvertedValue] = useState(0);
 
     useEffect(() => {
-        setConvertedValue(value * 33.3); // You can modify the multiplier as needed
+        setConvertedValue(value * 33.3);
       }, [value]);
       
     return (
