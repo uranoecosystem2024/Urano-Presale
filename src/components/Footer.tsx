@@ -180,6 +180,7 @@ const Footer = () => {
             <Divider sx={{
                 width: "100%",
                 borderColor: theme.palette.footerBorder.main,
+                marginTop: { xs: 2, lg: 0 },
             }} />
             <Typography variant="caption" fontWeight={400} color={theme.palette.text.secondary} paddingY={2}>
                 {readMore ? disclaimer : disclaimer.slice(0, 407) + "... "}
