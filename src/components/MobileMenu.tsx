@@ -263,7 +263,7 @@ const MobileMenu = () => {
                         </Link>
                     </Stack>
                     <Stack direction="row" justifyContent="center" alignItems="center" gap={1} marginBottom={2}>
-                        <Link href="/terms-and-disclaimer" underline="none">
+                        <Link href="/terms-and-conditions" underline="none">
                             <Box
                                 sx={{
                                     display: 'flex',
@@ -278,7 +278,7 @@ const MobileMenu = () => {
                                     color={theme.palette.text.secondary}
                                     className="navLink"
                                 >
-                                    Terms & Disclaimer
+                                    Terms & Conditions
                                 </Typography>
                             </Box>
                         </Link>
