@@ -1,8 +1,12 @@
-import { Stack, Typography, Link, List, ListItem} from '@mui/material';
+'use client';
+
+import { Stack, Typography, Link, List, ListItem, Divider } from '@mui/material';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
+import { useTheme, type Theme } from '@mui/material/styles';
 
 export default function PrivacyPolicy() {
+  const theme = useTheme<Theme>();
   return (
     <Stack
       direction="column"
@@ -13,325 +17,628 @@ export default function PrivacyPolicy() {
       py={{xs: 0, lg: 3}}
     >
       <Header />
-      <Stack flex={1} sx={{ p: { xs: 3, md: 9 } }} py={4} justifyContent="start" gap={{xs: 2, lg: 4}}>
-        <Typography variant="h3" component="h1" gutterBottom sx={{ mb: 4 }}>
-          Informativa sulla Privacy della Landing Page della Presale Urano Ecosystem
-        </Typography>
+      <Stack flex={1} sx={{ p: { xs: 3, md: 9 } }} justifyContent="start" gap={{xs: 2, lg: 4}}>
+        <Stack sx={{ p: { xs: 2, md: 4 } }}>
+          <Typography variant="h3" component="h1" gutterBottom sx={{ mb: 4 }}>
+            Privacy Policy for the Presale Urano Ecosystem Landing Page
+          </Typography>
+          
+          <Typography variant="body1" gutterBottom>
+            Last updated: [25/07/2025]
+          </Typography>
 
-        <Typography variant="h6" component="h2" gutterBottom>
-          1. Titolare del trattamento
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Ai sensi del Regolamento (UE) 2016/679 (&quot;GDPR&quot;) e delle normative applicabili in materia di protezione dei dati personali, il Titolare del trattamento è:
-        </Typography>
-        <List dense>
-          <ListItem>URANO ECOSYSTEM Sp. Z o.o.</ListItem>
-          <ListItem>Sede legale: ul. Mickiewicza 39A/3, 86-300 Grudziądz (Kujawsko-Pomorskie), Poland</ListItem>
-          <ListItem>Numero di registrazione (KRS): 0001028647</ListItem>
-          <ListItem>REGON: 524912675</ListItem>
-          <ListItem>Partita IVA (NIP): 8762504246</ListItem>
-          <ListItem>Email di contatto: official@uranoecosystem.com</ListItem>
-        </List>
-        <Typography variant="body1" gutterBottom>
-          Il Titolare ha nominato un Data Protection Officer (DPO), raggiungibile all&apos;indirizzo: dpo@uranoecosystem.com
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Il trattamento dei dati personali avviene anche in conformità con gli obblighi previsti dal Regolamento (UE) 2023/1114 (MiCA) in materia di offerte di crypto-asset, con particolare attenzione alle disposizioni relative all&apos;identificazione degli utenti (KYC), alla trasparenza informativa e alla prevenzione di abusi di mercato.
-        </Typography>
-
-        <Typography variant="h6" component="h2" gutterBottom>
-          2. Finalità del trattamento
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          I dati personali raccolti tramite la landing page della Presale del token $URANO sono trattati per le seguenti finalità:
-        </Typography>
-        <List dense>
-          <ListItem>• F1. Erogazione dei servizi: permettere la registrazione alla Presale e fornire contenuti informativi sul progetto Urano Ecosystem;</ListItem>
-          <ListItem>• F2. Verifica dell&apos;identità (KYC): procedere alla verifica dell&apos;identità e dell&apos;età degli utenti, in conformità alla normativa AML/CFT e MiCA;</ListItem>
-          <ListItem>• F3. Gestione amministrativa, tecnica e di sicurezza: assicurare il corretto funzionamento della piattaforma, prevenirne l&apos;abuso e garantirne la sicurezza informatica e operativa;</ListItem>
-          <ListItem>• F4. Adempimenti normativi e fiscali: rispettare obblighi di legge e normative settoriali applicabili, inclusi quelli in materia di prevenzione del riciclaggio, antiterrorismo e trasparenza nei mercati crypto;</ListItem>
-          <ListItem>• F5. Comunicazioni obbligatorie: inviare notifiche relative a modifiche dei Termini, delle Policy o aggiornamenti legali, laddove necessario;</ListItem>
-          <ListItem>• F6. Tutela dei diritti del Titolare: esercitare o difendere un diritto in sede giudiziaria o stragiudiziale.</ListItem>
-        </List>
-        
-        <Typography variant="h6" component="h2" gutterBottom>
-          Basi giuridiche del trattamento
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Il trattamento dei dati personali da parte di Urano Ecosystem si fonda sulle seguenti basi giuridiche, ai sensi dell&apos;articolo 6 del GDPR:
-        </Typography>
-        <List dense>
-          <ListItem>• Esecuzione di un contratto o di misure precontrattuali – ex art. 6(1)(b) GDPR: il trattamento è necessario per consentire l&apos;accesso dell&apos;utente alla Presale, per fornire i servizi connessi e per adempiere alle richieste precontrattuali da parte dell&apos;utente;</ListItem>
-          <ListItem>• Adempimento di obblighi legali – ex art. 6(1)(c) GDPR: in particolare in relazione alla normativa antiriciclaggio (AML/CFT), alla normativa fiscale applicabile e agli obblighi previsti dal Regolamento (UE) 2023/1114 (MiCA), che richiedono l&apos;identificazione dell&apos;utente e la tracciabilità delle operazioni rilevanti;</ListItem>
-          <ListItem>• Legittimo interesse del Titolare – ex art. 6(1)(f) GDPR: relativo alla prevenzione di frodi, alla sicurezza informatica, al monitoraggio tecnico della piattaforma e alla protezione dei diritti legali del Titolare, anche in sede giudiziale o amministrativa. Tali interessi sono bilanciati rispetto ai diritti e alle libertà fondamentali dell&apos;interessato;</ListItem>
-          <ListItem>• Consenso esplicito dell&apos;interessato – ex art. 6(1)(a) GDPR: richiesto, ove necessario, ad esempio per il trattamento di categorie particolari di dati (come dati biometrici gestiti dal provider KYC) o per l&apos;invio di comunicazioni opzionali. In ogni caso, il consenso è sempre revocabile in qualsiasi momento.</ListItem>
-        </List>
-        
-        <Typography variant="h6" component="h2" gutterBottom>
-          Restrizione di età
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          L&apos;accesso alla Presale è riservato esclusivamente a utenti maggiorenni (18+). Urano Ecosystem non raccoglie né tratta intenzionalmente dati personali relativi a minori. Eventuali dati accidentalmente raccolti saranno cancellati tempestivamente.
-        </Typography>
-
-        <Typography variant="h6" component="h2" gutterBottom>
-          3. Modalità di raccolta dei dati personali nella presale
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          I dati personali vengono raccolti direttamente dall&apos;utente in varie fasi della Presale. Al momento della registrazione, richiediamo e trattiamo dati identificativi (nome, cognome) e di contatto (indirizzo email). Per adempiere agli obblighi legali e di sicurezza (inclusi AML/CFT e MiCA), l&apos;utente viene reindirizzato alla piattaforma del nostro fornitore esterno, Persona Identities, Inc., per la verifica dell&apos;identità (KYC). Durante questa procedura, Persona raccoglie direttamente i dati necessari, come documenti d&apos;identità, dati di contatto, e potenzialmente dati biometrici con il consenso dell&apos;utente, senza che noi li trattiamo o conserviamo direttamente. Infine, per consentire la partecipazione alla Presale, Urano Ecosystem riceve unicamente l&apos;indirizzo pubblico del wallet blockchain dell&apos;utente e i metadati tecnici, come l&apos;esito della verifica (verificato/non verificato), un identificativo univoco e una marca temporale della verifica. In aggiunta, dati di navigazione come l&apos;indirizzo IP vengono raccolti automaticamente a fini di sicurezza e per il corretto funzionamento della piattaforma.
-        </Typography>
-
-        <Typography variant="h6" component="h2" gutterBottom>
-          4. Tipologia di dati trattati
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Nel contesto della registrazione e partecipazione alla Presale, nonché della semplice navigazione sulla landing page, Urano Ecosystem può trattare le seguenti categorie di dati personali:
-        </Typography>
-        <List dense>
-          <ListItem>• a. Dati identificativi: nome, cognome, e altri dati richiesti in fase di registrazione o verifica dell&apos;identità;</ListItem>
-          <ListItem>• b. Dati di contatto: indirizzo email fornito dall&apos;utente;</ListItem>
-          <ListItem>• c. Dati de verifica KYC: esito della verifica (verificato/non verificato), identificativo univoco della transazione, marca temporale, codice paese, e metadati tecnici forniti dal provider Persona;</ListItem>
-          <ListItem>• d. Indirizzo del wallet blockchain: indirizzo pubblico associato al wallet dell&apos;utente, utilizzato ai fini della partecipazione alla Presale e della verifica dell&apos;idoneità;</ListItem>
-          <ListItem>• e. Dati di navigazione e tecnici: indirizzo IP, user agent (browser/dispositivo), orari di accesso, referrer e log di sistema, raccolti automaticamente per finalità di sicurezza e statistica;</ListItem>
-          <ListItem>• f. Dati forniti volontariamente: eventuali ulteriori informazioni comunicate spontaneamente dall&apos;utente nei moduli presenti sul sito (es. richieste di contatto, commenti, suggerimenti).</ListItem>
-        </List>
-        <Typography variant="body1" gutterBottom>
-          Nota: Urano Ecosystem non raccoglie né tratta direttamente documenti d&apos;identità o dati biometrici. Tali informazioni, se richieste, sono gestite in maniera autonoma e sicura dal fornitore esterno Persona Identities, Inc., come specificato nel paragrafo dedicato alla verifica dell&apos;identità.
-        </Typography>
-
-        <Typography variant="h6" component="h2" gutterBottom>
-          5. Base giuridica del trattamento
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Il trattamento dei dati personali da parte di Urano Ecosystem è fondato su diverse basi giuridiche, a seconda delle specifiche finalità perseguite:
-        </Typography>
-        <List dense>
-          <ListItem>• a. Esecuzione di un contratto o di misure precontrattuali – ex art. 6(1)(b) GDPR: il trattamento è necessario per consentire l&apos;accesso dell&apos;utente alla Presale, per fornire i servizi connessi e per adempiere alle richieste precontrattuali da parte dell&apos;utente;</ListItem>
-          <ListItem>• b. Adempimento di obblighi legali – ex art. 6(1)(c) GDPR: in particolare in relazione alla normativa antiriciclaggio (AML/CFT), alla normativa fiscale applicabile e agli obblighi previsti dal Regolamento (UE) 2023/1114 (MiCA), che richiedono l&apos;identificazione dell&apos;utente e la tracciabilità delle operazioni rilevanti;</ListItem>
-          <ListItem>• c. Legittimo interesse del Titolare – ex art. 6(1)(f) GDPR: relativo alla prevenzione di frodi, alla sicurezza informatica, al monitoraggio tecnico della piattaforma e alla protezione dei diritti legali del Titolare, anche in sede giudiziale o amministrativa. Tali interessi sono bilanciati rispetto ai diritti e alle libertà fondamentali dell&apos;interessato;</ListItem>
-          <ListItem>• d. Consenso esplicito dell&apos;interessato – ex art. 6(1)(a) GDPR: richiesto, ove necessario, ad esempio per il trattamento di categorie particolari di dati (come dati biometrici gestiti dal provider KYC) o per l&apos;invio di comunicazioni opzionali. In ogni caso, il consenso è sempre revocabile in qualsiasi momento.</ListItem>
-        </List>
-
-        <Typography variant="h6" component="h2" gutterBottom>
-          6. Conservazione dei dati
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          I dati personali saranno conservati per un periodo non superiore a quanto necessario al conseguimento delle finalità indicate nella presente informativa e, in particolare:
-        </Typography>
-        <List dense>
-          <ListItem>• a. Per i dati raccolti ai fini della verifica dell&apos;identità (KYC), la conservazione sarà garantita per almeno 5 anni dalla cessazione della relazione contrattuale, in conformità alle normative applicabili in materia di antiriciclaggio (AML/CFT). Il trattamento e la conservazione di tali dati, laddove delegati a fornitori esterni specializzati (es. Persona Identities, Inc.), avverranno nel rispetto degli accordi contrattuali e delle misure di sicurezza previste.</ListItem>
-          <ListItem>• b. Per gli altri dati raccolti tramite la landing page (es. dati tecnici, e-mail, indirizzo IP), il periodo di conservazione non supererà i 12 mesi dalla raccolta, salvo obblighi di legge, finalità di difesa in giudizio o richieste delle autorità competenti.</ListItem>
-        </List>
-        <Typography variant="body1" gutterBottom>
-          Al termine dei periodi sopra indicati, i dati saranno cancellati, anonimizzati o resi inaccessibili, salvo che la loro ulteriore conservazione sia necessaria per adempiere a specifici obblighi normativi o in caso di contenziosi in corso.
-        </Typography>
-
-        <Typography variant="h6" component="h2" gutterBottom>
-          7. Destinatari e trasferimento dei dati
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          I dati personali potranno essere comunicati, nel rispetto dei principi di liceità, necessità e proporzionalità, esclusivamente ai seguenti soggetti terzi:
-        </Typography>
-        <List dense>
-          <ListItem>• a. Fornitori di servizi tecnologici e infrastrutturali (es. cloud, hosting, sicurezza informatica, manutenzione della piattaforma), limitatamente alle finalità tecniche e operative connesse all&apos;erogazione del servizio;</ListItem>
-          <ListItem>• b. Autorità pubbliche, enti regolatori o giudiziari, in adempimento ad obblighi legali o su richiesta legittima delle stesse (es. autorità fiscali, antiriciclaggio, giudiziarie);</ListItem>
-          <ListItem>• c. Consulenti professionali (legali, fiscali, contabili), limitatamente all&apos;assolvimento di obblighi normativi o per la tutela dei diritti del Titolare;</ListItem>
-          <ListItem>• d. Persona Identities, Inc., in qualità di fornitore esterno specializzato nei servizi di verifica dell&apos;identità (KYC), come dettagliato al punto 10 della presente Privacy Policy.</ListItem>
-        </List>
-        <Typography variant="body1" gutterBottom>
-          Tutti i destinatari sono vincolati da accordi contrattuali che garantiscono adeguate misure di sicurezza e il rispetto della normativa vigente in materia di protezione dei dati personali (GDPR). In caso di trasferimenti verso Paesi terzi, saranno applicate garanzie appropriate ai sensi degli articoli 44 e seguenti del GDPR (es. decisioni di adeguatezza, Standard Contractual Clauses).
-        </Typography>
-
-        <Typography variant="h6" component="h2" gutterBottom>
-          8. Trasferimenti Extra-UE
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Alcuni dati personali potrebbero essere trasferiti verso Paesi situati al di fuori dello Spazio Economico Europeo (SEE), tra cui gli Stati Uniti, in particolare nel caso di servizi forniti da soggetti terzi quali Persona Identities, Inc., provider con sede negli USA (vedi paragrafo 10).
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Tali trasferimenti avverranno esclusivamente nel rispetto degli articoli 44 e seguenti del GDPR, adottando una o più delle seguenti garanzie appropriate:
-        </Typography>
-        <List dense>
-          <ListItem>• a. Clausole Contrattuali Standard (Standard Contractual Clauses – SCC) adottate dalla Commissione Europea ai sensi dell&apos;art. 46(2)(c) GDPR;</ListItem>
-          <ListItem>• b. Verifica del livello adeguato di protezione dei dati offerto dal destinatario, anche tramite audit e dichiarazioni di conformità alle misure supplementari previste dalle Linee Guida EDPB 01/2020;</ListItem>
-          <ListItem>• c. Adozione di misure tecniche e organizzative idonee a garantire la sicurezza, l&apos;integrità e la non accessibilità non autorizzata dei dati personali trasferiti.</ListItem>
-        </List>
-        <Typography variant="body1" gutterBottom>
-          L&apos;Utente può richiedere maggiori informazioni sulle garanzie applicabili o copia delle Clausole Contrattuali Standard scrivendo a: official@uranoecosystem.com o dpo@uranoecosystem.com
-        </Typography>
-
-        <Typography variant="h6" component="h2" gutterBottom>
-          9. Diritti dell&apos;interessato
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          L&apos;Utente, in qualità di interessato, può esercitare in qualsiasi momento i diritti riconosciuti dagli articoli 15-21 del GDPR, tra cui:
-        </Typography>
-        <List dense>
-          <ListItem>• a. Diritto di accesso: ottenere conferma dell&apos;esistenza o meno di dati personali che lo riguardano e accedere agli stessi;</ListItem>
-          <ListItem>• b. Diritto di rettifica: richiedere la correzione o l&apos;aggiornamento dei dati inesatti o incompleti;</ListItem>
-          <ListItem>• c. Diritto alla cancellazione (&quot;oblio&quot;): ottenere la cancellazione dei propri dati nei casi previsti dall&apos;art. 17 GDPR;</ListItem>
-          <ListItem>• d. Diritto alla limitazione del trattamento: richiedere la limitazione del trattamento nei casi previsti dall&apos;art. 18 GDPR;</ListItem>
-          <ListItem>• e. Diritto di opposizione: opporsi al trattamento dei dati per motivi connessi alla propria situazione particolare (art. 21 GDPR);</ListItem>
-          <ListItem>• f. Diritto alla portabilità dei dati: receive i propri dati in un formato strutturato, di uso comune e leggibile da dispositivo automatico e, se tecnicamente fattibile, trasmetterli a un altro titolare del trattamento.</ListItem>
-        </List>
-        <Typography variant="body1" gutterBottom>
-          L&apos;Utente può esercitare i propri diritti inviando una richiesta:
-        </Typography>
-        <List dense>
-          <ListItem>• via email al Titolare: official@uranoecosystem.com</ListItem>
-          <ListItem>• oppure al Data Protection Officer (DPO): dpo@uranoecosystem.com</ListItem>
-        </List>
-        <Typography variant="body1" gutterBottom>
-          Le richieste saranno evase entro 30 giorni dal ricevimento, salvo proroghe nei casi di particolare complessità, in conformità con l&apos;art. 12 GDPR.
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          L&apos;esercizio dei diritti è gratuito, salvo nei casi in cui le richieste risultino manifestamente infondate o eccessive ai sensi dell&apos;art. 12(5) GDPR.
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          L&apos;Utente ha inoltre il diritto di proporre reclamo a un&apos;autorità di controllo competente, qualora ritenga che il trattamento dei propri dati violi la normativa vigente in materia di protezione dei dati personali (art. 77 GDPR).
-        </Typography>
-
-        <Typography variant="h6" component="h2" gutterBottom>
-          10. Sicurezza e protezione dei dati
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Il Titolare adotta misure tecniche e organizzative adeguate, in conformità agli articoli 24, 25 e 32 del GDPR, al fine di garantire un livello di sicurezza adeguato al rischio, tenuto conto della natura, dell&apos;ambito di applicazione, del contesto e delle finalità del trattamento.
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          In particolare, vengono implementate misure volte a:
-        </Typography>
-        <List dense>
-          <ListItem>• a. Garantire l&apos;integrità, la riservatezza e la disponibilità dei dati personali trattati;</ListItem>
-          <ListItem>• b. Prevenire accessi non autorizzati, divulgazioni accidentali, distruzione, perdita, alterazione o trattamento illecito;</ListItem>
-          <ListItem>• c. Applicare tecniche di crittografia e pseudonimizzazione per la protezione dei dati più sensibili;</ListItem>
-          <ListItem>• d. Eseguire backup periodici e sistemi di disaster recovery per la resilienza operativa;</ListItem>
-          <ListItem>• e. Monitorare e aggiornare regolarmente le infrastrutture digitali, incluse le piattaforme blockchain e smart contract utilizzati.</ListItem>
-        </List>
-        <Typography variant="body1" gutterBottom>
-          Inoltre, gli smart contract utilizzati per la Presale del token $URANO sono stati sottoposti ad audit di sicurezza da parte di terze parti indipendenti, al fine di garantire la trasparenza e la protezione dell&apos;interazione tecnica tra l&apos;utente e il protocollo. Maggiori informazioni sono disponibili alla pagina ufficiale: 
-          <Link href="https://www.uranoecosystem.com/audit" target="_blank" rel="noopener" sx={{ ml: 0.5 }}>
-            https://www.uranoecosystem.com/audit
-          </Link>
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Nel caso in cui vengano coinvolti fornitori terzi (es. per il KYC o il cloud hosting), Urano Ecosystem assicura che tali soggetti siano vincolati da obblighi contrattuali di sicurezza e conformità al GDPR.
-        </Typography>
-
-        <Typography variant="h6" component="h2" gutterBottom>
-          11. Servizi verifica identità
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Per garantire la conformità alle normative antiriciclaggio (AML/CFT) e al Regolamento (UE) 2023/1114 (MiCA), Urano Ecosystem si avvale dei servizi di verifica dell&apos;identità forniti da Persona Identities, Inc., società con sede negli Stati Uniti, specializzata nell&apos;onboarding sicuro degli utenti e nella protezione dei dati personali, in qualità di Responsabile del trattamento ai sensi dell&apos;art. 28 del Regolamento (UE) 2016/679 (GDPR).
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Durante la procedura KYC (Know Your Customer), l&apos;Utente viene reindirizzato a una sessione sicura ospitata direttamente sulla piattaforma di Persona. In tale sede, Persona raccoglierà e tratterà i seguenti dati:
-        </Typography>
-        <List dense>
-          <ListItem>• a. Dati identificativi (nome, cognome, data di nascita, indirizzo);</ListItem>
-          <ListItem>• b. Documento di identità (passaporto, carta d&apos;identità, patente, ecc.);</ListItem>
-          <ListItem>• c. Riconoscimento facciale tramite selfie o video breve (liveness check);</ListItem>
-          <ListItem>• d. Dati biometrici, ove richiesti e previo consenso esplicito dell&apos;Utente;</ListItem>
-          <ListItem>• e. Eventuali metadati tecnici necessari per la verifica.</ListItem>
-        </List>
-        <Typography variant="body1" gutterBottom>
-          Tali dati vengono trattati esclusivamente per le seguenti finalità:
-        </Typography>
-        <List dense>
-          <ListItem>• a. Verifica dell&apos;identità dell&apos;utente;</ListItem>
-          <ListItem>• b. Prevenzione delle frodi e delle attività illecite;</ListItem>
-          <ListItem>• c. Adempimento degli obblighi normativi in materia di AML/CFT e MiCA;</ListItem>
-          <ListItem>• d. Audit di sicurezza e conservazione a fini legali, ove previsto.</ListItem>
-        </List>
-        <Typography variant="body1" gutterBottom>
-          Persona adotta misure tecniche e organizzative avanzate per la protezione dei dati, tra cui crittografia, pseudonimizzazione, isolamento delle istanze, monitoraggio continuo e controlli di accesso granulari. I dati sono archiviati su infrastrutture conformi a standard internazionali, tra cui SOC 2 Tipo II e ISO 27001.
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          L&apos;Utente conserva in ogni momento la possibilità di esercitare i diritti previsti dal GDPR, inclusi accesso, rettifica e cancellazione dei dati, direttamente attraverso la piattaforma Persona.
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Urano Ecosystem non accede, conserva né tratta direttamente i dati biometrici o i documenti identificativi caricati dall&apos;Utente. Riceve unicamente:
-        </Typography>
-        <List dense>
-          <ListItem>• L&apos;esito della verifica (verificato/non verificato),</ListItem>
-          <ListItem>• Un identificativo univoco associato all&apos;Utente,</ListItem>
-          <ListItem>• Una marca temporale della verifica.</ListItem>
-        </List>
-        <Typography variant="body1" gutterBottom>
-          Persona Identities, Inc. garantisce piena conformità al GDPR e aderisce a framework internazionali per la protezione dei dati. Ulteriori dettagli sono disponibili alla loro informativa ufficiale:
-        </Typography>
-        <List dense>
-          <ListItem>
-            <Link href="https://withpersona.com/legal/privacy-policy?lang=it" target="_blank" rel="noopener">
-              https://withpersona.com/legal/privacy-policy?lang=it
+          <Typography variant="h6" component="h2" gutterBottom>
+            1. Data controller
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            Pursuant to Regulation (EU) 2016/679 (“GDPR”) and applicable data protection regulations, the Data Controller is:
+          </Typography>
+          
+          <List dense>
+            <ListItem>URANO ECOSYSTEM Sp. Z o.o.</ListItem>
+            <ListItem>Registered office: ul. Mickiewicza 39A/3, 86-300 Grudziądz (Kuyavian-Pomeranian Voivodeship), Poland</ListItem>
+            <ListItem>Registration number (KRS): 0001028647</ListItem>
+            <ListItem>REGON: 524912675</ListItem>
+            <ListItem>VAT number (NIP): 8762504246</ListItem>
+            <ListItem>Contact email: official@uranoecosystem.com</ListItem>
+          </List>
+          
+          <Typography variant="body1" paragraph>
+            The Data Controller has appointed a Data Protection Officer (DPO), who can be reached at:{' '}
+            <Link href="mailto:dpo@uranoecosystem.com" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
+              dpo@uranoecosystem.com
             </Link>
-          </ListItem>
-          <ListItem>
-            <Link href="https://withpersona.com/legal" target="_blank" rel="noopener">
-              https://withpersona.com/legal
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            The processing of personal data also takes place in compliance with the obligations set forth in Regulation (EU) 2023/1114 (MiCA) regarding crypto-asset offerings, with particular attention to the provisions relating to user identification (KYC), information transparency, and the prevention of market abuse.
+          </Typography>
+
+          <Typography variant="h6" component="h2" gutterBottom>
+            2. Purpose of the processing
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            The personal data collected through the landing page of the $URANO token Presale are processed for the following purposes:
+          </Typography>
+          
+          <List dense>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>F1. Provision of services:</strong> allow registration for the Presale and provide informative content on the Urano Ecosystem project;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>F2. Identity Verification (KYC):</strong> verify the identity and age of users, in compliance with AML/CFT and MiCA regulations;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>F3. Administrative, technical and security management:</strong> ensure the correct functioning of the platform, prevent its abuse and guarantee its IT and operational security;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>F4. Regulatory and tax compliance:</strong> comply with applicable legal and sector-specific regulatory obligations, including those relating to the prevention of money laundering, counterterrorism, and transparency in crypto markets;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>F5. Mandatory communications:</strong> send notifications regarding changes to the Terms, Policies or legal updates, where necessary;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>F6. Protection of the Data Controller&apos;s rights:</strong> exercise or defend a right in or out of court.
+              </Typography>
+            </ListItem>
+          </List>
+          
+          <Typography variant="body1" gutterBottom sx={{ fontWeight: 'bold' }}>
+            Legal bases of the processing
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            The processing of personal data by Urano Ecosystem is based on the following legal bases, pursuant to Article 6 of the GDPR:
+          </Typography>
+          
+          <List dense>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>Performance of a contract or pre-contractual measures</strong> – pursuant to art. 6(1)(b) GDPR: processing is necessary to allow the user to access the Presale, to provide the related services and to fulfill the user&apos;s pre-contractual requests;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>Fulfillment of legal obligations</strong> – pursuant to art. 6(1)(c) GDPR: in particular in relation to anti-money laundering legislation (AML/CFT), applicable tax legislation and the obligations set forth in Regulation (EU) 2023/1114 (MiCA), which require user identification and the traceability of relevant transactions;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>Legitimate interests of the Data Controller</strong> – pursuant to art. 6(1)(f) GDPR: relating to fraud prevention, IT security, technical monitoring of the platform, and the protection of the Data Controller&apos;s legal rights, including in judicial or administrative proceedings. These interests are balanced against the data subject&apos;s fundamental rights and freedoms;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>Explicit consent of the data subject</strong> – pursuant to Art. 6(1)(a) GDPR: required where necessary, for example, for the processing of special categories of data (such as biometric data managed by the KYC provider) or for the sending of optional communications. In any case, consent can be revoked at any time.
+              </Typography>
+            </ListItem>
+          </List>
+          
+          <Typography variant="body1" gutterBottom sx={{ fontWeight: 'bold' }}>
+            Age restriction
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            Access to the Presale is reserved exclusively for adult users (18+). Urano Ecosystem does not intentionally collect or process personal data relating to minors. Any data accidentally collected will be promptly deleted.
+          </Typography>
+
+          <Typography variant="h6" component="h2" gutterBottom>
+            3. Methods of collecting personal data in the pre-sale
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            Personal data is collected directly from the user at various stages of the Presale. Upon registration, we request and process identification data (first name, last name) and contact information (email address). To comply with legal and security obligations (including AML/CFT and MiCA), the user is redirected to the platform of our third-party provider, Persona Identities, Inc., for identity verification (KYC). During this process, Persona directly collects the necessary data, such as identity documents, contact information, and potentially biometric data with the user&apos;s consent, without us processing or storing it directly. Finally, to enable participation in the Presale, Urano Ecosystem receives only the public address of the user&apos;s blockchain wallet and technical metadata, such as the verification outcome (verified/unverified), a unique identifier, and a verification timestamp. Additionally, browsing data such as the IP address are collected automatically for security purposes and the proper functioning of the platform.
+          </Typography>
+
+          <Typography variant="h6" component="h2" gutterBottom>
+            4. Type of data processed
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            In the context of registration and participation in the Presale, as well as simply browsing the landing page, Urano Ecosystem may process the following categories of personal data:
+          </Typography>
+          
+          <List dense>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>a. Identification data:</strong> name, surname, and other data requested during registration or identity verification;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>b. Contact details:</strong> email address provided by the user;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>c. KYC verification data:</strong> verification outcome (verified/not verified), unique transaction identifier, timestamp, country code, and technical metadata provided by the Persona provider;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>d. Blockchain wallet address:</strong> public address associated with the user&apos;s wallet, used for the purposes of participating in the Presale and verifying eligibility;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>e. Browsing and technical data:</strong> IP address, user agent (browser/device), access times, referrer and system logs, collected automatically for security and statistical purposes;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>f. Data provided voluntarily:</strong> any additional information spontaneously communicated by the user in the forms on the site (e.g. contact requests, comments, suggestions).
+              </Typography>
+            </ListItem>
+          </List>
+          
+          <Typography variant="body1" paragraph sx={{ fontStyle: 'italic' }}>
+            Note: Urano Ecosystem does not directly collect or process identity documents or biometric data. Such information, if requested, is managed independently and securely by the third-party provider Persona Identities, Inc., as specified in the section on identity verification.
+          </Typography>
+
+          <Typography variant="h6" component="h2" gutterBottom>
+            5. Legal basis for processing
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            The processing of personal data by Urano Ecosystem is based on various legal bases, depending on the specific purposes pursued:
+          </Typography>
+          
+          <List dense>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>a. Performance of a contract or pre-contractual measures</strong> – ex art. 6(1)(b) GDPR: processing is necessary to allow the user to access the Presale, to provide related services and to fulfill pre-contractual requests by the user;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>b. Fulfillment of legal obligations</strong> – ex art. 6(1)(c) GDPR: in particular in relation to anti-money laundering legislation (AML/CFT), applicable tax legislation and the obligations set forth in Regulation (EU) 2023/1114 (MiCA), which require user identification and the traceability of relevant transactions;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>c. Legitimate interest of the Data Controller</strong> – ex art. 6(1)(f) GDPR: relating to fraud prevention, IT security, technical monitoring of the platform, and the protection of the Data Controller&apos;s legal rights, including in judicial or administrative proceedings. These interests are balanced against the data subject&apos;s fundamental rights and freedoms;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>d. Explicit consent of the interested party</strong> – ex art. 6(1)(a) GDPR: required, where necessary, for example, to process special categories of data (such as biometric data managed by the KYC provider) or to send optional communications. In any case, consent can be revoked at any time.
+              </Typography>
+            </ListItem>
+          </List>
+
+          <Typography variant="h6" component="h2" gutterBottom>
+            6. Data retention
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            Personal data will be retained for a period no longer than necessary to achieve the purposes indicated in this policy and, in particular:
+          </Typography>
+          
+          <List dense>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>a.</strong> For data collected for identity verification purposes (KYC), retention will be guaranteed for at least 5 years from the termination of the contractual relationship, in compliance with applicable anti-money laundering (AML/CFT) regulations. The processing and storage of such data, where delegated to specialized external providers (e.g., Persona Identities, Inc.), will be carried out in compliance with contractual agreements and required security measures.
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>b.</strong> For other data collected through the landing page (e.g. technical data, email, IP address), the retention period will not exceed 12 months from harvest, except for legal obligations, legal defense purposes, or requests from the competent authorities.
+              </Typography>
+            </ListItem>
+          </List>
+          
+          <Typography variant="body1" paragraph>
+            At the end of the periods indicated above, the data will be deleted, anonymized or made inaccessible, unless their further retention is necessary to fulfill specific regulatory obligations or in the event of ongoing disputes.
+          </Typography>
+
+          <Typography variant="h6" component="h2" gutterBottom>
+            7. Recipients and data transfer
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            Personal data may be disclosed, in compliance with the principles of lawfulness, necessity, and proportionality, exclusively to the following third parties:
+          </Typography>
+          
+          <List dense>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>a.</strong> Technology and infrastructure service providers (e.g., cloud, hosting, IT security, platform maintenance), limited to the technical and operational purposes related to the provision of the service;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>b.</strong> Public authorities, regulatory or judicial bodies, in compliance with legal obligations or at their legitimate request (e.g. tax, anti-money laundering, judicial authorities);
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>c.</strong> Professional consultants (legal, tax, accounting), limited to the fulfillment of regulatory obligations or to protect the rights of the Data Controller;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>d.</strong> Persona Identities, Inc., as a third-party provider specializing in identity verification (KYC) services, as detailed in Section 10 of this Privacy Policy.
+              </Typography>
+            </ListItem>
+          </List>
+          
+          <Typography variant="body1" paragraph>
+            All recipients are bound by contractual agreements which guarantee adequate security measures and compliance with current legislation on personal data protection (GDPR). In the event of transfers to third countries, the following measures will be applied: appropriate guarantees pursuant to Articles 44 et seq. of the GDPR (e.g. adequacy decisions, Standard Contractual Clauses).
+          </Typography>
+
+          <Typography variant="h6" component="h2" gutterBottom>
+            8. Transfers outside the EU
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            Some personal data may be transferred to countries located outside the European Economic Area (EEA), including United States, particularly in the case of services provided by third parties such as Persona Identities, Inc., provider based in the USA (see paragraph 10).
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            Such transfers will take place exclusively in compliance with the articles 44 and following of the GDPR, adopting one or more of the following appropriate guarantees:
+          </Typography>
+          
+          <List dense>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>a.</strong> Standard Contractual Clauses (SCC) adopted by the European Commission pursuant to art. 46(2)(c) GDPR;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>b.</strong> Verification of the adequate level of data protection offered by the recipient, including through audits and declarations of compliance with the additional measures provided for by the EDPB Guidelines 01/2020;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>c.</strong> Adoption of appropriate technical and organizational measures to guarantee the security, integrity, and prevention of unauthorized access to the personal data transferred.
+              </Typography>
+            </ListItem>
+          </List>
+          
+          <Typography variant="body1" paragraph>
+            The User can request further information on the applicable guarantees or a copy of the Standard Contractual Clauses by writing to:{' '}
+            <Link href="mailto:official@uranoecosystem.com" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
+              official@uranoecosystem.com
+            </Link>{' '}
+            or{' '}
+            <Link href="mailto:dpo@uranoecosystem.com" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
+              dpo@uranoecosystem.com
             </Link>
-          </ListItem>
-        </List>
+          </Typography>
 
-        <Typography variant="h6" component="h2" gutterBottom>
-          12. Nessun processo decisionale automatizzato
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Urano Ecosystem non adotta processi decisionali automatizzati, inclusa la profilazione, che producano effetti giuridici o significativi sull&apos;interessato, ai sensi dell&apos;articolo 22 del Regolamento (UE) 2016/679 (GDPR).
-        </Typography>
+          <Typography variant="h6" component="h2" gutterBottom>
+            9. Rights of the interested party
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            The User, as an interested party, can exercise at any time the rights recognised by the articles 15-21 del GDPR, including:
+          </Typography>
+          
+          <List dense>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>a. Right of access:</strong> obtain confirmation of the existence or otherwise of personal data concerning him or her and access it;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>b. Right to rectification:</strong> request the correction or updating of inaccurate or incomplete data;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>c. Right to erasure (“right to be forgotten”):</strong> obtain the erasure of your data in the cases provided for by art. 17 GDPR;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>d. Right to restriction of processing:</strong> request limitation of processing in the cases provided for by art. 18 GDPR;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>e. Right to object:</strong> object to the processing of data for reasons related to your particular situation (Article 21 GDPR);
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>f. Right to data portability:</strong> receive your data in a structured, commonly used and machine-readable format and, if technically feasible, transmit them to another data controller.
+              </Typography>
+            </ListItem>
+          </List>
+          
+          <Typography variant="body1" paragraph>
+            The User can exercise his/her rights by sending a request:
+          </Typography>
+          
+          <List dense>
+            <ListItem>
+              <Typography variant="body1">
+                via email to the Owner:{' '}
+                <Link href="mailto:official@uranoecosystem.com" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
+                  official@uranoecosystem.com
+                </Link>
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                or to the Data Protection Officer (DPO):{' '}
+                <Link href="mailto:dpo@uranoecosystem.com" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
+                  dpo@uranoecosystem.com
+                </Link>
+              </Typography>
+            </ListItem>
+          </List>
+          
+          <Typography variant="body1" paragraph>
+            Requests will be processed within 30 days from receipt, except for extensions in cases of particular complexity, in accordance with art. 12 GDPR.
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            The exercise of rights is free, except where requests are manifestly unfounded or excessive pursuant to art. 12(5) GDPR.
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            The User also has the right to lodge a complaint with a competent supervisory authority if he or she believes that the processing of his or her data violates the applicable legislation on the protection of personal data (Article 77 GDPR).
+          </Typography>
 
-        <Typography variant="h6" component="h2" gutterBottom>
-          13. Cookie e strumenti di tracciamento
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          La presente landing page utilizza cookie tecnici di sessione necessari per il corretto funzionamento del sito e per garantire all&apos;utente un accesso sicuro ai servizi, compresa l&apos;eventuale integrazione con il sistema di verifica dell&apos;identità (KYC). Tali cookie rientrano nella categoria dei cookie essenziali e non richiedono il consenso dell&apos;utente, ai sensi della normativa vigente (art. 122 del Codice Privacy e art. 5.3 della Direttiva ePrivacy).
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Eventuali cookie di terze parti potrebbero essere impiegati per fini tecnici strettamente necessari (es. prevenzione frodi durante il KYC), in conformità con le misure tecniche applicate dal provider Persona Identities, Inc. Questi cookie sono attivi solo nella misura in cui siano indispensabili all&apos;erogazione sicura del servizio.
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Per quanto riguarda invece cookie analitici, di profilazione o di tracciamento non essenziali, questi non vengono utilizzati su questa landing page. Qualora in futuro venissero implementati, saranno attivati esclusivamente previo consenso dell&apos;utente tramite apposito banner.
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Per ulteriori dettagli sui cookie utilizzati nella presente landing page, è disponibile un documento specifico consultabile alla pagina:
-          <Link href="https://www.uranoecosystempresale.com/cookie" target="_blank" rel="noopener" sx={{ ml: 0.5 }}>
-            https://www.uranoecosystempresale.com/cookie
-          </Link>
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Per informazioni complete sui cookie impiegati nell&apos;ambito dell&apos;intero ecosistema Urano, si rimanda alla Cookie Policy ufficiale, disponibile all&apos;indirizzo:
-          <Link href="https://www.uranoecosystem.com/cookie-policy" target="_blank" rel="noopener" sx={{ ml: 0.5 }}>
-            https://www.uranoecosystem.com/cookie-policy
-          </Link>
-        </Typography>
+          <Typography variant="h6" component="h2" gutterBottom>
+            10. Data security and protection
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            The Owner adopts appropriate technical and organizational measures, in accordance with the articles 24, 25 and 32 of the GDPR, in order to ensure a level of security appropriate to the risk, taking into account the nature, scope, context and purposes of the processing.
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            In particular, measures are implemented aimed at:
+          </Typography>
+          
+          <List dense>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>a.</strong> Guarantee the integrity, confidentiality and availability of the personal data processed;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>b.</strong> Prevent unauthorized access, accidental disclosure, destruction, loss, alteration or unlawful processing;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>c.</strong> Apply encryption and pseudonymization techniques to protect the most sensitive data;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>d.</strong> Perform periodic backups and disaster recovery systems for operational resilience;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>e.</strong> Regularly monitor and update digital infrastructure, including blockchain platforms and smart contracts used.
+              </Typography>
+            </ListItem>
+          </List>
+          
+          <Typography variant="body1" paragraph>
+            Additionally, the smart contracts used for the $URANO token presale have been subjected to security audits by independent third parties to ensure transparency and protection of the technical interaction between the user and the protocol. More information is available on the official page:{' '}
+            <Link href="https://www.uranoecosystem.com/audit" target="_blank" rel="noopener" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
+              https://www.uranoecosystem.com/audit
+            </Link>
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            When third-party providers are involved (e.g., for KYC or cloud hosting), Urano Ecosystem ensures that these parties are bound by contractual obligations regarding security and GDPR compliance.
+          </Typography>
 
-        <Typography variant="h6" component="h2" gutterBottom>
-          14. Modifiche alla Privacy Policy
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Urano Ecosystem si riserva il diritto di modificare la presente Privacy Policy in qualsiasi momento, anche in conseguenza di aggiornamenti normativi, evoluzioni tecnologiche o cambiamenti organizzativi interni.
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Eventuali modifiche saranno comunicate tramite annunci ufficiali pubblicati sui canali istituzionali del progetto, quali il sito web, i canali social ufficiali e altre comunicazioni pubbliche. L&apos;Utente è invitato a consultare periodicamente la versione più aggiornata dell&apos;informativa.
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          La versione corrente della Privacy Policy è sempre disponibile al seguente indirizzo:
-          <Link href="https://www.uranoecosystempresale.com/privacy" target="_blank" rel="noopener" sx={{ ml: 0.5 }}>
-            https://www.uranoecosystempresale.com/privacy
-          </Link>
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          Per ulteriori informazioni sul trattamento dei dati personali nell&apos;ambito del sito principale e delle attività dell&apos;ecosistema Urano, è possibile consultare la Privacy Policy generale disponibile al seguente link: 
-          <Link href="https://www.uranoecosystem.com/privacy-policy" target="_blank" rel="noopener" sx={{ ml: 0.5 }}>
-            https://www.uranoecosystem.com/privacy-policy
-          </Link>
-        </Typography>
+          <Typography variant="h6" component="h2" gutterBottom>
+            11. Identity verification services
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            To ensure compliance with anti-money laundering (AML/CFT) regulations and Regulation (EU) 2023/1114 (MiCA), Urano Ecosystem uses the identity verification services provided by Persona Identities, Inc., a US-based company specializing in secure user onboarding and personal data protection, as Data controller pursuant to art. 28 of Regulation (EU) 2016/679 (GDPR).
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            During the procedure KYC (Know Your Customer), the User is redirected to a secure session hosted directly on the Persona platform. There, Persona will collect and process the following data:
+          </Typography>
+          
+          <List dense>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>a.</strong> Identification data (name, surname, date of birth, address);
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>b.</strong> Identity document (passport, identity card, driving licence, etc.);
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>c.</strong> Facial recognition via selfie or short video (liveness check);
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>d.</strong> Biometric data, where required and with explicit consent of the User;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>e.</strong> Any technical metadata required for verification.
+              </Typography>
+            </ListItem>
+          </List>
+          
+          <Typography variant="body1" paragraph>
+            This data is processed exclusively for the following purposes:
+          </Typography>
+          
+          <List dense>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>a.</strong> Verification of user identity;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>b.</strong> Prevention of fraud and illegal activities;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>c.</strong> Compliance with AML/CFT and MiCA regulatory obligations;
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                <strong>d.</strong> Security audits and legal retention, where applicable.
+              </Typography>
+            </ListItem>
+          </List>
+          
+          <Typography variant="body1" paragraph>
+            Persona adopts advanced technical and organizational measures for data protection, including encryption, pseudonymization, instance isolation, continuous monitoring and granular access controls. The data is stored on infrastructures compliant with international standards, including SOC 2 Type II and ISO 27001.
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            The User retains the right to exercise the rights provided for by the GDPR at any time, including access, rectification, and deletion of data, directly through the Persona platform.
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            Urano Ecosystem does not directly access, store or process biometric data or identification documents uploaded by the User. It only receives:
+          </Typography>
+          
+          <List dense>
+            <ListItem>
+              <Typography variant="body1">
+                The outcome of the verification (verified/not verified),
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                A unique identifier associated with the User,
+              </Typography>
+            </ListItem>
+            <ListItem>
+              <Typography variant="body1">
+                A timestamp of the verification.
+              </Typography>
+            </ListItem>
+          </List>
+          
+          <Typography variant="body1" paragraph>
+            Persona Identities, Inc. guarantees full GDPR compliance and adheres to international data protection frameworks. Further details are available in their official policy:
+          </Typography>
+          
+          <List dense>
+            <ListItem>
+              <Link href="https://withpersona.com/legal/privacy-policy?lang=it" target="_blank" rel="noopener" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
+                https://withpersona.com/legal/privacy-policy?lang=it
+              </Link>
+            </ListItem>
+            <ListItem>
+              <Link href="https://withpersona.com/legal" target="_blank" rel="noopener" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
+                https://withpersona.com/legal
+              </Link>
+            </ListItem>
+          </List>
 
-        <Typography variant="h6" component="h2" gutterBottom>
-          15. Validità normativa
-        </Typography>
-        <Typography variant="body1" gutterBottom>
-          La presente Privacy Policy è redatta in conformità al Regolamento (UE) 2016/679 (GDPR) e, ove applicabile, al Regolamento (UE) 2023/1114 (MiCA). Essa costituisce parte integrante delle informazioni precontrattuali fornite all&apos;Utente, ai sensi della normativa vigente in materia di protezione dei dati personali e disciplina dei servizi relativi a crypto-asset.
-        </Typography>
+          <Typography variant="h6" component="h2" gutterBottom>
+            12. No automated decision-making
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            Urano Ecosystem does not adopt automated decision-making processes, including the profiling, which produce legal effects the significant on the interested party, pursuant to the Article 22 of Regulation (EU) 2016/679 (GDPR).
+          </Typography>
+
+          <Typography variant="h6" component="h2" gutterBottom>
+            13. Cookies and tracking tools
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            This landing page uses technical session cookies necessary for the proper functioning of the site and to guarantee the user secure access to services, including any integration with the identity verification system (KYC). These cookies fall into the category of essential cookies and do not require the user&apos;s consent, pursuant to current legislation (Article 122 of the Privacy Code and Article 5.3 of the ePrivacy Directive).
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            Possible third party cookies they may be used for strictly necessary technical purposes (e.g. fraud prevention during KYC), in accordance with the technical measures applied by the provider Persona Identities, Inc. These cookies are active only to the extent that they are essential for the secure provision of the service.
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            As for instead non-essential analytical, profiling or tracking cookies these are not used on this landing page. If they are implemented in the future, they will only be activated with the user&apos;s consent via a specific banner.
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            For further details on the cookies used on this landing page, a specific document is available on the page:{' '}
+            <Link href="https://www.uranoecosystempresale.com/cookie" target="_blank" rel="noopener" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
+              https://www.uranoecosystempresale.com/cookie
+            </Link>
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            For complete information on the cookies used across the entire Urano ecosystem, please refer to the official Cookie Policy, available at:{' '}
+            <Link href="https://www.uranoecosystem.com/cookie-policy" target="_blank" rel="noopener" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
+              https://www.uranoecosystem.com/cookie-policy
+            </Link>
+          </Typography>
+
+          <Typography variant="h6" component="h2" gutterBottom>
+            14. Changes to the Privacy Policy
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            Urano Ecosystem reserves the right to modify this Privacy Policy at any time, including as a result of regulatory updates, technological developments, or internal organizational changes.
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            Any changes will be communicated via official announcements published on institutional channels of the project, such as the website, official social media channels, and other public communications. Users are encouraged to periodically consult the most up-to-date version of the information.
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            The current version of the Privacy Policy is always available at the following address:{' '}
+            <Link href="https://www.uranoecosystempresale.com/privacy" target="_blank" rel="noopener" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
+              https://www.uranoecosystempresale.com/privacy
+            </Link>
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            For further information on the processing of personal data within the main site and the activities of the Urano ecosystem, please consult the general Privacy Policy available at the following link:{' '}
+            <Link href="https://www.uranoecosystem.com/privacy-policy" target="_blank" rel="noopener" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
+              https://www.uranoecosystem.com/privacy-policy
+            </Link>
+          </Typography>
+
+          <Typography variant="h6" component="h2" gutterBottom>
+            15. Regulatory validity
+          </Typography>
+          
+          <Typography variant="body1" paragraph>
+            This Privacy Policy is drafted in accordance with the Regulation (EU) 2016/679 (GDPR) and, where applicable, to the Regulation (EU) 2023/1114 (MiCA). It forms an integral part of the pre-contractual information provided to the User, pursuant to the applicable legislation regarding the protection of personal data and the regulation of services relating to crypto-assets.
+          </Typography>
+
+          <Divider sx={{ my: 4, borderColor: theme.palette.secondary.main }} />
+          
+          <Typography variant="body2" color="text.secondary" align="center">
+            Last updated: [25/07/2025]
+          </Typography>
+        </Stack>
       </Stack>
       <Footer />
     </Stack>

@@ -61,7 +61,7 @@ const Footer = () => {
                             </Typography>
                         </Box>
                     </Link>
-                    <Link href="/privacy-policy" underline="none">
+                    <Link href="/cookie-policy" underline="none">
                         <Box
                             sx={{
                                 display: 'flex',
