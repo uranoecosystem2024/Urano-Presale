@@ -10,16 +10,24 @@ interface SubscribeRequestBody {
 
 export async function POST(request: Request) {
     try {
+        // Log the incoming request to verify the data
+        console.log('Incoming request body:', request);
+        
         // Explicitly cast the parsed JSON to the SubscribeRequestBody type
         const body = await request.json() as SubscribeRequestBody;
-        const { email } = body;  // Cast it as SubscribeRequestBody
+        console.log('Parsed JSON body:', body); // Log the parsed body
+        
+        const { email } = body;  // Get the email from the parsed body
 
         if (!email) {
+            console.error('Email is required but not provided');
             return NextResponse.json({ message: 'Email is required' }, { status: 400 });
         }
 
         const apiKey = process.env.BREVO_API_KEY; // Access the API key from the .env file
         const listId = 3; // Your Brevo List ID
+
+        console.log('Making API call to Brevo with email:', email);
 
         // Make a request to Brevo to add the email to the list
         const response = await axios.post(
@@ -38,9 +46,13 @@ export async function POST(request: Request) {
             }
         );
 
+        // Log the API response from Brevo
+        console.log('Brevo API response:', response.data);
+
         if (response.status === 200) {
             return NextResponse.json({ message: 'Subscription successful' });
         } else {
+            console.error('Error from Brevo:', response.data);
             return NextResponse.json({ message: 'Something went wrong' }, { status: 500 });
         }
     } catch (error) {

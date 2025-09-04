@@ -62,10 +62,12 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose }) 
             if (response.status === 200) {
                 setIsSending(false);
                 setIsSent(true);
+                setIsError(false);  // Ensure isError is set to false on success
                 setTimeout(() => {
                     onClose(); // Close the modal after 2 seconds
                 }, 2000);
             } else {
+                // If status is not 200, treat it as an error
                 setIsSending(false);
                 setIsError(true);
             }
