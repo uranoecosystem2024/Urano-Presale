@@ -8,15 +8,20 @@ interface SubscribeRequestBody {
     email: string;
 }
 
+// Define the expected structure of the response from Brevo
+interface BrevoResponse {
+    id: number; // id field should exist in the response
+}
+
 export async function POST(request: Request) {
     try {
         // Log the incoming request to verify the data
         console.log('Incoming request body:', request);
-        
+
         // Explicitly cast the parsed JSON to the SubscribeRequestBody type
         const body = await request.json() as SubscribeRequestBody;
         console.log('Parsed JSON body:', body); // Log the parsed body
-        
+
         const { email } = body;  // Get the email from the parsed body
 
         if (!email) {
@@ -49,11 +54,15 @@ export async function POST(request: Request) {
         // Log the API response from Brevo
         console.log('Brevo API response:', response.data);
 
-        if (response.status === 200) {
+        // Assert the response type as BrevoResponse
+        const brevoResponse = response.data as BrevoResponse;
+
+        // Check if the Brevo response contains a valid contact id using optional chaining
+        if (brevoResponse?.id) {
             return NextResponse.json({ message: 'Subscription successful' });
         } else {
             console.error('Error from Brevo:', response.data);
-            return NextResponse.json({ message: 'Something went wrong' }, { status: 500 });
+            return NextResponse.json({ message: 'Something went wrong with the subscription.' }, { status: 500 });
         }
     } catch (error) {
         // Log detailed error information
