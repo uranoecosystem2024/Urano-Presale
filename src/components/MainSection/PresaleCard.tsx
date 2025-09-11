@@ -67,7 +67,7 @@ const PresaleCard = () => {
                         textAlign: "center",
                         color: theme.palette.text.primary,
                     }}>
-                        Private Round
+                        Private
                     </Typography>
                 </Stack>
                 <Stack alignItems={"end"} gap={0.5}>
