@@ -29,7 +29,7 @@ const Footer = () => {
         }}>
             <Stack direction={{ xs: "column", lg: "row" }} justifyContent="space-between" alignItems="center" width={{ xs: "100vw", lg: "100%" }}>
                 <Link href="/">
-                    <Image src={logo} alt="Logo" width={120} height={75} />
+                    <Image src={logo} alt="Logo" width={120} height={70} />
                 </Link>
                 <Stack direction={{ xs: "column", lg: "row" }} justifyContent="center" alignItems="center" gap={2}>
                     <Link href="/terms-and-conditions" underline="none">

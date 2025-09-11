@@ -22,7 +22,7 @@ const Header = () => {
             marginLeft: {xs: -2, lg: 0},
         }}>
             <Link href="https://www.uranoecosystem.com/">
-                <Image src={logo} alt="Logo" width={120} height={75} />
+                <Image src={logo} alt="Logo" width={120} height={70} />
             </Link>
             <Stack display={{
                 xs: "none",
