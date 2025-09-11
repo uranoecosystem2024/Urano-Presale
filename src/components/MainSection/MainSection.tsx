@@ -88,19 +88,22 @@ const MainSection = () => {
                         borderRadius: 2,
                         padding: 2,
                     }}>
-                        <Typography variant="h6" sx={{
-                            fontSize: "1.15rem",
-                            fontWeight: 500,
-                            color: theme.palette.text.primary,
-                        }}>
-                            Compliant RWA
-                        </Typography>
+                        <Stack direction={"row"} justifyContent={"start"} alignItems={"center"} gap={1}>
+                            <Image src={icon1} alt="icon1" style={{ width: "1.2rem", height: "1.2rem" }} />
+                            <Typography variant="h6" sx={{
+                                fontSize: "1.15rem",
+                                fontWeight: 500,
+                                color: theme.palette.text.primary,
+                            }}>
+                                Shape The Future
+                            </Typography>
+                        </Stack>
                         <Typography variant="h6" sx={{
                             fontSize: "1rem",
                             fontWeight: 300,
                             color: theme.palette.text.primary,
                         }}>
-                            Full regulatory alignment for secure investments
+                            Gain governance rights to influence Urano’s direction
                         </Typography>
                     </Stack>
                     <Stack gap={1} sx={{
@@ -109,19 +112,22 @@ const MainSection = () => {
                         borderRadius: 2,
                         padding: 2,
                     }}>
-                        <Typography variant="h6" sx={{
-                            fontSize: "1.15rem",
-                            fontWeight: 500,
-                            color: theme.palette.text.primary,
-                        }}>
-                            Fractional Access
-                        </Typography>
+                        <Stack direction={"row"} justifyContent={"start"} alignItems={"center"} gap={1}>
+                            <Image src={icon2} alt="icon2" style={{ width: "1.2rem", height: "1.2rem" }} />
+                            <Typography variant="h6" sx={{
+                                fontSize: "1.15rem",
+                                fontWeight: 500,
+                                color: theme.palette.text.primary,
+                            }}>
+                                Early Access
+                            </Typography>
+                        </Stack>
                         <Typography variant="h6" sx={{
                             fontSize: "1rem",
                             fontWeight: 300,
                             color: theme.palette.text.primary,
                         }}>
-                            Invest in real estate, SMEs, art & more
+                            Get priority entry to exclusive RWA offerings
                         </Typography>
                     </Stack>
                     <Stack gap={1} sx={{
@@ -130,23 +136,28 @@ const MainSection = () => {
                         borderRadius: 2,
                         padding: 2,
                     }}>
-                        <Typography variant="h6" sx={{
-                            fontSize: "1.15rem",
-                            fontWeight: 500,
-                            color: theme.palette.text.primary,
-                        }}>
-                            Instant Settlement
-                        </Typography>
+                        <Stack direction={"row"} justifyContent={"start"} alignItems={"center"} gap={1}>
+                            <Image src={icon3} alt="icon3" style={{ width: "1.2rem", height: "1.2rem" }} />
+                            <Typography variant="h6" sx={{
+                                fontSize: "1.15rem",
+                                fontWeight: 500,
+                                color: theme.palette.text.primary,
+                            }}>
+                                Staking Rewards
+                            </Typography>
+                        </Stack>
                         <Typography variant="h6" sx={{
                             fontSize: "1rem",
                             fontWeight: 300,
                             color: theme.palette.text.primary,
                         }}>
-                            Blockchain-powered transactions, fast and transparent
+                            Unlock dynamic incentives through staking <span style={{ fontWeight: 600, color: theme.palette.uranoGreen1.main }}>$URANO</span>
                         </Typography>
                     </Stack>
                 </Stack>
-                <Link href="https://www.uranoecosystem.com/token" underline="none" target="_blank">
+                <Link href="https://www.uranoecosystem.com/token" underline="none" target="_blank" sx={{
+                    display: { xs: "none", lg: "flex" },
+                }}>
                     <Box sx={{
                         width: "fit-content",
                         background: theme.palette.uranoGradient,
@@ -179,6 +190,29 @@ const MainSection = () => {
                 <Registration />
                 <PresaleCard />
                 <TokensSelection />
+                <Link href="https://www.uranoecosystem.com/token" underline="none" target="_blank" sx={{
+                    display: { xs: "none", lg: "flex" },
+                }}>
+                    <Box sx={{
+                        width: "100%",
+                        background: theme.palette.uranoGradient,
+                        border: `2px solid ${theme.palette.headerBorder.main}`,
+                        borderRadius: 2,
+                        paddingX: { xs: 1.5, lg: 5 },
+                        paddingY: { xs: 1.5, lg: 1 },
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        "&:hover": {
+                            border: `2px solid ${theme.palette.text.primary}`,
+                            filter: "brightness(1.2)",
+                        },
+                    }}>
+                        <Typography variant="body1" fontWeight={400} sx={{
+                            color: theme.palette.background.default
+                        }}>Connect Wallet</Typography>
+                    </Box>
+                </Link>
             </Stack>
         </Stack>
     )
