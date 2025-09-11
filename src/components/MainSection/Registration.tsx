@@ -38,7 +38,7 @@ const Registration = () => {
                     }}>
                         <Typography variant="body1" sx={{
                             fontWeight: 500,
-                            fontSize: { xs: "1rem", lg: "1.45rem" },
+                            fontSize: { xs: "1.25rem", lg: "1.45rem" },
                             lineHeight: 1,
                             color: "#2A6A69",
                         }}>
@@ -47,13 +47,13 @@ const Registration = () => {
                     </Box>
                     <Typography variant="subtitle2" sx={{
                         fontWeight: 500,
-                        fontSize: { xs: "0.75rem", lg: "0.75rem" },
+                        fontSize: { xs: "1rem", lg: "0.75rem" },
                         color: theme.palette.text.primary,
                         width: "80%",
                     }}>
                         Register with Email
                     </Typography>
-                    <IoChevronForward size={24} color={theme.palette.uranoGreen1.main} className="registrationChevronMobile" />
+                    <IoChevronForward size={20} color={theme.palette.uranoGreen1.main} className="registrationChevronMobile" />
                 </Stack>
                 <IoChevronForward size={24} color={theme.palette.text.primary} style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }} className="registrationChevronDesktop" />
                 <Stack width={{ xs: "100%", lg: "35%" }} direction={"row"} alignItems={"center"} gap={{ xs: 1, lg: 2 }} sx={{
@@ -82,7 +82,7 @@ const Registration = () => {
                     }}>
                         <Typography variant="body1" sx={{
                             fontWeight: 500,
-                            fontSize: { xs: "1rem", lg: "1.45rem" },
+                            fontSize: { xs: "1.25rem", lg: "1.45rem" },
                             lineHeight: 1,
                             color: "#2A6A69",
                         }}>
@@ -91,13 +91,13 @@ const Registration = () => {
                     </Box>
                     <Typography variant="subtitle2" sx={{
                         fontWeight: 500,
-                        fontSize: { xs: "0.75rem", lg: "0.75rem" },
+                        fontSize: { xs: "1rem", lg: "0.75rem" },
                         color: theme.palette.text.primary,
                         width: "80%",
                     }}>
                         Verify your identity
                     </Typography>
-                    <IoChevronForward size={24} color={theme.palette.uranoGreen1.main} className="registrationChevronMobile" />
+                    <IoChevronForward size={20} color={theme.palette.uranoGreen1.main} className="registrationChevronMobile" />
                 </Stack>
                 <IoChevronForward size={24} color={theme.palette.text.primary} style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }} className="registrationChevronDesktop" />
                 <Stack width={{ xs: "100%", lg: "35%" }} direction={"row"} alignItems={"center"} gap={{ xs: 1, lg: 2 }} sx={{
@@ -126,7 +126,7 @@ const Registration = () => {
                     }}>
                         <Typography variant="body1" sx={{
                             fontWeight: 500,
-                            fontSize: { xs: "1rem", lg: "1.45rem" },
+                            fontSize: { xs: "1.25rem", lg: "1.45rem" },
                             lineHeight: 1,
                             color: "#2A6A69",
                         }}>
@@ -135,13 +135,13 @@ const Registration = () => {
                     </Box>
                     <Typography variant="subtitle2" sx={{
                         fontWeight: 500,
-                        fontSize: { xs: "0.75rem", lg: "0.75rem" },
+                        fontSize: { xs: "1rem", lg: "0.75rem" },
                         color: theme.palette.text.primary,
                         width: "80%",
                     }}>
                         Connect wallet & Buy
                     </Typography>
-                    <IoChevronForward size={24} color={theme.palette.uranoGreen1.main} className="registrationChevronMobile" />
+                    <IoChevronForward size={20} color={theme.palette.uranoGreen1.main} className="registrationChevronMobile" />
                 </Stack>
 
             </Stack>
