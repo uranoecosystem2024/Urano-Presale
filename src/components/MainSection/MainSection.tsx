@@ -181,18 +181,20 @@ const MainSection = () => {
                 </Link>
             </Stack>
             <Stack width={{ xs: "100%", lg: "40%" }} flexGrow={1} gap={{ xs: 3, lg: 3 }} marginTop={{ xs: 4, lg: 0 }} sx={{
-                backgroundColor: theme.palette.transparentPaper.main,
-                border: `1px solid ${theme.palette.headerBorder.main}`,
-                borderRadius: "0.75rem",
-                padding: "0.6rem",
-                backdropFilter: "blur(8.2px)"
+                backgroundColor: { xs: "transparent", lg: theme.palette.transparentPaper.main },
+                border: { xs: "none", lg: `1px solid ${theme.palette.headerBorder.main}` },
+                borderRadius: { xs: 0, lg: "0.75rem" },
+                padding: { xs: 0, lg: "0.6rem" },
+                backdropFilter: { xs: "none", lg: "blur(8.2px)" }
             }}>
                 <Registration />
                 <PresaleCard />
                 <TokensSelection />
-                <Link href="https://www.uranoecosystem.com/token" underline="none" target="_blank" sx={{
-                    display: { xs: "none", lg: "flex" },
-                }}>
+                <Link href="/" underline="none" target="_blank"
+                onClick={(e) => {
+                    e.preventDefault();
+                }}
+                >
                     <Box sx={{
                         width: "100%",
                         background: theme.palette.uranoGradient,

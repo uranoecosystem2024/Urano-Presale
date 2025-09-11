@@ -11,7 +11,7 @@ import StatusBar from "@/components/MainSection/statusBar";
 const PresaleCard = () => {
     const theme = useTheme();
     return (
-        <Stack width={"100%"} alignItems={"center"} borderRadius={2} padding={2} gap={2} sx={{
+        <Stack width={"100%"} alignItems={"center"} borderRadius={{xs: 2.5, lg: 2}} padding={2} gap={2} sx={{
             border: "1px solid transparent",
             background: `
                 linear-gradient(${theme.palette.presaleCardBg.main}, ${theme.palette.presaleCardBg.main}) padding-box,

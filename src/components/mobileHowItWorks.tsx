@@ -7,6 +7,9 @@ import img1 from "@/assets/images/img1.webp"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { motion, useAnimation } from "framer-motion"
+import icon4 from "@/assets/images/icon4.webp"
+import icon5 from "@/assets/images/icon5.webp"
+import icon6 from "@/assets/images/icon6.webp"
 
 const MobileHowItWorks = () => {
     const theme = useTheme<Theme>()
@@ -169,36 +172,45 @@ const MobileHowItWorks = () => {
                     <Typography variant="subtitle1" color={"#fff"} sx={{ fontWeight: 500, fontSize: 16 }}>
                         Tokenize
                     </Typography>
-                    <Typography
-                        variant="body2"
-                        sx={{ fontWeight: 400, fontSize: 14, color: theme.palette.text.secondary }}
-                    >
-                        Real-world assets are digitized into secure, compliant tokens.
-                    </Typography>
+                    <Stack direction={"row"} alignItems={"start"} gap={1}>
+                        <Image src={icon4} alt="icon4" width={36} height={36} />
+                        <Typography
+                            variant="body2"
+                            sx={{ fontWeight: 400, fontSize: 14, color: theme.palette.text.secondary }}
+                        >
+                            Real-world assets are digitized into secure, compliant tokens.
+                        </Typography>
+                    </Stack>
                 </Stack>
 
                 <Stack paddingX={2} width={{ xs: "100%", lg: "22%" }} gap={1}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 500, fontSize: 16 }}>
                         Invest
                     </Typography>
-                    <Typography
-                        variant="body2"
-                        sx={{ fontWeight: 400, fontSize: 14, color: theme.palette.text.secondary }}
-                    >
-                        Access fractional ownership with low entry barriers
-                    </Typography>
+                    <Stack direction={"row"} alignItems={"start"} gap={1}>
+                        <Image src={icon5} alt="icon5" width={36} height={36} />
+                        <Typography
+                            variant="body2"
+                            sx={{ fontWeight: 400, fontSize: 14, color: theme.palette.text.secondary }}
+                        >
+                            Access fractional ownership with low entry barriers
+                        </Typography>
+                    </Stack>
                 </Stack>
 
                 <Stack paddingX={2} width={{ xs: "100%", lg: "22%" }} gap={1}>
                     <Typography variant="subtitle1" sx={{ fontWeight: 500, fontSize: 16 }}>
                         Earn / Settle
                     </Typography>
-                    <Typography
-                        variant="body2"
-                        sx={{ fontWeight: 400, fontSize: 14, color: theme.palette.text.secondary }}
-                    >
-                        Receive returns and settlements instantly via blockchain.
-                    </Typography>
+                    <Stack direction={"row"} alignItems={"start"} gap={1}>
+                        <Image src={icon6} alt="icon6" width={36} height={36} />
+                        <Typography
+                            variant="body2"
+                            sx={{ fontWeight: 400, fontSize: 14, color: theme.palette.text.secondary }}
+                        >
+                            Receive returns and settlements instantly via blockchain.
+                        </Typography>
+                    </Stack>
                 </Stack>
 
                 {/* Mobile Image and Compliance Note */}

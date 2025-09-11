@@ -3,7 +3,7 @@ import Header from '@/components/Header';
 import HowItWorks from '@/components/HowItWorks';
 import Footer from '@/components/Footer';
 import MainSection from '@/components/MainSection/MainSection';
-import MobileHowItWorks from '@/app/mobileHowItWorks';
+import MobileHowItWorks from '@/components/mobileHowItWorks';
 import Image from 'next/image';
 import coin1 from '@/assets/images/coin1.webp';
 import coin2 from '@/assets/images/coin2.webp';

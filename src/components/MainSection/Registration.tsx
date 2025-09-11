@@ -11,11 +11,12 @@ const Registration = () => {
     const [open, setOpen] = useState(false);
     return (
         <>
-            <Stack width={"100%"} direction={"row"} justifyContent={"space-between"} alignItems={"center"}>
-                <Stack width={{ xs: "48%", lg: "35%" }} direction={"row"} alignItems={"center"} gap={{ xs: 1, lg: 2 }} sx={{
+            <Stack width={"100%"} direction={{xs: "column", lg: "row"}} justifyContent={"space-between"} alignItems={"center"} gap={{ xs: 1, lg: 0 }}>
+                <Stack width={{ xs: "100%", lg: "35%" }} direction={"row"} alignItems={"center"} gap={{ xs: 1, lg: 2 }} sx={{
                     background: theme.palette.background.paper,
                     borderRadius: 2,
-                    padding: 1,
+                    paddingX: { xs: 1.5, lg: 1 },
+                    paddingY: { xs: 1.5, lg: 1 },
                     border: `1px solid ${theme.palette.headerBorder.main}`,
                     cursor: "pointer",
                     "&:hover": {
@@ -52,13 +53,14 @@ const Registration = () => {
                     }}>
                         Register with Email
                     </Typography>
-
+                    <IoChevronForward size={24} color={theme.palette.uranoGreen1.main} className="registrationChevronMobile" />
                 </Stack>
-                <IoChevronForward size={24} color={theme.palette.text.primary} style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }} />
-                <Stack width={{ xs: "48%", lg: "35%" }} direction={"row"} alignItems={"center"} gap={{ xs: 1, lg: 2 }} sx={{
+                <IoChevronForward size={24} color={theme.palette.text.primary} style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }} className="registrationChevronDesktop" />
+                <Stack width={{ xs: "100%", lg: "35%" }} direction={"row"} alignItems={"center"} gap={{ xs: 1, lg: 2 }} sx={{
                     background: theme.palette.background.paper,
                     borderRadius: 2,
-                    padding: 1,
+                    paddingX: { xs: 1.5, lg: 1 },
+                    paddingY: { xs: 1.5, lg: 1 },
                     border: `1px solid ${theme.palette.headerBorder.main}`,
                     cursor: "pointer",
                     "&:hover": {
@@ -95,13 +97,14 @@ const Registration = () => {
                     }}>
                         Verify your identity
                     </Typography>
-
+                    <IoChevronForward size={24} color={theme.palette.uranoGreen1.main} className="registrationChevronMobile" />
                 </Stack>
-                <IoChevronForward size={24} color={theme.palette.text.primary} style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }} />
-                <Stack width={{ xs: "48%", lg: "35%" }} direction={"row"} alignItems={"center"} gap={{ xs: 1, lg: 2 }} sx={{
+                <IoChevronForward size={24} color={theme.palette.text.primary} style={{ marginLeft: "0.5rem", marginRight: "0.5rem" }} className="registrationChevronDesktop" />
+                <Stack width={{ xs: "100%", lg: "35%" }} direction={"row"} alignItems={"center"} gap={{ xs: 1, lg: 2 }} sx={{
                     background: theme.palette.background.paper,
                     borderRadius: 2,
-                    padding: 1,
+                    paddingX: { xs: 1.5, lg: 1 },
+                    paddingY: { xs: 1.5, lg: 1 },
                     border: `1px solid ${theme.palette.headerBorder.main}`,
                     cursor: "pointer",
                     "&:hover": {
@@ -138,7 +141,7 @@ const Registration = () => {
                     }}>
                         Connect wallet & Buy
                     </Typography>
-
+                    <IoChevronForward size={24} color={theme.palette.uranoGreen1.main} className="registrationChevronMobile" />
                 </Stack>
 
             </Stack>
