@@ -57,7 +57,7 @@ const MainSection = () => {
                             fontWeight: 500,
                             color: theme.palette.text.primary,
                         }}>
-                            Compliant RWA – <span style={{ fontWeight: 300, color: theme.palette.darkerText.main }}>Full regulatory alignment for secure investments</span>
+                            Shape The Future – <span style={{ fontWeight: 300, color: theme.palette.darkerText.main }}>Gain governance rights to influence Urano’s direction</span>
                         </Typography>
                     </Stack>
                     <Stack direction={"row"} gap={1} alignItems={"center"}>
@@ -67,7 +67,7 @@ const MainSection = () => {
                             fontWeight: 500,
                             color: theme.palette.text.primary,
                         }}>
-                            Fractional Access – <span style={{ fontWeight: 300, color: theme.palette.darkerText.main }}>Invest in real estate, SMEs, art & more</span>
+                            Early Access – <span style={{ fontWeight: 300, color: theme.palette.darkerText.main }}>Get priority entry to exclusive RWA offerings</span>
                         </Typography>
                     </Stack>
                     <Stack direction={"row"} gap={1} alignItems={"center"}>
@@ -77,7 +77,7 @@ const MainSection = () => {
                             fontWeight: 500,
                             color: theme.palette.text.primary,
                         }}>
-                            Instant Settlement – <span style={{ fontWeight: 300, color: theme.palette.darkerText.main }}>Blockchain-powered transactions, fast and transparent</span>
+                            Staking Rewards – <span style={{ fontWeight: 300, color: theme.palette.darkerText.main }}>Unlock dynamic incentives through staking <span style={{ fontWeight: 600, color: theme.palette.uranoGreen1.main }}>$URANO</span></span>
                         </Typography>
                     </Stack>
                 </Stack>
