@@ -146,9 +146,7 @@ const MainSection = () => {
                         </Typography>
                     </Stack>
                 </Stack>
-                <Link href="/" underline="none" onClick={(e) => {
-                    e.preventDefault();
-                }}>
+                <Link href="https://www.uranoecosystem.com/token" underline="none" target="_blank">
                     <Box sx={{
                         width: "fit-content",
                         background: theme.palette.uranoGradient,
