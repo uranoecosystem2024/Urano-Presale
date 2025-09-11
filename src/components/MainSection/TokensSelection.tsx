@@ -27,7 +27,8 @@ const TokensSelection = () => {
                 border: `1px solid ${theme.palette.headerBorder.main}`,
                 borderRadius: "50%",
                 padding: "0.6rem",
-                backdropFilter: "blur(8.2px)"
+                backdropFilter: "blur(8.2px)",
+                transform: {xs: "rotate(90deg)", lg: "rotate(0deg)"},
             }}>
                 <AiOutlineSwap size={20} color="#14EFC0" />
             </IconButton>
