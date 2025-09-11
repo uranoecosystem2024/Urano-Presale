@@ -1,5 +1,5 @@
 "use client"
-import { Typography, Stack } from "@mui/material";
+import { Typography, Stack, Link, Box } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import Registration from "./Registration";
 import PresaleCard from "./PresaleCard";
@@ -146,6 +146,30 @@ const MainSection = () => {
                         </Typography>
                     </Stack>
                 </Stack>
+                <Link href="/" underline="none" onClick={(e) => {
+                    e.preventDefault();
+                }}>
+                    <Box sx={{
+                        width: "fit-content",
+                        background: theme.palette.uranoGradient,
+                        border: `2px solid ${theme.palette.headerBorder.main}`,
+                        borderRadius: 2,
+                        paddingX: { xs: 1.5, lg: 5 },
+                        paddingY: { xs: 1.5, lg: 1 },
+                        marginLeft: 1,
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        "&:hover": {
+                            border: `2px solid ${theme.palette.text.primary}`,
+                            filter: "brightness(1.2)",
+                        },
+                    }}>
+                        <Typography variant="body1" fontWeight={400} sx={{
+                            color: theme.palette.background.default
+                        }}>Learn More</Typography>
+                    </Box>
+                </Link>
             </Stack>
             <Stack width={{ xs: "100%", lg: "40%" }} flexGrow={1} gap={{ xs: 3, lg: 3 }} marginTop={{ xs: 4, lg: 0 }} sx={{
                 backgroundColor: theme.palette.transparentPaper.main,

@@ -8,6 +8,9 @@ import { useEffect, useState } from "react"
 
 import Union from "@/assets/images/Union.webp"
 import img1 from "@/assets/images/img1.webp"
+import icon4 from "@/assets/images/icon4.webp"
+import icon5 from "@/assets/images/icon5.webp"
+import icon6 from "@/assets/images/icon6.webp"
 
 const HowItWorks = () => {
   const theme = useTheme<Theme>()
@@ -35,37 +38,37 @@ const HowItWorks = () => {
   }, [])
 
   useEffect(() => {
-  if (isInView) {
-    void lineControls
-      .start({
-        width: "calc(66% + 4rem)",
-        transition: { duration: 1, ease: "easeOut" },
-      })
-      .catch((error) => {
-        console.error("Error in lineControls animation:", error);
-      });
-
-    setTimeout(() => {
-      void imageControls
+    if (isInView) {
+      void lineControls
         .start({
-          scale: 1.1,
-          transition: {
-            duration: 0.3,
-            ease: "easeOut",
-          },
-        })
-        .then(() => {
-          void imageControls.start({
-            scale: 1,
-            transition: { duration: 0.3, ease: "easeOut" },
-          });
+          width: "calc(70% + 4rem)",
+          transition: { duration: 1, ease: "easeOut" },
         })
         .catch((error) => {
-          console.error("Error in imageControls animation:", error);
+          console.error("Error in lineControls animation:", error);
         });
-    }, 1000);
-  }
-}, [isInView, lineControls, imageControls]);
+
+      setTimeout(() => {
+        void imageControls
+          .start({
+            scale: 1.1,
+            transition: {
+              duration: 0.3,
+              ease: "easeOut",
+            },
+          })
+          .then(() => {
+            void imageControls.start({
+              scale: 1,
+              transition: { duration: 0.3, ease: "easeOut" },
+            });
+          })
+          .catch((error) => {
+            console.error("Error in imageControls animation:", error);
+          });
+      }, 1000);
+    }
+  }, [isInView, lineControls, imageControls]);
 
 
   return (
@@ -166,45 +169,54 @@ const HowItWorks = () => {
           />
         </Box>
 
-        <Stack paddingX={2} width={{ xs: "100%", lg: "22%" }} gap={1}>
+        <Stack paddingX={2} width={{ xs: "100%", lg: "27%" }} gap={1}>
           <Typography variant="subtitle1" color={"#fff"} sx={{ fontWeight: 500, fontSize: 16 }}>
             Tokenize
           </Typography>
-          <Typography
-            variant="body2"
-            sx={{ fontWeight: 400, fontSize: 14, color: theme.palette.text.secondary }}
-          >
-            Real-world assets are digitized into secure, compliant tokens.
-          </Typography>
+          <Stack direction={"row"} gap={1} alignItems={"center"}>
+            <Image src={icon4} alt="icon4" width={36} height={36} />
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: 400, fontSize: 14, color: theme.palette.text.secondary }}
+            >
+              Real-world assets are digitized into secure, compliant tokens.
+            </Typography>
+          </Stack>
         </Stack>
 
-        <Stack paddingX={2} width={{ xs: "100%", lg: "22%" }} gap={1}>
+        <Stack paddingX={2} width={{ xs: "100%", lg: "27%" }} gap={1}>
           <Typography variant="subtitle1" sx={{ fontWeight: 500, fontSize: 16 }}>
             Invest
           </Typography>
-          <Typography
-            variant="body2"
-            sx={{ fontWeight: 400, fontSize: 14, color: theme.palette.text.secondary }}
-          >
-            Access fractional ownership with low entry barriers
-          </Typography>
+          <Stack direction={"row"} gap={1} alignItems={"center"}>
+            <Image src={icon5} alt="icon5" width={36} height={36} />
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: 400, fontSize: 14, color: theme.palette.text.secondary }}
+            >
+              Access fractional ownership with low entry barriers
+            </Typography>
+          </Stack>
         </Stack>
 
-        <Stack paddingX={2} width={{ xs: "100%", lg: "22%" }} gap={1}>
+        <Stack paddingX={2} width={{ xs: "100%", lg: "27%" }} gap={1}>
           <Typography variant="subtitle1" sx={{ fontWeight: 500, fontSize: 16 }}>
             Earn / Settle
           </Typography>
-          <Typography
-            variant="body2"
-            sx={{ fontWeight: 400, fontSize: 14, color: theme.palette.text.secondary }}
-          >
-            Receive returns and settlements instantly via blockchain.
-          </Typography>
+          <Stack direction={"row"} gap={1} alignItems={"center"}>
+            <Image src={icon6} alt="icon6" width={36} height={36} />
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: 400, fontSize: 14, color: theme.palette.text.secondary }}
+            >
+              Receive returns and settlements instantly via blockchain.
+            </Typography>
+          </Stack>
         </Stack>
 
         <Stack
           paddingX={2}
-          width={{ xs: "100%", lg: "22%" }}
+          width={{ xs: "100%", lg: "19%" }}
           alignItems={"center"}
           justifyContent={"end"}
           marginTop={-2}
