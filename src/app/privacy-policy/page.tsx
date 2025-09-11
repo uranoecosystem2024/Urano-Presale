@@ -587,15 +587,15 @@ export default function PrivacyPolicy() {
           
           <Typography variant="body1" paragraph>
             For further details on the cookies used on this landing page, a specific document is available on the page:{' '}
-            <Link href="https://www.uranoecosystempresale.com/cookie" target="_blank" rel="noopener" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
-              https://www.uranoecosystempresale.com/cookie
+            <Link href="https://www.presale.uranoecosystem.com/cookie-policy" target="_blank" rel="noopener" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
+            https://www.presale.uranoecosystem.com/cookie-policy
             </Link>
           </Typography>
           
           <Typography variant="body1" paragraph>
             For complete information on the cookies used across the entire Urano ecosystem, please refer to the official Cookie Policy, available at:{' '}
-            <Link href="https://www.uranoecosystem.com/cookie-policy" target="_blank" rel="noopener" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
-              https://www.uranoecosystem.com/cookie-policy
+            <Link href="https://www.presale.uranoecosystem.com/cookie-policy" target="_blank" rel="noopener" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
+            https://www.presale.uranoecosystem.com/cookie-policy
             </Link>
           </Typography>
 
@@ -613,8 +613,8 @@ export default function PrivacyPolicy() {
           
           <Typography variant="body1" paragraph>
             The current version of the Privacy Policy is always available at the following address:{' '}
-            <Link href="https://www.uranoecosystempresale.com/privacy" target="_blank" rel="noopener" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
-              https://www.uranoecosystempresale.com/privacy
+            <Link href="https://www.presale.uranoecosystem.com/privacy-policy" target="_blank" rel="noopener" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
+            https://www.presale.uranoecosystem.com/privacy-policy
             </Link>
           </Typography>
           

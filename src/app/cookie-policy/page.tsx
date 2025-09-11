@@ -29,8 +29,8 @@ export default function CookiePolicy() {
           
           <Typography variant="body1" paragraph>
             This Cookie Policy describes the use of cookies and similar technologies on the Presale di Urano Ecosystem landing page, accessible at:{' '}
-            <Link href="https://www.uranoecosystempresale.com" target="_blank" rel="noopener" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
-              https://www.uranoecosystempresale.com
+            <Link href="https://www.presale.uranoecosystem.com/cookie-policy" target="_blank" rel="noopener" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
+            https://www.presale.uranoecosystem.com/cookie-policy
             </Link>{' '}
             (hereinafter, the &ldquo;Landing Page&rdquo;).
           </Typography>
@@ -196,8 +196,8 @@ export default function CookiePolicy() {
           
           <Typography variant="body1" paragraph>
             The latest version will always be available at:{' '}
-            <Link href="https://www.uranoecosystempresale.com/cookie" target="_blank" rel="noopener" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
-              https://www.uranoecosystempresale.com/cookie
+            <Link href="https://www.presale.uranoecosystem.com/cookie-policy" target="_blank" rel="noopener" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>
+            https://www.presale.uranoecosystem.com/cookie-policy
             </Link>
           </Typography>
           

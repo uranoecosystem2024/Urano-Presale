@@ -32,7 +32,7 @@ export default function Terms() {
           </Typography>
           
           <Typography variant="body1" paragraph>
-            This document regulates the access, navigation and participation in the presale (the &quot;Presale&quot;) of the $URANO token through the online platform reachable at the address <Link href="https://www.uranoecosystempresale.com" target="_blank" rel="noopener" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>https://www.uranoecosystempresale.com</Link> (the &quot;Platform&quot;), made available by Urano Ecosystem Sp. z o.o. (the &quot;Company&quot; or the &quot;Issuer&quot;). These terms and conditions (the &quot;Terms&quot;) apply to all Users who interact with the Platform during the Pre-sale phase.
+            This document regulates the access, navigation and participation in the presale (the &quot;Presale&quot;) of the $URANO token through the online platform reachable at the address <Link href="https://www.presale.uranoecosystem.com" target="_blank" rel="noopener" sx={{ textDecoration: 'none', color: theme.palette.uranoGreen1.main }}>https://www.presale.uranoecosystem.com/privacy-policy</Link> (the &quot;Platform&quot;), made available by Urano Ecosystem Sp. z o.o. (the &quot;Company&quot; or the &quot;Issuer&quot;). These terms and conditions (the &quot;Terms&quot;) apply to all Users who interact with the Platform during the Pre-sale phase.
           </Typography>
           
           <Typography variant="body1" paragraph>
