@@ -135,7 +135,13 @@ const MainSection = () => {
                     </Stack>
                 </Stack>
             </Stack>
-            <Stack width={{ xs: "100%", lg: "40%" }} flexGrow={1} gap={{ xs: 3, lg: 3 }} marginTop={{ xs: 4, lg: 0 }}>
+            <Stack width={{ xs: "100%", lg: "40%" }} flexGrow={1} gap={{ xs: 3, lg: 3 }} marginTop={{ xs: 4, lg: 0 }} sx={{
+                backgroundColor: theme.palette.transparentPaper.main,
+                border: `1px solid ${theme.palette.headerBorder.main}`,
+                borderRadius: "0.75rem",
+                padding: "0.6rem",
+                backdropFilter: "blur(8.2px)"
+            }}>
                 <Registration />
                 <PresaleCard />
                 <TokensSelection />

@@ -6,9 +6,8 @@ import Image from "next/image"
 import { motion, useAnimation } from "framer-motion"
 import { useEffect, useState } from "react"
 
-import Union from "@/assets/images/Union.png"
+import Union from "@/assets/images/Union.webp"
 import img1 from "@/assets/images/img1.webp"
-import coins from "@/assets/images/coins.webp"
 
 const HowItWorks = () => {
   const theme = useTheme<Theme>()
@@ -88,7 +87,7 @@ const HowItWorks = () => {
         src={Union}
         alt="Union"
         fill
-        style={{ position: "absolute", top: 0, left: 0, zIndex: 1 }}
+        style={{ position: "absolute", top: 0, left: 0, zIndex: 1, }}
       />
       <Typography
         variant="h5"

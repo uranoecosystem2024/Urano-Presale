@@ -10,7 +10,6 @@ import {
   type Theme,
   type SxProps,
 } from "@mui/material";
-import ExpandMoreRoundedIcon from "@mui/icons-material/ExpandMoreRounded";
 
 type StablecoinFieldProps = {
   label?: string;
@@ -43,7 +42,7 @@ export default function StablecoinField({
         pattern: "[0-9.]*",
         style: { fontSize: 18, fontWeight: 500 },
         sx: {
-          textAlign: {xs: "right", lg: "center"},
+          textAlign: {xs: "right", lg: "right"},
         },
         "aria-label": label,
       }}
@@ -73,7 +72,6 @@ export default function StablecoinField({
               <Box component="span" sx={{ fontWeight: 400, fontSize: 16 }}>
                 {tokenSymbol}
               </Box>
-              <ExpandMoreRoundedIcon fontSize="small" />
             </Button>
           </InputAdornment>
         ),

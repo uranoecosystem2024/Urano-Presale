@@ -25,6 +25,7 @@ const Footer = () => {
             paddingX: 5,
             paddingBottom: { xs: 3, lg: 0 },
             marginLeft: { xs: -2, lg: 0 },
+            backdropFilter: "blur(12px)"
         }}>
             <Stack direction={{ xs: "column", lg: "row" }} justifyContent="space-between" alignItems="center" width={{ xs: "100vw", lg: "100%" }}>
                 <Link href="/">
