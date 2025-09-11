@@ -178,8 +178,6 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({ open, onClose }) 
                                     </Typography>
                                 ) : (
                                     <Typography variant="body1" color="text.secondary" textAlign="center">
-                                        Create your account in seconds.
-                                        <br />
                                         Just enter your email to get started.
                                     </Typography>
                                 )
