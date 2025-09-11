@@ -27,6 +27,7 @@ export default function Home() {
         alt="coins urano"
         width={175}
         height={175}
+        priority
         style={{ position: "absolute", top: "13%", right: "-4%", zIndex: 0 }}
       />
       <Stack flex={1} px={{ xs: 1, lg: 5 }} py={4} justifyContent="end" gap={{ xs: 2, lg: 4 }} sx={{ position: "relative", overflow: "hidden" }}>
@@ -48,6 +49,7 @@ export default function Home() {
         alt="coins urano"
         width={200}
         height={200}
+        priority
         style={{ position: "absolute", bottom: "4%", left: "-5%", zIndex: 0 }}
       />
       <Footer />
