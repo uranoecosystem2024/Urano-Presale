@@ -5,6 +5,9 @@ import Registration from "./Registration";
 import PresaleCard from "./PresaleCard";
 import TokensSelection from "./TokensSelection";
 import mobileCoin1 from "@/assets/images/mobileCoin1.webp"
+import icon1 from "@/assets/images/icon1.webp"
+import icon2 from "@/assets/images/icon2.webp"
+import icon3 from "@/assets/images/icon3.webp"
 import Image from "next/image";
 const MainSection = () => {
     const theme = useTheme();
@@ -28,11 +31,11 @@ const MainSection = () => {
                         Welcome to Urano Ecosystem
                     </Typography>
                     <Typography variant="h6" sx={{
-                        fontSize: { xs: "1rem", lg: "1.25rem" },
-                        fontWeight: { xs: 400, lg: 400 },
+                        fontSize: { xs: "1rem", lg: "0.95rem" },
+                        fontWeight: { xs: 400, lg: 300 },
                         color: theme.palette.text.primary,
                     }}>
-                        The gateway to Real World Assets tokenization
+                        The gateway to tokenized Real World Assets, powered by <span style={{ fontWeight: 600, color: theme.palette.uranoGreen1.main }}>$URANO</span>
                     </Typography>
                 </Stack>
                 <Stack display={{ xs: "flex", lg: "none" }} width={"100%"} justifyContent={"center"} alignItems={"center"} sx={{
@@ -47,27 +50,36 @@ const MainSection = () => {
                     />
                 </Stack>
                 <Stack gap={1.5} display={{ xs: "none", lg: "flex" }}>
-                    <Typography variant="h6" sx={{
-                        fontSize: "1rem",
-                        fontWeight: 500,
-                        color: theme.palette.text.primary,
-                    }}>
-                        Compliant RWA – <span style={{ fontWeight: 300 }}>Full regulatory alignment for secure investments</span>
-                    </Typography>
-                    <Typography variant="h6" sx={{
-                        fontSize: "1rem",
-                        fontWeight: 500,
-                        color: theme.palette.text.primary,
-                    }}>
-                        Fractional Access – <span style={{ fontWeight: 300 }}>Invest in real estate, SMEs, art & more</span>
-                    </Typography>
-                    <Typography variant="h6" sx={{
-                        fontSize: "1rem",
-                        fontWeight: 500,
-                        color: theme.palette.text.primary,
-                    }}>
-                        Instant Settlement – <span style={{ fontWeight: 300 }}>Blockchain-powered transactions, fast and transparent</span>
-                    </Typography>
+                    <Stack direction={"row"} gap={1} alignItems={"center"}>
+                        <Image src={icon1} alt="icon1" style={{ width: "1.2rem", height: "1.2rem" }} />
+                        <Typography variant="h6" sx={{
+                            fontSize: "1rem",
+                            fontWeight: 500,
+                            color: theme.palette.text.primary,
+                        }}>
+                            Compliant RWA – <span style={{ fontWeight: 300, color: theme.palette.darkerText.main }}>Full regulatory alignment for secure investments</span>
+                        </Typography>
+                    </Stack>
+                    <Stack direction={"row"} gap={1} alignItems={"center"}>
+                        <Image src={icon2} alt="icon2" style={{ width: "1.2rem", height: "1.2rem" }} />
+                        <Typography variant="h6" sx={{
+                            fontSize: "1rem",
+                            fontWeight: 500,
+                            color: theme.palette.text.primary,
+                        }}>
+                            Fractional Access – <span style={{ fontWeight: 300, color: theme.palette.darkerText.main }}>Invest in real estate, SMEs, art & more</span>
+                        </Typography>
+                    </Stack>
+                    <Stack direction={"row"} gap={1} alignItems={"center"}>
+                        <Image src={icon3} alt="icon3" style={{ width: "1.2rem", height: "1.2rem" }} />
+                        <Typography variant="h6" sx={{
+                            fontSize: "1rem",
+                            fontWeight: 500,
+                            color: theme.palette.text.primary,
+                        }}>
+                            Instant Settlement – <span style={{ fontWeight: 300, color: theme.palette.darkerText.main }}>Blockchain-powered transactions, fast and transparent</span>
+                        </Typography>
+                    </Stack>
                 </Stack>
                 <Stack gap={1.5} display={{ xs: "flex", lg: "none" }}>
                     <Stack gap={1} sx={{

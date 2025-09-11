@@ -26,6 +26,9 @@ declare module "@mui/material/styles" {
       presaleCardBg: {
         main: string
       }
+      darkerText: {
+        main: string
+      }
     }
   
     interface PaletteOptions {
@@ -52,6 +55,9 @@ declare module "@mui/material/styles" {
       presaleCardBg: {
         main: string
       }
+      darkerText: {
+        main: string
+      }
     }
   }
 
@@ -69,6 +75,7 @@ const themeOptions: ThemeOptions = {
       presaleCardBg: { main: 'rgba(24, 24, 24, 1)' },
       primary: { main: '#000000' },
       secondary: { main: '#2D2D2D' },
+      darkerText: { main: '#DEDEDE' },
       background: { default: '#131313', paper: '#151515' },
       text: { primary: '#ffffff', secondary: '#9F9F9F', disabled: '#F5F5F5' },
       error: { main: '#FF0000' },
