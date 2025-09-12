@@ -23,7 +23,7 @@ export default function Home() {
         >
             <Header />
 
-            <Stack flex={1} width={{ xs: "95%", lg: "55%" }} py={4} alignItems={"center"} justifyContent="start" gap={{ xs: 1.5, lg: 2 }} sx={{ position: "relative" }}>
+            <Stack flex={1} width={{ xs: "95%", lg: "65%" }} py={4} alignItems={"center"} justifyContent="start" gap={{ xs: 1.5, lg: 2 }} sx={{ position: "relative" }}>
                 <Typography className="conthrax" variant="h3" sx={{
                     fontSize: { xs: "1.4rem", lg: "2rem" },
                     fontWeight: 600,
@@ -103,7 +103,7 @@ export default function Home() {
                                             color: theme.palette.info.main,
                                         },
                                         "&:hover .iconButton": {
-                                            filter: { xs: "none", lg: "invert(1)" },
+                                            filter: { xs: "none", lg: "brightness(0)" },
                                         },
                                     },
                                 }}>
@@ -133,15 +133,15 @@ export default function Home() {
                                         "&:hover .connectWalletLink": {
                                             color: theme.palette.info.main,
                                         },
-                                        "&:hover .iconButton": {
-                                            filter: { xs: "none", lg: "invert(1)" },
+                                        "&:hover .buttonIcon2": {
+                                            filter: { xs: "none", lg: "brightness(0)" },
                                         },
                                     },
                                 }}>
                                     <Typography variant="body1" fontWeight={400} className="connectWalletLink" sx={{
                                         color: { xs: theme.palette.text.disabled, lg: theme.palette.text.disabled }
                                     }}>Disconnect</Typography>
-                                    <Slash variant="Bold" color={theme.palette.text.disabled} size={18} className="buttonIcon" />
+                                    <Slash variant="Bold" color={theme.palette.text.disabled} size={18} className="buttonIcon2" />
                                 </Box>
                             </Link>
                         </Stack>
