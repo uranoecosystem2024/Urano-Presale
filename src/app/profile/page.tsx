@@ -7,7 +7,7 @@ import { useTheme } from '@mui/material/styles';
 import Image from 'next/image';
 import arbLogo from '@/assets/images/WhiteText_horizontal_RGB.webp';
 import coin1 from '@/assets/images/coin1.webp';
-import { Slash, CopySuccess, Copy } from 'iconsax-reactjs';
+import { Slash, Copy } from 'iconsax-reactjs';
 export default function Home() {
     const theme = useTheme();
     return (
@@ -23,7 +23,7 @@ export default function Home() {
         >
             <Header />
 
-            <Stack flex={1} width={"55%"} py={4} alignItems={"center"} justifyContent="start" gap={{ xs: 2, lg: 2 }} sx={{ position: "relative" }}>
+            <Stack flex={1} width={{ xs: "85%", lg: "55%" }} py={4} alignItems={"center"} justifyContent="start" gap={{ xs: 1.5, lg: 2 }} sx={{ position: "relative" }}>
                 <Typography className="conthrax" variant="h3" sx={{
                     fontSize: { xs: "1.4rem", lg: "2rem" },
                     fontWeight: 600,
@@ -40,7 +40,7 @@ export default function Home() {
                     padding: 3,
                     gap: 2,
                 }}>
-                    <Stack direction={"row"} alignItems={"center"} gap={2}>
+                    <Stack direction={"row"} alignItems={"center"} justifyContent={{ xs: "space-between", lg: "flex-start" }} gap={2}>
                         <Typography variant="h6" sx={{
                             fontSize: "1rem",
                             fontWeight: 500,
@@ -56,8 +56,8 @@ export default function Home() {
                             <Image src={arbLogo} alt="arbitrum-logo" style={{ width: "6rem", height: "1.55rem" }} />
                         </Stack>
                     </Stack>
-                    <Stack width={"100%"} direction={"row"} alignItems={"center"} justifyContent={"space-between"}>
-                        <Stack width={"65%"} direction={"row"} alignItems={"center"} gap={1} sx={{
+                    <Stack width={"100%"} direction={{ xs: "column", lg: "row" }} alignItems={"center"} justifyContent={"space-between"} gap={{ xs: 1, lg: 0 }}>
+                        <Stack width={{ xs: "100%", lg: "65%" }} direction={"row"} alignItems={"center"} gap={1} sx={{
                             background: theme.palette.transparentPaper.main,
                             border: `1px solid ${theme.palette.headerBorder.main}`,
                             borderRadius: 2,
@@ -81,70 +81,74 @@ export default function Home() {
                                 color: theme.palette.text.primary,
                             }}>0xAbcdef1234567890AbCdEf1234567890AbCdEf12</Typography>
                         </Stack>
-                        <Link href="/" underline="none" onClick={(e) => {
-                            e.preventDefault();
-                        }}>
-                            <Box sx={{
-                                background: { xs: theme.palette.uranoGradient, lg: theme.palette.secondary.main },
-                                border: `1px solid ${theme.palette.headerBorder.main}`,
-                                borderRadius: 2,
-                                paddingX: { xs: 1.5, lg: 2 },
-                                paddingY: { xs: 1.5, lg: 1 },
-                                marginLeft: 1,
-                                gap: 1,
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                "&:hover": {
-                                    background: theme.palette.uranoGradient,
-                                    "&:hover .connectWalletLink": {
-                                        color: theme.palette.info.main,
-                                    },
-                                    "&:hover .iconButton": {
-                                        filter: "invert(1)",
-                                    },
-                                },
+                        <Stack width={{ xs: "100%", lg: "35%" }} direction={"row"} alignItems={"center"} justifyContent={"center"} gap={{ xs: 0.5, lg: 1 }}>
+                            <Link href="/" underline="none" sx={{ width: "50%" }} onClick={(e) => {
+                                e.preventDefault();
                             }}>
-                                <Typography variant="body1" fontWeight={400} className="connectWalletLink" sx={{
-                                    color: { xs: theme.palette.background.default, lg: theme.palette.text.disabled }
-                                }}>Copy</Typography>
-                                <Copy variant="Bold" color={theme.palette.text.disabled} size={18} className="iconButton" />
-                            </Box>
-                        </Link>
-                        <Link href="/" underline="none" onClick={(e) => {
-                            e.preventDefault();
-                        }}>
-                            <Box sx={{
-                                background: { xs: theme.palette.uranoGradient, lg: theme.palette.secondary.main },
-                                border: `1px solid ${theme.palette.headerBorder.main}`,
-                                borderRadius: 2,
-                                paddingX: { xs: 1.5, lg: 2 },
-                                paddingY: { xs: 1.5, lg: 1 },
-                                marginLeft: 1,
-                                gap: 1,
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                "&:hover": {
-                                    background: theme.palette.uranoGradient,
-                                    "&:hover .connectWalletLink": {
-                                        color: theme.palette.info.main,
+                                <Box sx={{
+                                    width: "100%",
+                                    background: { xs: theme.palette.secondary.main, lg: theme.palette.secondary.main },
+                                    border: `1px solid ${theme.palette.headerBorder.main}`,
+                                    borderRadius: 2,
+                                    paddingX: { xs: 1.5, lg: 2 },
+                                    paddingY: { xs: 1.5, lg: 1 },
+                                    marginLeft: { xs: 0, lg: 1 },
+                                    gap: { xs: 0.5, lg: 1 },
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    "&:hover": {
+                                        background: theme.palette.uranoGradient,
+                                        "&:hover .connectWalletLink": {
+                                            color: theme.palette.info.main,
+                                        },
+                                        "&:hover .iconButton": {
+                                            filter: { xs: "none", lg: "invert(1)" },
+                                        },
                                     },
-                                    "&:hover .buttonIcon": {
-                                        filter: "invert(1)",
-                                    },
-                                },
+                                }}>
+                                    <Typography variant="body1" fontWeight={400} className="connectWalletLink" sx={{
+                                        color: { xs: theme.palette.text.disabled, lg: theme.palette.text.disabled }
+                                    }}>Copy</Typography>
+                                    <Copy variant="Bold" color={theme.palette.text.disabled} size={18} className="iconButton" />
+                                </Box>
+                            </Link>
+                            <Link href="/" underline="none" sx={{ width: "50%" }} onClick={(e) => {
+                                e.preventDefault();
                             }}>
-                                <Typography variant="body1" fontWeight={400} className="connectWalletLink" sx={{
-                                    color: { xs: theme.palette.background.default, lg: theme.palette.text.disabled }
-                                }}>Disconnect</Typography>
-                                <Slash variant="Bold" color={theme.palette.text.disabled} size={18} className="buttonIcon" />
-                            </Box>
-                        </Link>
+                                <Box sx={{
+                                    width: "100%",
+                                    background: { xs: theme.palette.secondary.main, lg: theme.palette.secondary.main },
+                                    border: `1px solid ${theme.palette.headerBorder.main}`,
+                                    borderRadius: 2,
+                                    paddingX: { xs: 1.5, lg: 2 },
+                                    paddingY: { xs: 1.5, lg: 1 },
+                                    marginLeft: { xs: 0, lg: 1 },
+                                    gap: { xs: 0.5, lg: 1 },
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    "&:hover": {
+                                        background: theme.palette.uranoGradient,
+                                        "&:hover .connectWalletLink": {
+                                            color: theme.palette.info.main,
+                                        },
+                                        "&:hover .iconButton": {
+                                            filter: { xs: "none", lg: "invert(1)" },
+                                        },
+                                    },
+                                }}>
+                                    <Typography variant="body1" fontWeight={400} className="connectWalletLink" sx={{
+                                        color: { xs: theme.palette.text.disabled, lg: theme.palette.text.disabled }
+                                    }}>Disconnect</Typography>
+                                    <Slash variant="Bold" color={theme.palette.text.disabled} size={18} className="buttonIcon" />
+                                </Box>
+                            </Link>
+                        </Stack>
                     </Stack>
                 </Stack>
-                <Stack width={"100%"} direction={"row"} alignItems={"stretch"} justifyContent={"space-between"} gap={2}>
-                    <Stack width={"50%"} flexGrow={1} sx={{
+                <Stack width={"100%"} direction={{ xs: "column", lg: "row" }} alignItems={"stretch"} justifyContent={"space-between"} gap={{ xs: 1, lg: 2 }}>
+                    <Stack width={{ xs: "100%", lg: "50%" }} flexGrow={1} sx={{
                         backgroundColor: theme.palette.presaleCardBg.main,
                         border: `1px solid ${theme.palette.headerBorder.main}`,
                         borderRadius: 2,
@@ -186,7 +190,7 @@ export default function Home() {
                             </Stack>
                         </Stack>
                     </Stack>
-                    <Stack width={"50%"} flexGrow={1} sx={{
+                    <Stack width={{ xs: "100%", lg: "50%" }} flexGrow={1} sx={{
                         backgroundColor: theme.palette.presaleCardBg.main,
                         border: `1px solid ${theme.palette.headerBorder.main}`,
                         borderRadius: 2,
@@ -240,8 +244,8 @@ export default function Home() {
                             color: theme.palette.text.secondary,
                         }}>Strategic Round</Typography>
                     </Stack>
-                    <Stack width={"100%"} direction={"row"} alignItems={"center"} justifyContent={"space-between"} gap={2}>
-                        <Stack width={"50%"} gap={1} sx={{
+                    <Stack width={"100%"} direction={{ xs: "column", lg: "row" }} alignItems={"center"} justifyContent={"space-between"} gap={{ xs: 1, lg: 2 }}>
+                        <Stack width={{ xs: "100%", lg: "50%" }} gap={1} sx={{
                             background: theme.palette.transparentPaper.main,
                             border: `1px solid ${theme.palette.headerBorder.main}`,
                             borderRadius: 2,
@@ -259,7 +263,7 @@ export default function Home() {
                                 color: theme.palette.text.primary,
                             }}>10%</Typography>
                         </Stack>
-                        <Stack width={"50%"} gap={1} sx={{
+                        <Stack width={{ xs: "100%", lg: "50%" }} gap={1} sx={{
                             background: theme.palette.transparentPaper.main,
                             border: `1px solid ${theme.palette.headerBorder.main}`,
                             borderRadius: 2,
@@ -278,8 +282,8 @@ export default function Home() {
                             }}>24 months</Typography>
                         </Stack>
                     </Stack>
-                    <Stack width={"100%"} direction={"row"} alignItems={"center"} justifyContent={"space-between"} gap={2}>
-                        <Stack width={"50%"} gap={1} sx={{
+                    <Stack width={"100%"} direction={{ xs: "column", lg: "row" }} alignItems={"center"} justifyContent={"space-between"} gap={{ xs: 1, lg: 2 }}>
+                        <Stack width={{ xs: "100%", lg: "50%" }} gap={1} sx={{
                             background: theme.palette.transparentPaper.main,
                             border: `1px solid ${theme.palette.headerBorder.main}`,
                             borderRadius: 2,
@@ -297,7 +301,7 @@ export default function Home() {
                                 color: theme.palette.text.primary,
                             }}>3 months</Typography>
                         </Stack>
-                        <Stack width={"50%"} gap={1} sx={{
+                        <Stack width={{ xs: "100%", lg: "50%" }} gap={1} sx={{
                             background: theme.palette.transparentPaper.main,
                             border: `1px solid ${theme.palette.headerBorder.main}`,
                             borderRadius: 2,
@@ -331,7 +335,7 @@ export default function Home() {
                             color: theme.palette.text.primary,
                         }}>Available $URANO (Claimable)</Typography>
                     </Stack>
-                    <Stack width={"100%"} gap={2} sx={{
+                    <Stack width={"100%"} gap={{ xs: 1, lg: 2 }} direction={{ xs: "column-reverse", lg: "column" }} sx={{
                         border: "1px solid transparent",
                         background: `
                             linear-gradient(rgba(28, 34, 33, 1), rgba(28, 34, 33, 1)) padding-box,
@@ -357,40 +361,41 @@ export default function Home() {
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent',
                         }}>12,500 $URANO</Typography>
-                        <Image src={coin1} alt="coin1" style={{
+                        <Image src={coin1} alt="coin1" className="readyToClaimCoin" style={{
                             width: "auto",
                             height: "120%",
                             position: "absolute",
                             top: "10%",
                             right: "5%",
                             zIndex: 1,
+
                         }} />
                     </Stack>
                     <Link href="/" underline="none" target="_blank"
-                onClick={(e) => {
-                    e.preventDefault();
-                }}
-                >
-                    <Box sx={{
-                        width: "100%",
-                        background: theme.palette.uranoGradient,
-                        border: `2px solid ${theme.palette.headerBorder.main}`,
-                        borderRadius: 2,
-                        paddingX: { xs: 1.5, lg: 5 },
-                        paddingY: { xs: 1.5, lg: 1 },
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        "&:hover": {
-                            border: `2px solid ${theme.palette.text.primary}`,
-                            filter: "brightness(1.2)",
-                        },
-                    }}>
-                        <Typography variant="body1" fontWeight={400} sx={{
-                            color: theme.palette.background.default
-                        }}>Claim 12,500 $URANO</Typography>
-                    </Box>
-                </Link>
+                        onClick={(e) => {
+                            e.preventDefault();
+                        }}
+                    >
+                        <Box sx={{
+                            width: "100%",
+                            background: theme.palette.uranoGradient,
+                            border: `2px solid ${theme.palette.headerBorder.main}`,
+                            borderRadius: 2,
+                            paddingX: { xs: 1.5, lg: 5 },
+                            paddingY: { xs: 1.5, lg: 1 },
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            "&:hover": {
+                                border: `2px solid ${theme.palette.text.primary}`,
+                                filter: "brightness(1.2)",
+                            },
+                        }}>
+                            <Typography variant="body1" fontWeight={400} sx={{
+                                color: theme.palette.background.default
+                            }}>Claim 12,500 $URANO</Typography>
+                        </Box>
+                    </Link>
                     <Divider sx={{
                         borderBottom: `0.5px solid ${theme.palette.grey[800]}`,
                         marginTop: 2,
