@@ -23,7 +23,7 @@ export default function Home() {
         >
             <Header />
 
-            <Stack flex={1} width={{ xs: "85%", lg: "55%" }} py={4} alignItems={"center"} justifyContent="start" gap={{ xs: 1.5, lg: 2 }} sx={{ position: "relative" }}>
+            <Stack flex={1} width={{ xs: "95%", lg: "55%" }} py={4} alignItems={"center"} justifyContent="start" gap={{ xs: 1.5, lg: 2 }} sx={{ position: "relative" }}>
                 <Typography className="conthrax" variant="h3" sx={{
                     fontSize: { xs: "1.4rem", lg: "2rem" },
                     fontWeight: 600,
