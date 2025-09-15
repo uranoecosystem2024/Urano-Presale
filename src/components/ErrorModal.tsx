@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import Image from 'next/image';
 import popupbg from "@/assets/images/pop-up-bg.webp";
-import { BiErrorAlt } from "react-icons/bi";
+import { InfoCircle } from 'iconsax-reactjs';
 
 interface ErrorModalProps {
     open: boolean;
@@ -78,12 +78,12 @@ const ErrorModal: React.FC<ErrorModalProps> = ({ open, onClose, errorTitle, erro
                             paddingX: 2,
                             paddingY: 1,
                             aspectRatio: 1,
-                            background: theme.palette.error.main,
+                            background: "#FFD54F",
                             marginTop: -6.5,
                             border: `5px solid ${theme.palette.background.paper}`,
                         }}
                     >
-                        <BiErrorAlt size={30} color={theme.palette.background.paper} />
+                        <InfoCircle size={30} variant="Bold" color={"#370D00"} />
                     </Box>
 
                     <Stack width={'100%'} height={'100%'} alignItems={'center'} justifyContent={'center'} paddingY={2} gap={4}>
