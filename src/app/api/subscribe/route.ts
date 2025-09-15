@@ -1,77 +1,182 @@
-// app/api/subscribe/route.ts
+import { NextResponse } from "next/server";
+import axios, { type AxiosInstance } from "axios";
 
-import { NextResponse } from 'next/server';
-import axios from 'axios';
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
-// Define the interface for the incoming request body
 interface SubscribeRequestBody {
-    email: string;
+  email?: string;
 }
 
-interface BrevoResponse {
-    id: number; 
+interface BrevoContact {
+  id?: number;
+  email?: string;
+  listIds?: number[];
+}
+
+interface BrevoCreateOrUpdateContactRequest {
+  email: string;
+  listIds: number[];
+  updateEnabled: boolean;
+}
+
+interface BrevoCreateOrUpdateContactResponse {
+  id?: number;
+}
+
+type SuccessStatus = "already_subscribed" | "added_to_list" | "subscribed";
+type ErrorStatus = "error";
+
+const BREVO_API_KEY = process.env.BREVO_API_KEY!;
+const BREVO_LIST_ID = Number(process.env.BREVO_LIST_ID ?? "3");
+
+if (!BREVO_API_KEY) {
+  throw new Error("Missing BREVO_API_KEY environment variable");
+}
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function makeClient(): AxiosInstance {
+  return axios.create({
+    baseURL: "https://api.brevo.com/v3",
+    headers: {
+      accept: "application/json",
+      "content-type": "application/json",
+      "api-key": BREVO_API_KEY,
+    },
+    timeout: 12_000,
+  });
+}
+
+function stringifyUnknown(x: unknown): string {
+  if (typeof x === "string") return x;
+  try {
+    return JSON.stringify(x);
+  } catch {
+    return String(x);
+  }
+}
+
+function getErrorMessage(e: unknown): string {
+  if (axios.isAxiosError(e)) {
+    const data = e.response?.data as Record<string, unknown>;
+    if (data && typeof data === "object" && "message" in data) {
+      const msg = data.message;
+      if (typeof msg === "string") return msg;
+    }
+    return e.message ?? "Unknown Axios error";
+  }
+  if (e instanceof Error) return e.message;
+  return String(e);
 }
 
 export async function POST(request: Request) {
-    try {
-        // Log the incoming request to verify the data
-        console.log('Incoming request body:', request);
+  try {
+    const { email } = (await request.json()) as SubscribeRequestBody;
 
-        // Explicitly cast the parsed JSON to the SubscribeRequestBody type
-        const body = await request.json() as SubscribeRequestBody;
-        console.log('Parsed JSON body:', body); // Log the parsed body
-
-        const { email } = body;  // Get the email from the parsed body
-
-        if (!email) {
-            console.error('Email is required but not provided');
-            return NextResponse.json({ message: 'Email is required' }, { status: 400 });
-        }
-
-        const apiKey = process.env.BREVO_API_KEY; // Access the API key from the .env file
-        const listId = 3; // Your Brevo List ID
-
-        console.log('Making API call to Brevo with email:', email);
-
-        // Make a request to Brevo to add the email to the list
-        const response = await axios.post(
-            'https://api.brevo.com/v3/contacts',
-            {
-                updateEnabled: false, // Add the updateEnabled field
-                email: email,
-                listIds: [listId], // Add the email to your specified list
-            },
-            {
-                headers: {
-                    'accept': 'application/json', // Set accept header for JSON response
-                    'api-key': apiKey, // The API key from the .env file
-                    'content-type': 'application/json', // Set content-type header
-                }
-            }
-        );
-
-        // Log the API response from Brevo
-        console.log('Brevo API response:', response.data);
-
-        // Assert the response type as BrevoResponse
-        const brevoResponse = response.data as BrevoResponse;
-
-        // Check if the Brevo response contains a valid contact id using optional chaining
-        if (brevoResponse?.id) {
-            return NextResponse.json({ message: 'Subscription successful' });
-        } else {
-            console.error('Error from Brevo:', response.data);
-            return NextResponse.json({ message: 'Something went wrong with the subscription.' }, { status: 500 });
-        }
-    } catch (error) {
-        // Log detailed error information
-        if (axios.isAxiosError(error)) {
-            console.error('Error response from Brevo:', error.response?.data); // Log Brevo's error message
-            console.error('Error status:', error.response?.status);
-        } else {
-            console.error('Unexpected error:', error);
-        }
-
-        return NextResponse.json({ message: 'Unable to subscribe. Please try again.' }, { status: 500 });
+    if (!email || !EMAIL_REGEX.test(email)) {
+      return NextResponse.json(
+        { status: "error" as ErrorStatus, message: "Invalid or missing email" },
+        { status: 400 }
+      );
     }
+
+    const client = makeClient();
+
+    let exists = false;
+    let inList = false;
+
+    try {
+      const { data: contact } = await client.get<BrevoContact>(
+        `/contacts/${encodeURIComponent(email)}`
+      );
+
+      exists = true;
+
+      const listIds: number[] = contact.listIds ?? [];
+      inList = listIds.includes(BREVO_LIST_ID);
+
+      if (inList) {
+        return NextResponse.json(
+          {
+            status: "already_subscribed" as SuccessStatus,
+            message: "Email already registered in this list",
+          },
+          { status: 200 }
+        );
+      }
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        const code = err.response?.status ?? 0;
+        if (code !== 404) {
+          const detail = stringifyUnknown(err.response?.data ?? err);
+          return NextResponse.json(
+            {
+              status: "error" as ErrorStatus,
+              message: "Brevo lookup failed",
+              detail,
+            },
+            { status: 502 }
+          );
+        }
+      } else {
+        return NextResponse.json(
+          {
+            status: "error" as ErrorStatus,
+            message: "Lookup error",
+            detail: stringifyUnknown(err),
+          },
+          { status: 502 }
+        );
+      }
+    }
+
+    const payload: BrevoCreateOrUpdateContactRequest = {
+      email,
+      listIds: [BREVO_LIST_ID],
+      updateEnabled: true,
+    };
+
+    const postRes = await client.post<BrevoCreateOrUpdateContactResponse>("/contacts", payload);
+
+    if (!postRes.data || (typeof postRes.data.id !== "number" && !exists)) {
+      return NextResponse.json(
+        {
+          status: "error" as ErrorStatus,
+          message: "Brevo subscribe returned an unexpected response",
+          detail: stringifyUnknown(postRes.data),
+        },
+        { status: 502 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        status: (exists ? "added_to_list" : "subscribed") as SuccessStatus,
+        message: exists ? "Email added to the list" : "Subscription successful",
+      },
+      { status: 200 }
+    );
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      const message = getErrorMessage(error);
+      const detail = stringifyUnknown(error.response?.data ?? error);
+      return NextResponse.json(
+        {
+          status: "error" as ErrorStatus,
+          message,
+          detail,
+        },
+        { status: 502 }
+      );
+    }
+
+    return NextResponse.json(
+      {
+        status: "error" as ErrorStatus,
+        message: getErrorMessage(error),
+      },
+      { status: 500 }
+    );
+  }
 }
