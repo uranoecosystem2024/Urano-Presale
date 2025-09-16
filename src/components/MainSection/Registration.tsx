@@ -8,6 +8,8 @@ import SubscriptionModal from "../SubscriptionModal";
 import ErrorModal from "../ErrorModal";
 import VerifyIdentityModal from "@/components/VerifyIdentityModal";
 import WalletModal from "@/components/WalletModal";
+import { useConnectModal } from "thirdweb/react"
+import { client } from "@/lib/thirdwebClient"
 
 type Progress = {
   step1: boolean;
@@ -27,6 +29,8 @@ const Registration = () => {
   const [errorModalTitle, setErrorModalTitle] = useState("");
   const [errorModalMessage, setErrorModalMessage] = useState("");
 
+  const { connect } = useConnectModal()
+
   const [progress, setProgress] = useState<Progress>({
     step1: false,
     step2: false,
@@ -37,13 +41,13 @@ const Registration = () => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) setProgress(JSON.parse(saved) as Progress);
-    } catch {}
+    } catch { }
   }, []);
 
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
-    } catch {}
+    } catch { }
   }, [progress]);
 
   const locked = useMemo(
@@ -74,21 +78,24 @@ const Registration = () => {
     setOpenStep2(true);
   };
 
-  const handleClickStep3 = () => {
+  const handleClickStep3 = async () => {
     if (locked.step3) {
       const missing =
         !progress.step1 && !progress.step2
           ? "steps 1 and 2"
           : !progress.step1
-          ? "step 1"
-          : "step 2";
+            ? "step 1"
+            : "step 2";
       showLockError(
         "Previous steps incomplete",
         `Please complete ${missing} before connecting a wallet & buying.`
       );
+      setOpenStep3(true);
       return;
     }
-    setOpenStep3(true);
+    else {
+      await connect({ client })
+    }
   };
 
   const completeStep1 = () => setProgress((p) => ({ ...p, step1: true }));
