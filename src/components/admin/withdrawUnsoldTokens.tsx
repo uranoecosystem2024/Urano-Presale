@@ -1,4 +1,3 @@
-// components/withdrawUnsoldTokens.tsx
 "use client";
 
 import { useMemo, useState } from "react";
@@ -19,20 +18,13 @@ import {
 export type RoundOption = { id: string; label: string };
 
 export type WithdrawUnsoldTokensProps = {
-    /** Section title */
-    title?: string; // default: "Withdraw Unsold Tokens"
-    /** Subtitle under the title */
-    subtitle?: string; // default: "Withdraw remaining tokens after presale ends"
-    /** Rounds for the Select */
+    title?: string;
+    subtitle?: string;
     rounds: RoundOption[];
-    /** Disable entire block */
     disabled?: boolean;
-    /** Loading state for the button */
     loading?: boolean;
-    /** Initial values (optional) */
     initialAddress?: string;
     initialRoundId?: string;
-    /** Called when user clicks Withdraw and form is valid */
     onWithdraw?: (address: string, roundId: string) => void;
 };
 
@@ -91,7 +83,6 @@ export default function WithdrawUnsoldTokens({
 
     return (
         <Stack gap={4} width="100%">
-            {/* Header */}
             <Stack gap={0.5}>
                 <Typography variant="h6" sx={{ color: theme.palette.text.primary }}>
                     {title}
@@ -101,7 +92,6 @@ export default function WithdrawUnsoldTokens({
                 </Typography>
             </Stack>
 
-            {/* Inputs row */}
             <Stack direction={{ xs: "column", md: "row" }} gap={2} alignItems="stretch">
                 <TextField
                     fullWidth

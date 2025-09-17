@@ -19,20 +19,16 @@ import {
 export type RoundOption = { id: string; label: string };
 
 export type ManualSepaPurchaseProps = {
-    /** Section title shown above the card */
-    title?: string; // default: "Manual SEPA Purchase"
-    /** Subtitle shown inside the card header */
-    subtitle?: string; // default: "Add SEPA purchase manually to the system"
+    title?: string;
+    subtitle?: string;
     rounds: RoundOption[];
-    tokenSymbol?: string; // default: "URANO"
+    tokenSymbol?: string;
     disabled?: boolean;
     loading?: boolean;
-    /** Initial values (optional) */
     initialAddress?: string;
     initialRoundId?: string;
     initialAmount?: string | number;
     initialReference?: string;
-    /** Called when "Add Purchase" is clicked and form is valid */
     onSubmit?: (payload: {
         address: string;
         roundId: string;
@@ -95,7 +91,6 @@ export default function ManualSepaPurchase({
     } as const;
 
     const handleAmountChange = (v: string) => {
-        // allow only digits and one dot
         const sanitized = v.replace(/[^\d.]/g, "");
         const parts = sanitized.split(".");
         const next = parts.length > 2 ? `${parts[0]}.${parts.slice(1).join("")}` : sanitized;
@@ -118,10 +113,6 @@ export default function ManualSepaPurchase({
 
     return (
         <Stack gap={2} width="100%">
-            {/* Section title */}
-
-
-            {/* Card */}
             <Stack gap={4}>
                 <Stack gap={0.5}>
                     <Typography variant="h6" sx={{ color: theme.palette.text.primary }}>
@@ -132,7 +123,6 @@ export default function ManualSepaPurchase({
                     </Typography>
                 </Stack>
 
-                {/* Address */}
                 <TextField
                     fullWidth
                     label="Address"
@@ -145,7 +135,6 @@ export default function ManualSepaPurchase({
                     sx={inputSx}
                 />
 
-                {/* Row: Round | Amount | Reference | Button */}
                 <Stack direction={{ xs: "column", lg: "row" }} gap={2} alignItems="stretch">
                     <FormControl fullWidth disabled={disabled} sx={inputSx}>
                         <InputLabel id="sepa-round-label" shrink>

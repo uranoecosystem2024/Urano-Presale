@@ -11,28 +11,19 @@ import {
   useTheme,
 } from "@mui/material";
 
-/** Domain model for a presale round */
 export type RoundStatusItem = {
   id: string;
-  title: string;        // e.g. "Seed Round"
+  title: string;
   active: boolean;
 };
 
-/** Props for the manager */
 export type RoundStatusManagementProps = {
-  /** Rounds to display */
   rounds: RoundStatusItem[];
-  /** If true, only one round can be active at a time (matches the screenshot UX) */
   singleActive?: boolean;
-  /** Disable all interactions */
   disabled?: boolean;
-  /** Called when a round is toggled. Provides the next full list + the toggled id */
   onChange?: (next: RoundStatusItem[], changedId: string) => void;
-  /** "Show more" click for a given round id */
   onShowMore?: (id: string) => void;
-  /** Optional title override */
   title?: string;
-  /** Optional subtitle override */
   subtitle?: string;
 };
 
@@ -48,7 +39,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
   const theme = useTheme();
   const [items, setItems] = useState<RoundStatusItem[]>(rounds);
 
-  // keep local state in sync if parent updates `rounds`
   useEffect(() => setItems(rounds), [rounds]);
 
   const handleToggle = (id: string, nextVal: boolean) => {
@@ -91,7 +81,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
 
   return (
     <Stack gap={2} width="100%">
-      {/* Header */}
       <Stack gap={0.5}>
         <Typography variant="h6" sx={{ color: theme.palette.text.primary }}>
           {title}
@@ -101,7 +90,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
         </Typography>
       </Stack>
 
-      {/* Cards */}
       <Stack gap={2}>
         {items.map((r, idx) => {
           const isActive = r.active;
@@ -121,7 +109,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                     : "none",
                 }}
               >
-                {/* Left: title + status */}
                 <Stack gap={1}>
                   <Typography
                     variant="h6"
@@ -157,7 +144,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                   )}
                 </Stack>
 
-                {/* Right: toggle + show more */}
                 <Stack direction="row" alignItems="center" gap={1.5}>
                   <Switch
                     checked={isActive}
@@ -190,12 +176,11 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                 </Stack>
               </Stack>
 
-              {/* subtle separator like the screenshot spacing */}
               {idx < items.length - 1 && (
                 <Divider
                   sx={{
                     borderColor: "transparent",
-                    my: -0.5, // visually keeps the same spacing as the screenshot cards
+                    my: -0.5,
                   }}
                 />
               )}

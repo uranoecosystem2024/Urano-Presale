@@ -1,23 +1,15 @@
-// components/institutionalRoundAccess.tsx
 "use client";
 
 import { useEffect, useId, useState } from "react";
 import { Stack, Typography, Switch, useTheme } from "@mui/material";
 
 export type InstitutionalRoundAccessProps = {
-  /** Controlled value. If provided, component becomes controlled. */
   value?: boolean;
-  /** Uncontrolled initial value (used only when `value` is undefined). */
   defaultValue?: boolean;
-  /** Called whenever the toggle changes. */
   onChange?: (next: boolean) => void;
-  /** Disable interactions */
   disabled?: boolean;
-  /** Title text */
   title?: string;
-  /** Subtitle when ON */
   subtitleOn?: string;
-  /** Subtitle when OFF */
   subtitleOff?: string;
 };
 
@@ -34,13 +26,11 @@ export default function InstitutionalRoundAccess({
   const [on, setOn] = useState<boolean>(value ?? defaultValue);
   const descId = useId();
 
-  // keep local state in sync if parent controls `value`
   useEffect(() => {
     if (typeof value === "boolean") setOn(value);
   }, [value]);
 
   const handleToggle = (next: boolean) => {
-    // if uncontrolled, update internal state
     if (typeof value !== "boolean") setOn(next);
     onChange?.(next);
   };
