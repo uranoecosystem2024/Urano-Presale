@@ -133,7 +133,7 @@ const Footer = () => {
                         }} />
                     </Link>
                 </Stack>
-                <Stack direction="row" justifyContent="end" alignItems="center" gap={1} marginTop={{ xs: 2, lg: 0 }}>
+                <Stack direction="row" justifyContent="end" alignItems="center" gap={{ xs: 0.5, lg: 1 }} marginTop={{ xs: 2, lg: 0 }}>
                     <Link href="https://x.com/uranoecosystem" underline="none" target="_blank">
                         <Box sx={{
                             backgroundColor: theme.palette.secondary.main,
@@ -172,6 +172,32 @@ const Footer = () => {
                             },
                         }}>
                             <PiTelegramLogoDuotone size={24} color={theme.palette.text.disabled} className="navIcon" />
+                        </Box>
+                    </Link>
+                    <Link href="/" underline="none" onClick={(e) => {
+                        e.preventDefault();
+                        setReadMore(!readMore)
+                    }}>
+                        <Box sx={{
+                            backgroundColor: theme.palette.secondary.main,
+                            border: `1px solid ${theme.palette.headerBorder.main}`,
+                            borderRadius: 2,
+                            paddingX: { xs: 1.5, lg: 2 },
+                            paddingY: { xs: 1.5, lg: 1 },
+                            marginLeft: 1,
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            "&:hover": {
+                                background: theme.palette.uranoGradient,
+                                "&:hover .connectWalletLink": {
+                                    color: theme.palette.info.main,
+                                },
+                            },
+                        }}>
+                            <Typography variant="body1" fontWeight={400} className="connectWalletLink" sx={{
+                                color: theme.palette.text.disabled
+                            }}>Compliance note</Typography>
                         </Box>
                     </Link>
                 </Stack>
