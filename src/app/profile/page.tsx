@@ -6,9 +6,11 @@ import Footer from '@/components/Footer';
 import { useTheme } from '@mui/material/styles';
 import Image from 'next/image';
 import arbLogo from '@/assets/images/WhiteText_horizontal_RGB.webp';
-import coin1 from '@/assets/images/coin1.webp';
 import { Slash, Copy } from 'iconsax-reactjs';
-export default function Home() {
+import { IoIosCheckmarkCircle } from "react-icons/io";
+
+
+export default function Profile() {
     const theme = useTheme();
     return (
         <Stack
@@ -335,67 +337,90 @@ export default function Home() {
                             color: theme.palette.text.primary,
                         }}>Available $URANO (Claimable)</Typography>
                     </Stack>
-                    <Stack width={"100%"} gap={{ xs: 1, lg: 2 }} direction={{ xs: "column-reverse", lg: "column" }} sx={{
-                        border: "1px solid transparent",
-                        background: `
+                    <Stack direction={{ xs: "column-reverse", lg: "row" }} justifyContent={"space-between"} gap={{xs:2, lg:1}}>
+                        <Stack width={{ xs: "100%", lg: "50%" }} gap={1}>
+                            <Stack width={"100%"} gap={{ xs: 1, lg: 2 }} direction={{ xs: "column-reverse", lg: "column" }} sx={{
+                                border: "1px solid transparent",
+                                background: `
                             linear-gradient(rgba(28, 34, 33, 1), rgba(28, 34, 33, 1)) padding-box,
                             linear-gradient(260.63deg, rgba(107, 226, 194, 0.82) 0%, #6BE2C2 100%) border-box,
                             linear-gradient(0deg, #242424, #242424) border-box
                         `,
-                        position: "relative",
-                        overflow: "hidden",
-                        borderRadius: 2,
-                        paddingX: 2,
-                        paddingY: 2,
-                    }}>
-                        <Typography variant="h6" sx={{
-                            fontSize: "1rem",
-                            fontWeight: 400,
-                            color: theme.palette.text.primary,
-                        }}>Ready To Claim</Typography>
-                        <Typography variant="h6" sx={{
-                            fontSize: "1.5rem",
-                            fontWeight: 500,
-                            background: theme.palette.uranoGradient,
-                            backgroundClip: 'text',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                        }}>12,500 $URANO</Typography>
-                        <Image src={coin1} alt="coin1" className="readyToClaimCoin" style={{
-                            width: "auto",
-                            height: "120%",
-                            position: "absolute",
-                            top: "10%",
-                            right: "5%",
-                            zIndex: 1,
-
-                        }} />
+                                position: "relative",
+                                overflow: "hidden",
+                                borderRadius: 2,
+                                paddingX: 2,
+                                paddingY: 2,
+                            }}>
+                                <Typography variant="h6" sx={{
+                                    fontSize: "1rem",
+                                    fontWeight: 400,
+                                    color: theme.palette.text.primary,
+                                }}>Unclaimed</Typography>
+                                <Typography variant="h6" sx={{
+                                    fontSize: "1.5rem",
+                                    fontWeight: 500,
+                                    background: theme.palette.uranoGradient,
+                                    backgroundClip: 'text',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent',
+                                }}>12,500 $URANO</Typography>
+                            </Stack>
+                            <Link href="/" underline="none" target="_blank"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                }}
+                            >
+                                <Box sx={{
+                                    width: "100%",
+                                    background: theme.palette.uranoGradient,
+                                    border: `2px solid ${theme.palette.headerBorder.main}`,
+                                    borderRadius: 2,
+                                    paddingX: { xs: 1.5, lg: 5 },
+                                    paddingY: { xs: 1.5, lg: 1 },
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    "&:hover": {
+                                        border: `2px solid ${theme.palette.text.primary}`,
+                                        filter: "brightness(1.2)",
+                                    },
+                                }}>
+                                    <Typography variant="body1" fontWeight={400} sx={{
+                                        color: theme.palette.background.default
+                                    }}>Claim 12,500 $URANO</Typography>
+                                </Box>
+                            </Link>
+                        </Stack>
+                        <Stack width={{ xs: "100%", lg: "50%" }} gap={1}>
+                            <Stack width={"100%"} gap={{ xs: 1, lg: 2 }} direction={{ xs: "column-reverse", lg: "column" }} sx={{
+                                border: "1px solid #5E9BC3",
+                                background: "#1C2022",
+                                position: "relative",
+                                overflow: "hidden",
+                                borderRadius: 2,
+                                paddingX: 2,
+                                paddingY: 2,
+                            }}>
+                                <Stack width={"100%"} direction={"row"} alignItems={"center"} justifyContent={"space-between"} gap={1}>
+                                    <Typography variant="h6" sx={{
+                                        fontSize: "1rem",
+                                        fontWeight: 400,
+                                        color: theme.palette.text.primary,
+                                    }}>Claimed</Typography>
+                                    <IoIosCheckmarkCircle size={24} color={theme.palette.text.primary} />
+                                </Stack>
+                                <Typography variant="h6" sx={{
+                                    fontSize: "1.5rem",
+                                    fontWeight: 500,
+                                    background: theme.palette.uranoGradient,
+                                    backgroundClip: 'text',
+                                    WebkitBackgroundClip: 'text',
+                                    WebkitTextFillColor: 'transparent',
+                                }}>5,000 $URANO</Typography>
+                            </Stack>
+                        </Stack>
                     </Stack>
-                    <Link href="/" underline="none" target="_blank"
-                        onClick={(e) => {
-                            e.preventDefault();
-                        }}
-                    >
-                        <Box sx={{
-                            width: "100%",
-                            background: theme.palette.uranoGradient,
-                            border: `2px solid ${theme.palette.headerBorder.main}`,
-                            borderRadius: 2,
-                            paddingX: { xs: 1.5, lg: 5 },
-                            paddingY: { xs: 1.5, lg: 1 },
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            "&:hover": {
-                                border: `2px solid ${theme.palette.text.primary}`,
-                                filter: "brightness(1.2)",
-                            },
-                        }}>
-                            <Typography variant="body1" fontWeight={400} sx={{
-                                color: theme.palette.background.default
-                            }}>Claim 12,500 $URANO</Typography>
-                        </Box>
-                    </Link>
                     <Divider sx={{
                         borderBottom: `0.5px solid ${theme.palette.grey[800]}`,
                         marginTop: 2,
