@@ -51,7 +51,6 @@ const MainSection = () => {
                 </Stack>
                 <Stack gap={1.5} display={{ xs: "none", lg: "flex" }}>
                     <Stack direction={"row"} gap={1} alignItems={"center"}>
-                        <Image src={icon1} alt="icon1" style={{ width: "1.2rem", height: "1.2rem" }} />
                         <Typography variant="h6" sx={{
                             fontSize: "1rem",
                             fontWeight: 500,
@@ -61,7 +60,6 @@ const MainSection = () => {
                         </Typography>
                     </Stack>
                     <Stack direction={"row"} gap={1} alignItems={"center"}>
-                        <Image src={icon2} alt="icon2" style={{ width: "1.2rem", height: "1.2rem" }} />
                         <Typography variant="h6" sx={{
                             fontSize: "1rem",
                             fontWeight: 500,
@@ -71,13 +69,21 @@ const MainSection = () => {
                         </Typography>
                     </Stack>
                     <Stack direction={"row"} gap={1} alignItems={"center"}>
-                        <Image src={icon3} alt="icon3" style={{ width: "1.2rem", height: "1.2rem" }} />
                         <Typography variant="h6" sx={{
                             fontSize: "1rem",
                             fontWeight: 500,
                             color: theme.palette.text.primary,
                         }}>
                             Staking Rewards – <span style={{ fontWeight: 300, color: theme.palette.darkerText.main }}>Unlock dynamic incentives through staking <span style={{ fontWeight: 600, color: theme.palette.uranoGreen1.main }}>$URANO</span></span>
+                        </Typography>
+                    </Stack>
+                    <Stack direction={"row"} gap={1} alignItems={"center"}>
+                        <Typography variant="h6" sx={{
+                            fontSize: "1rem",
+                            fontWeight: 500,
+                            color: theme.palette.text.primary,
+                        }}>
+                            Revenue-sharing Pool – <span style={{ fontWeight: 300, color: theme.palette.darkerText.main }}>Access protocol fees distributed to key contributors</span>
                         </Typography>
                     </Stack>
                 </Stack>
