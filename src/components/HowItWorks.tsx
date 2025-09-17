@@ -145,7 +145,7 @@ const HowItWorks = () => {
           paddingX: { xs: 0, lg: 3 },
           paddingTop: { xs: 2, lg: 6 },
           paddingBottom: 2,
-          gap: 2,
+          gap: {xs: 2, lg:1},
           position: "relative",
           zIndex: 2,
         }}
@@ -173,11 +173,17 @@ const HowItWorks = () => {
         </Box>
 
         <Stack paddingX={2} width={{ xs: "100%", lg: "17%" }} gap={1}>
-          <Stack direction={"row"} gap={1} alignItems={"center"}>
+          <Stack direction={"row"} gap={1} alignItems={"center"} sx={{
+            cursor: "pointer",
+            transition: "transform .2s",
+            "&:hover":{
+              transform: {xs: "none", lg: "scale(1.1)"}
+            }
+          }}>
             <Image src={step1} alt="step1" width={48} height={48} style={{ borderRadius: 2 }} />
             <Typography
               variant="body2"
-              sx={{ fontWeight: 400, fontSize: 16, color: theme.palette.text.secondary }}
+              sx={{ fontWeight: 400, fontSize: 15, color: theme.palette.text.secondary }}
             >
               <strong style={{ color: theme.palette.text.primary, fontWeight: 400 }}>Sign up</strong> with your email
             </Typography>
@@ -189,11 +195,17 @@ const HowItWorks = () => {
         </Stack>
 
         <Stack paddingX={2} width={{ xs: "100%", lg: "22%" }} gap={1}>
-          <Stack direction={"row"} gap={1} alignItems={"center"}>
+          <Stack direction={"row"} gap={1} alignItems={"center"} sx={{
+            cursor: "pointer",
+            transition: "transform .2s",
+            "&:hover":{
+              transform: {xs: "none", lg: "scale(1.1)"}
+            }
+          }}>
             <Image src={step2} alt="step2" width={48} height={48} style={{ borderRadius: 2 }} />
             <Typography
               variant="body2"
-              sx={{ fontWeight: 400, fontSize: 16, color: theme.palette.text.secondary }}
+              sx={{ fontWeight: 400, fontSize: 15, color: theme.palette.text.secondary }}
             >
               Verify your identity via <strong style={{ color: theme.palette.text.primary, fontWeight: 400 }}>Persona</strong>
             </Typography>
@@ -204,12 +216,18 @@ const HowItWorks = () => {
           <IoChevronForward size={22} color={theme.palette.text.primary} />
         </Stack>
 
-        <Stack paddingX={2} width={{ xs: "100%", lg: "17%" }} gap={1}>
-          <Stack direction={"row"} gap={1} alignItems={"center"}>
+        <Stack paddingX={2} width={{ xs: "100%", lg: "20%" }} gap={1}>
+          <Stack direction={"row"} gap={1} alignItems={"center"} sx={{
+            cursor: "pointer",
+            transition: "transform .2s",
+            "&:hover":{
+              transform: {xs: "none", lg: "scale(1.1)"}
+            }
+          }}>
             <Image src={step3} alt="step3" width={48} height={48} style={{ borderRadius: 2 }} />
             <Typography
               variant="body2"
-              sx={{ fontWeight: 400, fontSize: 16, color: theme.palette.text.secondary }}
+              sx={{ fontWeight: 400, fontSize: 15, color: theme.palette.text.secondary }}
             >
               <strong style={{ color: theme.palette.text.primary, fontWeight: 400 }}>Connect</strong> your wallet
             </Typography>
@@ -220,12 +238,18 @@ const HowItWorks = () => {
           <IoChevronForward size={22} color={theme.palette.text.primary} />
         </Stack>
 
-        <Stack paddingX={2} width={{ xs: "100%", lg: "17%" }} gap={1}>
-          <Stack direction={"row"} gap={1} alignItems={"center"}>
+        <Stack paddingX={2} width={{ xs: "100%", lg: "20%" }} gap={1}>
+          <Stack direction={"row"} gap={1} alignItems={"center"} sx={{
+            cursor: "pointer",
+            transition: "transform .2s",
+            "&:hover":{
+              transform: {xs: "none", lg: "scale(1.1)"}
+            }
+          }}>
             <Image src={step4} alt="step4" width={48} height={48} style={{ borderRadius: 2 }} />
             <Typography
               variant="body2"
-              sx={{ fontWeight: 400, fontSize: 16, color: theme.palette.text.secondary }}
+              sx={{ fontWeight: 400, fontSize: 15, color: theme.palette.text.secondary }}
             >
               <strong style={{ color: theme.palette.text.primary, fontWeight: 400 }}>Select your amount</strong> & buy
             </Typography>
@@ -237,11 +261,17 @@ const HowItWorks = () => {
         </Stack>
 
         <Stack paddingX={2} width={{ xs: "100%", lg: "20%" }} gap={1}>
-          <Stack direction={"row"} gap={1} alignItems={"center"}>
+          <Stack direction={"row"} gap={1} alignItems={"center"} sx={{
+            cursor: "pointer",
+            transition: "transform .2s",
+            "&:hover":{
+              transform: {xs: "none", lg: "scale(1.1)"}
+            }
+          }}>
             <Image src={step5} alt="step5" width={48} height={48} style={{ borderRadius: 2 }} />
             <Typography
               variant="body2"
-              sx={{ fontWeight: 400, fontSize: 16, color: theme.palette.text.secondary }}
+              sx={{ fontWeight: 400, fontSize: 15, color: theme.palette.text.secondary }}
             >
               Claim your <strong style={{ color: theme.palette.text.primary, fontWeight: 400 }}>$URANO & TGE</strong>
             </Typography>

@@ -238,7 +238,6 @@ const Registration = () => {
 
       <SubscriptionModal open={openStep1} onClose={() => setOpenStep1(false)} onComplete={completeStep1} />
       <VerifyIdentityModal open={openStep2} onClose={() => setOpenStep2(false)} onComplete={completeStep2} />
-      <WalletModal open={openStep3} onClose={() => setOpenStep3(false)} onComplete={completeStep3} />
 
       <ErrorModal
         open={errorModalOpen}
