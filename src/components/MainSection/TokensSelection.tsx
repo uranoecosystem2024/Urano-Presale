@@ -30,7 +30,7 @@ const TokensSelection = () => {
                 backdropFilter: "blur(8.2px)",
                 transform: {xs: "rotate(90deg)", lg: "rotate(0deg)"},
                 "&:hover":{
-                    border: `1px solid ${theme.palette.text.disabled}`
+                    border: `1px solid ${theme.palette.text.secondary}`
                 }
             }}>
                 <AiOutlineSwap size={20} color="#14EFC0" />
