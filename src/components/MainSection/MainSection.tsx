@@ -188,7 +188,12 @@ const MainSection = () => {
             </Stack>
             <Stack width={{ xs: "100%", lg: "40%" }} flexGrow={1} gap={{ xs: 3, lg: 3 }} marginTop={{ xs: 4, lg: 0 }} sx={{
                 backgroundColor: { xs: "transparent", lg: theme.palette.transparentPaper.main },
-                border: { xs: "none", lg: `1px solid ${theme.palette.headerBorder.main}` },
+                border: "1px solid transparent",
+                background: `
+                linear-gradient(${theme.palette.presaleCardBg.main}, ${theme.palette.presaleCardBg.main}) padding-box,
+                linear-gradient(260.63deg, rgba(107, 226, 194, 0.82) 2.15%, rgba(0, 0, 0, 0) 52.96%, #6BE2C2 100%) border-box,
+                linear-gradient(0deg, #242424, #242424) border-box
+            `,
                 borderRadius: { xs: 0, lg: "0.75rem" },
                 padding: { xs: 0, lg: "0.6rem" },
                 backdropFilter: { xs: "none", lg: "blur(8.2px)" }
@@ -197,9 +202,9 @@ const MainSection = () => {
                 <PresaleCard />
                 <TokensSelection />
                 <Link href="/" underline="none" target="_blank"
-                onClick={(e) => {
-                    e.preventDefault();
-                }}
+                    onClick={(e) => {
+                        e.preventDefault();
+                    }}
                 >
                     <Box sx={{
                         width: "100%",
