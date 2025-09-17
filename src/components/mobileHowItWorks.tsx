@@ -1,15 +1,16 @@
 "use client"
 
-import { Stack, Typography, Box, Link } from "@mui/material"
+import { Stack, Typography, Box } from "@mui/material"
 import { useTheme, type Theme } from "@mui/material/styles"
 import Union from "@/assets/images/Union.png"
-import img1 from "@/assets/images/img1.webp"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { motion, useAnimation } from "framer-motion"
-import icon4 from "@/assets/images/icon4.webp"
-import icon5 from "@/assets/images/icon5.webp"
-import icon6 from "@/assets/images/icon6.webp"
+import step1 from "@/assets/images/step1.webp"
+import step2 from "@/assets/images/step2.webp"
+import step3 from "@/assets/images/step3.webp"
+import step4 from "@/assets/images/step4.webp"
+import step5 from "@/assets/images/step5.webp"
 
 const MobileHowItWorks = () => {
     const theme = useTheme<Theme>()
@@ -148,7 +149,7 @@ const MobileHowItWorks = () => {
                 <Box
                     id="howItWorksMobileLine"
                     sx={{
-                        height: "60%",
+                        height: "96%",
                         width: 5,
                         position: "absolute",
                         top: 0,
@@ -167,100 +168,65 @@ const MobileHowItWorks = () => {
                     />
                 </Box>
 
-                {/* Text and Image for mobile */}
-                <Stack paddingX={2} width={{ xs: "100%", lg: "22%" }} gap={1}>
-                    <Typography variant="subtitle1" color={"#fff"} sx={{ fontWeight: 500, fontSize: 16 }}>
-                        Tokenize
-                    </Typography>
-                    <Stack direction={"row"} alignItems={"start"} gap={1}>
-                        <Image src={icon4} alt="icon4" width={36} height={36} />
+                <Stack paddingX={2} width={{ xs: "100%", lg: "17%" }} gap={1}>
+                    <Stack direction={"row"} gap={1} alignItems={"center"}>
+                        <Image src={step1} alt="step1" width={48} height={48} style={{ borderRadius: 2 }} />
                         <Typography
                             variant="body2"
-                            sx={{ fontWeight: 400, fontSize: 14, color: theme.palette.text.secondary }}
+                            sx={{ fontWeight: 400, fontSize: 16, color: theme.palette.text.secondary }}
                         >
-                            Real-world assets are digitized into secure, compliant tokens.
+                            <strong style={{ color: theme.palette.text.primary, fontWeight: 400 }}>Sign up</strong> with your email
                         </Typography>
                     </Stack>
                 </Stack>
 
+
                 <Stack paddingX={2} width={{ xs: "100%", lg: "22%" }} gap={1}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 500, fontSize: 16 }}>
-                        Invest
-                    </Typography>
-                    <Stack direction={"row"} alignItems={"start"} gap={1}>
-                        <Image src={icon5} alt="icon5" width={36} height={36} />
+                    <Stack direction={"row"} gap={1} alignItems={"center"}>
+                        <Image src={step2} alt="step2" width={48} height={48} style={{ borderRadius: 2 }} />
                         <Typography
                             variant="body2"
-                            sx={{ fontWeight: 400, fontSize: 14, color: theme.palette.text.secondary }}
+                            sx={{ fontWeight: 400, fontSize: 16, color: theme.palette.text.secondary }}
                         >
-                            Access fractional ownership with low entry barriers
+                            Verify your identity via <strong style={{ color: theme.palette.text.primary, fontWeight: 400 }}>Persona</strong>
                         </Typography>
                     </Stack>
                 </Stack>
 
-                <Stack paddingX={2} width={{ xs: "100%", lg: "22%" }} gap={1}>
-                    <Typography variant="subtitle1" sx={{ fontWeight: 500, fontSize: 16 }}>
-                        Earn / Settle
-                    </Typography>
-                    <Stack direction={"row"} alignItems={"start"} gap={1}>
-                        <Image src={icon6} alt="icon6" width={36} height={36} />
+                <Stack paddingX={2} width={{ xs: "100%", lg: "17%" }} gap={1}>
+                    <Stack direction={"row"} gap={1} alignItems={"center"}>
+                        <Image src={step3} alt="step3" width={48} height={48} style={{ borderRadius: 2 }} />
                         <Typography
                             variant="body2"
-                            sx={{ fontWeight: 400, fontSize: 14, color: theme.palette.text.secondary }}
+                            sx={{ fontWeight: 400, fontSize: 16, color: theme.palette.text.secondary }}
                         >
-                            Receive returns and settlements instantly via blockchain.
+                            <strong style={{ color: theme.palette.text.primary, fontWeight: 400 }}>Connect</strong> your wallet
                         </Typography>
                     </Stack>
                 </Stack>
 
-                {/* Mobile Image and Compliance Note */}
-                <Stack
-                    paddingX={2}
-                    width={{ xs: "100%", lg: "22%" }}
-                    alignItems={"center"}
-                    justifyContent={"end"}
-                    marginTop={-2}
-                >
-                    <motion.div
-                        animate={mobileImageControls}
-                        className="howItWorksImgMobile"
-                        style={{ display: "inline-block" }}
-                    >
-                        <Image className="howItWorksImgMobile" src={img1} alt="img1" width={220} height={150} />
-                    </motion.div>
-                    <Link href="https://docs.uranoecosystem.com/the-legal-and-compliant-structure-of-urano" underline="none" sx={{ width: { xs: "95%", lg: "fit-content" } }}>
-                        <Box
-                            sx={{
-                                width: { xs: "100%", lg: "fit-content" },
-                                marginTop: -4,
-                                background: { xs: theme.palette.uranoGreen1.main, lg: theme.palette.secondary.main },
-                                border: `1px solid ${theme.palette.headerBorder.main}`,
-                                borderRadius: 2,
-                                boxShadow: 2,
-                                paddingX: 3,
-                                paddingY: 1,
-                                marginLeft: 1,
-                                display: 'flex',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                "&:hover": {
-                                    background: theme.palette.uranoGradient,
-                                    "&:hover .connectWalletLink": {
-                                        color: theme.palette.info.main,
-                                    },
-                                },
-                            }}
+                <Stack paddingX={2} width={{ xs: "100%", lg: "17%" }} gap={1}>
+                    <Stack direction={"row"} gap={1} alignItems={"center"}>
+                        <Image src={step4} alt="step4" width={48} height={48} style={{ borderRadius: 2 }} />
+                        <Typography
+                            variant="body2"
+                            sx={{ fontWeight: 400, fontSize: 16, color: theme.palette.text.secondary }}
                         >
-                            <Typography
-                                variant="body1"
-                                fontWeight={400}
-                                color={theme.palette.text.disabled}
-                                className="connectWalletLink"
-                            >
-                                Compliance Note
-                            </Typography>
-                        </Box>
-                    </Link>
+                            <strong style={{ color: theme.palette.text.primary, fontWeight: 400 }}>Select your amount</strong> & buy
+                        </Typography>
+                    </Stack>
+                </Stack>
+
+                <Stack paddingX={2} width={{ xs: "100%", lg: "20%" }} gap={1}>
+                    <Stack direction={"row"} gap={1} alignItems={"center"}>
+                        <Image src={step5} alt="step5" width={48} height={48} style={{ borderRadius: 2 }} />
+                        <Typography
+                            variant="body2"
+                            sx={{ fontWeight: 400, fontSize: 16, color: theme.palette.text.secondary }}
+                        >
+                            Claim your <strong style={{ color: theme.palette.text.primary, fontWeight: 400 }}>$URANO & TGE</strong>
+                        </Typography>
+                    </Stack>
                 </Stack>
             </Stack>
         </Stack>
