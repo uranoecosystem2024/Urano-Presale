@@ -252,8 +252,9 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                     direction="row"
                     alignItems="center"
                     justifyContent="space-between"
+                    flexWrap={{ xs: "wrap", md: "nowrap" }}
                   >
-                    <Stack gap={1}>
+                    <Stack gap={1} direction={{ xs: "row", md: "column" }} alignItems="center" justifyContent={{ xs: "space-between", lg: "flex-start" }} flexWrap={{ xs: "wrap", md: "nowrap" }} width={{ xs: "100%", md: "auto" }}>
                       <Typography
                         variant="h6"
                         sx={{
@@ -282,14 +283,14 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                       ) : (
                         <Typography
                           variant="body2"
-                          sx={{ color: theme.palette.text.secondary }}
+                          sx={{ color: theme.palette.text.secondary, width: 100, textAlign: "end" }}
                         >
                           Inactive
                         </Typography>
                       )}
                     </Stack>
 
-                    <Stack direction="row" alignItems="center" gap={1.5}>
+                    <Stack direction={{ xs: "row-reverse", lg: "row" }} alignItems="center" justifyContent={{ xs: "space-between", md: "flex-end" }} gap={1.5} width={{ xs: "100%", lg: "auto" }} marginTop={{ xs: 2, md: 0 }}>
                       <Switch
                         checked={isActive}
                         onChange={(e) => handleToggle(r.id, e.target.checked)}
@@ -301,7 +302,7 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                       <Button
                         onClick={() => handleShowMore(r.id)}
                         disabled={disabled || !isFirstActive}
-                        sx={{ ...actionBtnSx, py: 1.25 }}
+                        sx={{ ...actionBtnSx, py: 1.25, }}
                       >
                         {isExpanded ? "Hide" : "Show more"}
                       </Button>
@@ -360,7 +361,12 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                         />
                       </Grid>
                       <Grid size={{ xs: 12, md: 1.5 }}>
-                        <Button sx={actionBtnSx}>Save</Button>
+                        <Button sx={
+                          {
+                            ...actionBtnSx,
+                            width: { xs: "100%", md: "auto" },
+                          }
+                        }>Save</Button>
                       </Grid>
                     </Grid>
 
@@ -641,7 +647,12 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                       </Grid>
 
                       <Grid size={{ xs: 12, md: 1.5 }}>
-                        <Button sx={actionBtnSx}>Save</Button>
+                        <Button sx={
+                          {
+                            ...actionBtnSx,
+                            width: { xs: "100%", md: "auto" },
+                          }
+                        }>Save</Button>
                       </Grid>
                     </Grid>
 
@@ -703,7 +714,12 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                         />
                       </Grid>
                       <Grid size={{ xs: 12, md: 1.5 }}>
-                        <Button sx={actionBtnSx}>Save</Button>
+                        <Button sx={
+                          {
+                            ...actionBtnSx,
+                            width: { xs: "100%", md: "auto" },
+                          }
+                        }>Save</Button>
                       </Grid>
                     </Grid>
 

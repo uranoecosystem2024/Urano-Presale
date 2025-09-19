@@ -104,7 +104,18 @@ export default function InstitutionalAllowlist({
                             console.log("Import CSV");
                         }}
                     >
-                        Import CSV
+                        <Typography variant="body1" fontWeight={400} sx={{
+                            whiteSpace: "nowrap",
+                            display: { xs: "none", md: "block" },
+                        }}>
+                            Import CSV
+                        </Typography>
+                        <Typography variant="body1" fontWeight={400} sx={{
+                            whiteSpace: "nowrap",
+                            display: { xs: "block", md: "none" },
+                        }}>
+                            Import
+                        </Typography>
                     </Button>
                 </Stack>
 

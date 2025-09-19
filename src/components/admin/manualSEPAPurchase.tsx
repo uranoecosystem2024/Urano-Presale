@@ -207,7 +207,7 @@ export default function ManualSepaPurchase({
                         sx={{
                             ...actionBtnSx,
                             width: "fit-content",
-                            minWidth: "20%",
+                            minWidth: {xs: "100%", lg: "20%"},
                             height: "fit-content",
                             "&:hover": {
                                 background: theme.palette.uranoGradient,
