@@ -47,7 +47,7 @@ export default function Admin() {
                     marginTop: 4,
                 }}>Admin Panel</Typography>
                 <Typography variant="h6" sx={{
-                    fontSize: { xs: "0.5rem", lg: "0.875rem" },
+                    fontSize: { xs: "0.875rem", lg: "0.875rem" },
                     fontWeight: 400,
                     color: theme.palette.text.primary,
                 }}>Manage token presale rounds and vesting parameters</Typography>

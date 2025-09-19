@@ -45,14 +45,24 @@ export default function InstitutionalAllowlist({
 
     const inputSx = {
         "& .MuiOutlinedInput-root": {
-            background: theme.palette.background.paper,
-            borderRadius: 2,
-            "& fieldset": { borderColor: theme.palette.headerBorder.main },
-            "&:hover fieldset": { borderColor: theme.palette.text.primary },
-            "&.Mui-focused fieldset": { borderColor: theme.palette.uranoGreen1.main },
+          background: theme.palette.background.paper,
+          borderRadius: 2,
+          "& fieldset": { borderColor: theme.palette.headerBorder.main },
+          "&:hover fieldset": { borderColor: theme.palette.text.primary },
+          "&.Mui-focused fieldset": { borderColor: theme.palette.uranoGreen1.main },
         },
+    
+        // keep placeholder opacity
         "& .MuiInputBase-input::placeholder": { opacity: 0.7 },
-    } as const;
+    
+        // ⬇️ label color stays white, including when focused/shrunk
+        "& .MuiInputLabel-root": {
+          color: theme.palette.common.white,
+          "&.Mui-focused": { color: theme.palette.common.white },
+          "&.MuiInputLabel-shrink": { color: theme.palette.common.white },
+          "&.Mui-disabled": { color: theme.palette.text.disabled }, // optional
+        },
+      } as const;
 
     const actionBtnSx = {
         textTransform: "none",
