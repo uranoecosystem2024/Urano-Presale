@@ -393,7 +393,7 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                         <TextField
                           fullWidth
                           label="TGE Date"
-                          placeholder="dd.mm.yy"
+                          placeholder="Select a date"
                           value={tgeDate}
                           onClick={(e) =>
                             openDate(e.currentTarget as HTMLElement)
@@ -487,7 +487,7 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                         <TextField
                           fullWidth
                           label="TGE Time"
-                          placeholder="hh.mm"
+                          placeholder="Select a time"
                           value={tgeTime}
                           onClick={(e) =>
                             openTime(e.currentTarget as HTMLElement)
