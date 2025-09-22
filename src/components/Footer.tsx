@@ -154,7 +154,7 @@ const Footer = () => {
                             <PiXLogo size={24} color={theme.palette.text.disabled} className="navIcon" />
                         </Box>
                     </Link>
-                    <Link href="t.me/UranoEcosystem" underline="none" target="_blank">
+                    <Link href="https://t.me/UranoEcosystem" underline="none" target="_blank">
                         <Box sx={{
                             backgroundColor: theme.palette.secondary.main,
                             border: `1px solid ${theme.palette.headerBorder.main}`,
