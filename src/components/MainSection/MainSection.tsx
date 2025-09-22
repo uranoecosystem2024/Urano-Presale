@@ -89,13 +89,12 @@ const MainSection = () => {
                 </Stack>
                 <Stack gap={1.5} display={{ xs: "flex", lg: "none" }}>
                     <Stack gap={1} sx={{
-                        background: theme.palette.transparentPaper.main,
+                        background: "rgba(21, 21, 21, 0.7)",
                         border: `1px solid ${theme.palette.headerBorder.main}`,
                         borderRadius: 2,
                         padding: 2,
                     }}>
                         <Stack direction={"row"} justifyContent={"start"} alignItems={"center"} gap={1}>
-                            <Image src={icon1} alt="icon1" style={{ width: "1.2rem", height: "1.2rem" }} />
                             <Typography variant="h6" sx={{
                                 fontSize: "1.15rem",
                                 fontWeight: 500,
@@ -113,13 +112,12 @@ const MainSection = () => {
                         </Typography>
                     </Stack>
                     <Stack gap={1} sx={{
-                        background: theme.palette.transparentPaper.main,
+                        background: "rgba(21, 21, 21, 0.7)",
                         border: `1px solid ${theme.palette.headerBorder.main}`,
                         borderRadius: 2,
                         padding: 2,
                     }}>
                         <Stack direction={"row"} justifyContent={"start"} alignItems={"center"} gap={1}>
-                            <Image src={icon2} alt="icon2" style={{ width: "1.2rem", height: "1.2rem" }} />
                             <Typography variant="h6" sx={{
                                 fontSize: "1.15rem",
                                 fontWeight: 500,
@@ -137,19 +135,41 @@ const MainSection = () => {
                         </Typography>
                     </Stack>
                     <Stack gap={1} sx={{
-                        background: theme.palette.transparentPaper.main,
+                        background: "rgba(21, 21, 21, 0.7)",
                         border: `1px solid ${theme.palette.headerBorder.main}`,
                         borderRadius: 2,
                         padding: 2,
                     }}>
                         <Stack direction={"row"} justifyContent={"start"} alignItems={"center"} gap={1}>
-                            <Image src={icon3} alt="icon3" style={{ width: "1.2rem", height: "1.2rem" }} />
                             <Typography variant="h6" sx={{
                                 fontSize: "1.15rem",
                                 fontWeight: 500,
                                 color: theme.palette.text.primary,
                             }}>
                                 Staking Rewards
+                            </Typography>
+                        </Stack>
+                        <Typography variant="h6" sx={{
+                            fontSize: "1rem",
+                            fontWeight: 300,
+                            color: theme.palette.text.primary,
+                        }}>
+                            Unlock dynamic incentives through staking <span style={{ fontWeight: 600, color: theme.palette.uranoGreen1.main }}>$URANO</span>
+                        </Typography>
+                    </Stack>
+                    <Stack gap={1} sx={{
+                        background: "rgba(21, 21, 21, 0.7)",
+                        border: `1px solid ${theme.palette.headerBorder.main}`,
+                        borderRadius: 2,
+                        padding: 2,
+                    }}>
+                        <Stack direction={"row"} justifyContent={"start"} alignItems={"center"} gap={1}>
+                            <Typography variant="h6" sx={{
+                                fontSize: "1.15rem",
+                                fontWeight: 500,
+                                color: theme.palette.text.primary,
+                            }}>
+                                Revenue-sharing Pool
                             </Typography>
                         </Stack>
                         <Typography variant="h6" sx={{
