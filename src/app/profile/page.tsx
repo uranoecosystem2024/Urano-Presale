@@ -9,6 +9,9 @@ import arbLogo from '@/assets/images/WhiteText_horizontal_RGB.webp';
 import { Slash, Copy } from 'iconsax-reactjs';
 import { IoIosCheckmarkCircle } from "react-icons/io";
 
+import profileToken1 from '@/assets/images/profileToken1.webp';
+import profileToken2 from '@/assets/images/profileToken2.webp';
+
 
 export default function Profile() {
     const theme = useTheme();
@@ -25,6 +28,7 @@ export default function Profile() {
         >
             <Header />
 
+            <Image src={profileToken1} alt="profileToken1" width={360} height={360} style={{ position: "absolute", top: "20vh", right: 0 }} />
             <Stack flex={1} width={{ xs: "95%", lg: "65%" }} py={4} alignItems={"center"} justifyContent="start" gap={{ xs: 1.5, lg: 2 }} sx={{ position: "relative" }}>
                 <Typography className="conthrax" variant="h3" sx={{
                     fontSize: { xs: "1.4rem", lg: "2rem" },
@@ -494,7 +498,7 @@ export default function Profile() {
                     </Stack>
                 </Stack>
             </Stack>
-
+            <Image src={profileToken1} alt="profileToken2" width={300} height={300} style={{ position: "absolute", bottom: "20vh", left: -30 }} />
             <Footer />
         </Stack >
     );
