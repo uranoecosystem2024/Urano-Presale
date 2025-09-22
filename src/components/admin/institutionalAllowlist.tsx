@@ -140,6 +140,11 @@ export default function InstitutionalAllowlist({
                             value={roundId}
                             onChange={(e: SelectChangeEvent<string>) => setRoundId(e.target.value)}
                             displayEmpty
+                            sx={{
+                                "& .MuiSelect-icon": {
+                                  filter: "invert(1)",
+                                },
+                              }}
                             renderValue={(val) =>
                                 val
                                     ? rounds.find((r) => r.id === val)?.label ?? val

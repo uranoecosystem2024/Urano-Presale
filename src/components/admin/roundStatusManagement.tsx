@@ -772,6 +772,11 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                               setRoundId(e.target.value)
                             }
                             displayEmpty
+                            sx={{
+                              "& .MuiSelect-icon": {
+                                filter: "invert(1)",
+                              },
+                            }}
                             renderValue={(val) =>
                               val ? (
                                 items.find((rr) => rr.id === val)?.title ?? val
