@@ -24,7 +24,7 @@ const TokensSelection = () => {
       
     return (
         <Stack width={"100%"} direction={{xs: "column",lg:"row"}} justifyContent={"space-between"} alignItems={"center"} gap={{xs: 2, lg: 1.5}}>
-            <Stack width={{xs:"100%",lg:"auto"}}>
+            <Stack width={{xs:"100%",lg:"45%"}}>
                 <TokenSelectionTextField value={value} label="Pay with stablecoin" tokenIconSrc={usdc.src} tokenSymbol="USDC" onChange={(v) => setValue(v)} />
             </Stack>
             <IconButton sx={{
@@ -40,7 +40,7 @@ const TokensSelection = () => {
             }}>
                 <AiOutlineSwap size={20} color="#14EFC0" />
             </IconButton>
-            <Stack width={{xs:"100%",lg:"auto"}}>
+            <Stack width={{xs:"100%",lg:"45%"}}>
                 <TokenSelectionTextField value={convertedValue} label="Receive URANO" tokenIconSrc={urano.src} tokenSymbol="URANO" />
             </Stack>
 
