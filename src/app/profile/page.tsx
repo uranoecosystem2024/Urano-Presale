@@ -498,7 +498,7 @@ export default function Profile() {
                     </Stack>
                 </Stack>
             </Stack>
-            <Image src={profileToken1} alt="profileToken2" width={300} height={300} style={{ position: "absolute", bottom: "20vh", left: -30 }} />
+            <Image src={profileToken2} alt="profileToken2" width={300} height={300} style={{ position: "absolute", bottom: "20vh", left: -30 }} />
             <Footer />
         </Stack >
     );
