@@ -14,16 +14,16 @@ const TokensSelection = () => {
     const [convertedValue, setConvertedValue] = useState(0);
 
     const RATE = 33.3;
-
-    const round = (n: number, dp = 6) =>
-        Math.round(n * 10 ** dp) / 10 ** dp;
       
-      useEffect(() => {
-        setConvertedValue(round(Number(value) * RATE, 6)); // choose dp (2/4/6) as needed
+    useEffect(() => {
+        const raw = Number(value) * RATE;
+        // do the rounding in base-10, not with Math.round on the float
+        const rounded = Number(raw.toFixed(2)); // pick your dp
+        setConvertedValue(rounded);
       }, [value]);
       
     return (
-        <Stack width={"100%"} direction={{xs: "column",lg:"row"}} justifyContent={"space-between"} alignItems={"center"} gap={{xs: 2, lg: 1.5}}>
+        <Stack width={"100%"} direction={{xs: "column",lg:"row"}} justifyContent={"space-between"} alignItems={"center"} gap={{xs: 2, lg: 1}}>
             <Stack width={{xs:"100%",lg:"45%"}}>
                 <TokenSelectionTextField value={value} label="Pay with stablecoin" tokenIconSrc={usdc.src} tokenSymbol="USDC" onChange={(v) => setValue(v)} />
             </Stack>

@@ -103,13 +103,19 @@ export default function StablecoinField({
         },
         sx: {
           textAlign: { xs: "right", lg: "right" },
+          '& .MuiOutlinedInput-root': {
+            pl: 0,         // left padding on the root
+            pr: 0,         // right padding on the root
+          },
+          '& .MuiOutlinedInput-root.MuiInputBase-adornedStart': { pl: 0 },
+          '& .MuiOutlinedInput-root.MuiInputBase-adornedEnd': { pr: 0 },
         },
         "aria-label": label,
         title: String(value ?? ""), // shows full value on hover
       }}
       InputProps={{
         startAdornment: (
-          <InputAdornment position="start" sx={{ mr: 0.5 }}>
+          <InputAdornment position="start" sx={{ ml: -1 }}>
             <Button
               onClick={onPickToken}
               disableRipple
