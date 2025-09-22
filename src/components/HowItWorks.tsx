@@ -145,7 +145,7 @@ const HowItWorks = () => {
           paddingX: { xs: 0, lg: 3 },
           paddingTop: { xs: 2, lg: 6 },
           paddingBottom: 2,
-          gap: {xs: 2, lg:1},
+          gap: {xs: 2, lg:0.5},
           position: "relative",
           zIndex: 2,
         }}
@@ -180,7 +180,7 @@ const HowItWorks = () => {
               transform: {xs: "none", lg: "scale(1.1)"}
             }
           }}>
-            <Image src={step1} alt="step1" width={48} height={48} style={{ borderRadius: 2 }} />
+            <Image src={step1} alt="step1" width={72} height={72} style={{ borderRadius: 2 }} />
             <Typography
               variant="body2"
               sx={{ fontWeight: 400, fontSize: 15, color: theme.palette.text.secondary }}
@@ -202,7 +202,7 @@ const HowItWorks = () => {
               transform: {xs: "none", lg: "scale(1.1)"}
             }
           }}>
-            <Image src={step2} alt="step2" width={48} height={48} style={{ borderRadius: 2 }} />
+            <Image src={step2} alt="step2" width={72} height={72} style={{ borderRadius: 2 }} />
             <Typography
               variant="body2"
               sx={{ fontWeight: 400, fontSize: 15, color: theme.palette.text.secondary }}
@@ -224,7 +224,7 @@ const HowItWorks = () => {
               transform: {xs: "none", lg: "scale(1.1)"}
             }
           }}>
-            <Image src={step3} alt="step3" width={48} height={48} style={{ borderRadius: 2 }} />
+            <Image src={step3} alt="step3" width={72} height={72} style={{ borderRadius: 2 }} />
             <Typography
               variant="body2"
               sx={{ fontWeight: 400, fontSize: 15, color: theme.palette.text.secondary }}
@@ -246,7 +246,7 @@ const HowItWorks = () => {
               transform: {xs: "none", lg: "scale(1.1)"}
             }
           }}>
-            <Image src={step4} alt="step4" width={48} height={48} style={{ borderRadius: 2 }} />
+            <Image src={step4} alt="step4" width={72} height={72} style={{ borderRadius: 2 }} />
             <Typography
               variant="body2"
               sx={{ fontWeight: 400, fontSize: 15, color: theme.palette.text.secondary }}
@@ -268,7 +268,7 @@ const HowItWorks = () => {
               transform: {xs: "none", lg: "scale(1.1)"}
             }
           }}>
-            <Image src={step5} alt="step5" width={48} height={48} style={{ borderRadius: 2 }} />
+            <Image src={step5} alt="step5" width={72} height={72} style={{ borderRadius: 2 }} />
             <Typography
               variant="body2"
               sx={{ fontWeight: 400, fontSize: 15, color: theme.palette.text.secondary }}
