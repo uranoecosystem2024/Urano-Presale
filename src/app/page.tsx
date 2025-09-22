@@ -38,7 +38,7 @@ export default function Home() {
           alt="coins urano"
           width={130}
           height={130}
-          style={{ position: "absolute", top: "60%", left: "20%", zIndex: 0 }}
+          style={{ position: "absolute", top: "64%", left: "20%", zIndex: 0 }}
         />
         <HowItWorks />
         <MobileHowItWorks />
