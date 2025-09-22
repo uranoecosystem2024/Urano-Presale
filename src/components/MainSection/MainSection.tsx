@@ -206,7 +206,7 @@ const MainSection = () => {
             </Stack>
             <Stack width={{ xs: "100%", lg: "40%" }} flexGrow={1} gap={{ xs: 3, lg: 3 }} marginTop={{ xs: 4, lg: 0 }} sx={{
                 backgroundColor: { xs: "transparent", lg: theme.palette.transparentPaper.main },
-                border: "1px solid transparent",
+                border: {xs: "none", lg: "1px solid transparent"},
                 background: {
                     xs: "transparent",
                     lg: `
