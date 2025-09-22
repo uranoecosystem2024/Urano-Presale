@@ -47,7 +47,7 @@ export default function Home() {
         className="coinsDesktop"
         src={coin2}
         alt="coins urano"
-        width={200}
+        width={220}
         height={200}
         priority
         style={{ position: "absolute", bottom: "4%", left: "-5%", zIndex: 0 }}
