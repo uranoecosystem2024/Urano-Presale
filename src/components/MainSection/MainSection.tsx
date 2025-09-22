@@ -5,9 +5,6 @@ import Registration from "./Registration";
 import PresaleCard from "./PresaleCard";
 import TokensSelection from "./TokensSelection";
 import mobileCoin1 from "@/assets/images/mobileCoin1.webp"
-import icon1 from "@/assets/images/icon1.webp"
-import icon2 from "@/assets/images/icon2.webp"
-import icon3 from "@/assets/images/icon3.webp"
 import Image from "next/image";
 const MainSection = () => {
     const theme = useTheme();
