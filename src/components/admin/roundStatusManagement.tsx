@@ -158,10 +158,15 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
       opacity: 1,
     },
     "& .MuiSwitch-switchBase.Mui-checked": {
-      color: theme.palette.uranoGreen1.main,
+      color: "rgba(42, 112, 100, 1)",
       "& + .MuiSwitch-track": {
-        backgroundColor: theme.palette.uranoGreen1.main,
+        backgroundColor: "rgba(42, 112, 100, 1)",
         opacity: 1,
+      },
+      "& .MuiSwitch-thumb": {
+        backgroundColor: "rgba(102, 212, 194, 1)",
+        filter: "drop-shadow(0 2px 1px rgba(0, 0, 0, 0.20)) drop-shadow(0 1px 1px rgba(0, 0, 0, 0.14)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.12))",
+        boxShadow: "0 0px 0.5px 8px rgba(102, 212, 194, 0.1)",
       },
     },
   } as const;
@@ -273,7 +278,7 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                           variant="outlined"
                           sx={{
                             height: 28,
-                            width: 100,
+                            width: "100%",
                             borderColor: theme.palette.uranoGreen1.main,
                             color: theme.palette.uranoGreen1.main,
                             fontWeight: 500,
@@ -283,7 +288,7 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                       ) : (
                         <Typography
                           variant="body2"
-                          sx={{ color: theme.palette.text.secondary, width: 100, textAlign: "end" }}
+                          sx={{ color: theme.palette.text.secondary, width: "100%", textAlign: "left" }}
                         >
                           Inactive
                         </Typography>
@@ -302,7 +307,7 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                       <Button
                         onClick={() => handleShowMore(r.id)}
                         disabled={disabled || !isFirstActive}
-                        sx={{ ...actionBtnSx, py: 1.25, }}
+                        sx={{ ...actionBtnSx, py: 1.25, color: isExpanded ? theme.palette.text.disabled : theme.palette.text.primary }}
                       >
                         {isExpanded ? "Hide" : "Show more"}
                       </Button>
