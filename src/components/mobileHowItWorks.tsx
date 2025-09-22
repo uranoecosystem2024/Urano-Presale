@@ -6,11 +6,11 @@ import Union from "@/assets/images/Union.png"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { motion, useAnimation } from "framer-motion"
-import step1 from "@/assets/images/step1.webp"
-import step2 from "@/assets/images/step2.webp"
-import step3 from "@/assets/images/step3.webp"
-import step4 from "@/assets/images/step4.webp"
-import step5 from "@/assets/images/step5.webp"
+import step1 from "@/assets/images/how1.webp"
+import step2 from "@/assets/images/how2.webp"
+import step3 from "@/assets/images/how3.webp"
+import step4 from "@/assets/images/how4.webp"
+import step5 from "@/assets/images/how5.webp"
 
 const MobileHowItWorks = () => {
     const theme = useTheme<Theme>()
@@ -170,7 +170,7 @@ const MobileHowItWorks = () => {
 
                 <Stack paddingX={2} width={{ xs: "100%", lg: "17%" }} gap={1}>
                     <Stack direction={"row"} gap={1} alignItems={"center"}>
-                        <Image src={step1} alt="step1" width={48} height={48} style={{ borderRadius: 2 }} />
+                        <Image src={step1} alt="step1" width={64} height={56} style={{ borderRadius: 2 }} />
                         <Typography
                             variant="body2"
                             sx={{ fontWeight: 400, fontSize: 16, color: theme.palette.text.secondary }}
@@ -183,7 +183,7 @@ const MobileHowItWorks = () => {
 
                 <Stack paddingX={2} width={{ xs: "100%", lg: "22%" }} gap={1}>
                     <Stack direction={"row"} gap={1} alignItems={"center"}>
-                        <Image src={step2} alt="step2" width={48} height={48} style={{ borderRadius: 2 }} />
+                        <Image src={step2} alt="step2" width={64} height={56} style={{ borderRadius: 2 }} />
                         <Typography
                             variant="body2"
                             sx={{ fontWeight: 400, fontSize: 16, color: theme.palette.text.secondary }}
@@ -195,7 +195,7 @@ const MobileHowItWorks = () => {
 
                 <Stack paddingX={2} width={{ xs: "100%", lg: "17%" }} gap={1}>
                     <Stack direction={"row"} gap={1} alignItems={"center"}>
-                        <Image src={step3} alt="step3" width={48} height={48} style={{ borderRadius: 2 }} />
+                        <Image src={step3} alt="step3" width={64} height={56} style={{ borderRadius: 2 }} />
                         <Typography
                             variant="body2"
                             sx={{ fontWeight: 400, fontSize: 16, color: theme.palette.text.secondary }}
@@ -207,7 +207,7 @@ const MobileHowItWorks = () => {
 
                 <Stack paddingX={2} width={{ xs: "100%", lg: "17%" }} gap={1}>
                     <Stack direction={"row"} gap={1} alignItems={"center"}>
-                        <Image src={step4} alt="step4" width={48} height={48} style={{ borderRadius: 2 }} />
+                        <Image src={step4} alt="step4" width={64} height={56} style={{ borderRadius: 2 }} />
                         <Typography
                             variant="body2"
                             sx={{ fontWeight: 400, fontSize: 16, color: theme.palette.text.secondary }}
@@ -219,7 +219,7 @@ const MobileHowItWorks = () => {
 
                 <Stack paddingX={2} width={{ xs: "100%", lg: "20%" }} gap={1}>
                     <Stack direction={"row"} gap={1} alignItems={"center"}>
-                        <Image src={step5} alt="step5" width={48} height={48} style={{ borderRadius: 2 }} />
+                        <Image src={step5} alt="step5" width={64} height={56} style={{ borderRadius: 2 }} />
                         <Typography
                             variant="body2"
                             sx={{ fontWeight: 400, fontSize: 16, color: theme.palette.text.secondary }}

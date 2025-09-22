@@ -7,11 +7,11 @@ import { motion, useAnimation } from "framer-motion"
 import { useEffect, useState } from "react"
 
 import Union from "@/assets/images/Union.webp"
-import step1 from "@/assets/images/step1.webp"
-import step2 from "@/assets/images/step2.webp"
-import step3 from "@/assets/images/step3.webp"
-import step4 from "@/assets/images/step4.webp"
-import step5 from "@/assets/images/step5.webp"
+import step1 from "@/assets/images/how1.webp"
+import step2 from "@/assets/images/how2.webp"
+import step3 from "@/assets/images/how3.webp"
+import step4 from "@/assets/images/how4.webp"
+import step5 from "@/assets/images/how5.webp"
 
 import { IoChevronForward } from "react-icons/io5";
 
@@ -180,7 +180,7 @@ const HowItWorks = () => {
               transform: {xs: "none", lg: "scale(1.1)"}
             }
           }}>
-            <Image src={step1} alt="step1" width={72} height={72} style={{ borderRadius: 2 }} />
+            <Image src={step1} alt="step1" width={72} height={64} style={{ borderRadius: 2 }} />
             <Typography
               variant="body2"
               sx={{ fontWeight: 400, fontSize: 15, color: theme.palette.text.secondary }}
@@ -202,7 +202,7 @@ const HowItWorks = () => {
               transform: {xs: "none", lg: "scale(1.1)"}
             }
           }}>
-            <Image src={step2} alt="step2" width={72} height={72} style={{ borderRadius: 2 }} />
+            <Image src={step2} alt="step2" width={72} height={64} style={{ borderRadius: 2 }} />
             <Typography
               variant="body2"
               sx={{ fontWeight: 400, fontSize: 15, color: theme.palette.text.secondary }}
@@ -224,7 +224,7 @@ const HowItWorks = () => {
               transform: {xs: "none", lg: "scale(1.1)"}
             }
           }}>
-            <Image src={step3} alt="step3" width={72} height={72} style={{ borderRadius: 2 }} />
+            <Image src={step3} alt="step3" width={72} height={64} style={{ borderRadius: 2 }} />
             <Typography
               variant="body2"
               sx={{ fontWeight: 400, fontSize: 15, color: theme.palette.text.secondary }}
@@ -246,7 +246,7 @@ const HowItWorks = () => {
               transform: {xs: "none", lg: "scale(1.1)"}
             }
           }}>
-            <Image src={step4} alt="step4" width={72} height={72} style={{ borderRadius: 2 }} />
+            <Image src={step4} alt="step4" width={72} height={64} style={{ borderRadius: 2 }} />
             <Typography
               variant="body2"
               sx={{ fontWeight: 400, fontSize: 15, color: theme.palette.text.secondary }}
@@ -268,7 +268,7 @@ const HowItWorks = () => {
               transform: {xs: "none", lg: "scale(1.1)"}
             }
           }}>
-            <Image src={step5} alt="step5" width={72} height={72} style={{ borderRadius: 2 }} />
+            <Image src={step5} alt="step5" width={72} height={64} style={{ borderRadius: 2 }} />
             <Typography
               variant="body2"
               sx={{ fontWeight: 400, fontSize: 15, color: theme.palette.text.secondary }}
