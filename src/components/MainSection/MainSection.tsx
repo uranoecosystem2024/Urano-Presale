@@ -180,6 +180,7 @@ const MainSection = () => {
                 </Stack>
                 <Link href="https://www.uranoecosystem.com/token" underline="none" target="_blank" sx={{
                     display: { xs: "none", lg: "flex" },
+                    width: "fit-content",
                 }}>
                     <Box sx={{
                         width: "fit-content",

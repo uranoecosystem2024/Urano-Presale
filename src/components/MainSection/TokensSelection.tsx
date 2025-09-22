@@ -13,8 +13,13 @@ const TokensSelection = () => {
     const [value, setValue] = useState(0);
     const [convertedValue, setConvertedValue] = useState(0);
 
-    useEffect(() => {
-        setConvertedValue(value * 33.3);
+    const RATE = 33.3;
+
+    const round = (n: number, dp = 6) =>
+        Math.round(n * 10 ** dp) / 10 ** dp;
+      
+      useEffect(() => {
+        setConvertedValue(round(Number(value) * RATE, 6)); // choose dp (2/4/6) as needed
       }, [value]);
       
     return (
