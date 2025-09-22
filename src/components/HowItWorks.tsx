@@ -273,7 +273,7 @@ const HowItWorks = () => {
               variant="body2"
               sx={{ fontWeight: 400, fontSize: 15, color: theme.palette.text.secondary }}
             >
-              Claim your <strong style={{ color: theme.palette.text.primary, fontWeight: 400 }}>$URANO & TGE</strong>
+              Claim your <strong style={{ color: theme.palette.text.primary, fontWeight: 400 }}>$URANO at TGE</strong>
             </Typography>
           </Stack>
         </Stack>
