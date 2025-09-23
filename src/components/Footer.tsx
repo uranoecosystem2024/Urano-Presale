@@ -223,7 +223,7 @@ const Footer = () => {
                             setReadMore(!readMore)
                         }}
                     >
-                        {readMore ? "Show less" : "Show more"}
+                        {readMore ? " Show less" : "Show more"}
                     </Link>
                 </span>
             </Typography>
