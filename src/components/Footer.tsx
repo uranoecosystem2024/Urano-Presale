@@ -227,6 +227,14 @@ const Footer = () => {
                     </Link>
                 </span>
             </Typography>
+            <Divider sx={{
+                width: "100%",
+                borderColor: theme.palette.footerBorder.main,
+                marginTop: { xs: 2, lg: 0 },
+            }} />
+            <Typography variant="caption" fontWeight={400} color={theme.palette.text.secondary} paddingY={2}>
+                Urano Ecosystem Sp. Z o.o. © 2025 Urano Ecosystem, All rights reserved.
+            </Typography>
         </Stack>
     )
 }

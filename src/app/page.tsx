@@ -6,7 +6,7 @@ import MainSection from '@/components/MainSection/MainSection';
 import MobileHowItWorks from '@/components/mobileHowItWorks';
 import Image from 'next/image';
 import coin1 from '@/assets/images/coin1.webp';
-import coin2 from '@/assets/images/coin2.webp';
+import coin2 from '@/assets/images/newUranoToken.webp';
 import coin3 from '@/assets/images/coin3.webp';
 
 export default function Home() {
@@ -47,10 +47,10 @@ export default function Home() {
         className="coinsDesktop"
         src={coin2}
         alt="coins urano"
-        width={220}
+        width={175}
         height={200}
         priority
-        style={{ position: "absolute", bottom: "4%", left: "-5%", zIndex: 0 }}
+        style={{ position: "absolute", bottom: "4%", left: "-3%", zIndex: 0 }}
       />
       <Footer />
     </Stack>
