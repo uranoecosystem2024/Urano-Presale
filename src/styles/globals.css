@@ -61,7 +61,21 @@ html, body {
   display: block !important;
 }
 
+.profileToken1 {
+  display: block !important;
+}
+
+.profileToken2 {
+  display: block !important;
+}
+
 @media (max-width: 1024px) {
+  .profileToken1 {
+    display: none !important;
+  }
+  .profileToken2 {
+    display: none !important;
+  }
   .readyToClaimCoin {
     display: none !important;
   }
@@ -99,6 +113,7 @@ html, body {
     display: block !important;
     animation: float 6s ease-in-out infinite;
   }
+  
 
 }
 

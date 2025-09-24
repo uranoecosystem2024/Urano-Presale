@@ -45,12 +45,12 @@ export default function Home() {
       </Stack>
       <Image
         className="coinsDesktop"
-        src={coin2}
+        src={coin1}
         alt="coins urano"
-        width={175}
-        height={200}
+        width={150}
+        height={175}
         priority
-        style={{ position: "absolute", bottom: "4%", left: "-3%", zIndex: 0 }}
+        style={{ position: "absolute", bottom: "8%", left: "-3%", zIndex: 0, transform: "scaleX(-1)", opacity: 0.5 }}
       />
       <Footer />
     </Stack>
