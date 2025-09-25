@@ -50,7 +50,7 @@ export default function Home() {
         width={150}
         height={175}
         priority
-        style={{ position: "absolute", bottom: "8%", left: "-3%", zIndex: 0, transform: "scaleX(-1)", opacity: 0.5 }}
+        style={{ position: "absolute", bottom: "8%", left: "-3%", zIndex: 0, opacity: 0.5 }}
       />
       <Footer />
     </Stack>
