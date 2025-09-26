@@ -7,6 +7,7 @@ import { ThemeProvider, CssBaseline } from '@mui/material';
 import type { Theme } from '@mui/material/styles';
 import theme from '@/theme/theme';
 import { ThirdwebProvider } from "thirdweb/react";
+import { ToastContainer } from 'react-toastify';
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
@@ -15,6 +16,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <CssBaseline />
         <ThirdwebProvider>
           {children}
+          <ToastContainer position='bottom-right' />
         </ThirdwebProvider>
       </ThemeProvider>
     </AppRouterCacheProvider>

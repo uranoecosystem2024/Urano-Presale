@@ -16,6 +16,7 @@ import { client } from "@/lib/thirdwebClient";
 import { parseUnits } from "viem";
 
 const RATE = 33.3; // 1 USDC = 33.3 URANO (example)
+const MIN_USDC = 100;
 const AMOUNT_STORAGE_KEY = "urano:purchaseAmount:v1";
 const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_ADDRESS_SEPOLIA as `0x${string}` | undefined;
 const ZERO: `0x${string}` = "0x0000000000000000000000000000000000000000";
@@ -42,25 +43,12 @@ const TokensSelection = () => {
 
   const readEnabled = Boolean(address && usdcContract);
 
-  // helpful logs in dev if something is missing
-  useEffect(() => {
-    if (process.env.NODE_ENV === "development") {
-      if (!USDC_ADDRESS) {
-        console.warn("NEXT_PUBLIC_USDC_ADDRESS_SEPOLIA is missing; USDC balance cannot be read.");
-      }
-      if (!address) {
-        console.warn("Wallet not connected; USDC balance cannot be read.");
-      }
-    }
-  }, [address]);
-
   // Always pass a valid params object; gate with queryOptions.enabled
   const { data: usdcBal } = useReadContract(getBalance, {
     contract: readEnabled ? usdcContract! : fallbackContract,
     address: readEnabled ? address! : ZERO,
     queryOptions: {
       enabled: readEnabled,
-      // optional niceties:
       refetchInterval: 15_000,
       retry: 3,
     },
@@ -73,7 +61,7 @@ const TokensSelection = () => {
     setConvertedValue(rounded);
   }, [value]);
 
-  // Publish amount so the CTA can reflect "Insert amount" when value is 0
+  // Publish amount so the CTA approves exactly what the user typed
   useEffect(() => {
     try {
       localStorage.setItem(AMOUNT_STORAGE_KEY, String(value || 0));
@@ -83,7 +71,7 @@ const TokensSelection = () => {
     }
   }, [value]);
 
-  // Check insufficient funds
+  // Checks
   const insufficient = useMemo(() => {
     if (!usdcBal || !Number.isFinite(value)) return false;
     const dec = usdcBal.decimals ?? 6;
@@ -95,15 +83,21 @@ const TokensSelection = () => {
     }
   }, [value, usdcBal]);
 
+  const belowMin = useMemo(() => value > 0 && value < MIN_USDC, [value]);
+
   // Helper text below the USDC input
   const usdcHelper: string = useMemo(() => {
-    if (!usdcBal) return "Balance: -- USDC";
+    if (insufficient) return "Insufficient balance";
+    if (belowMin) return `Min amount is ${MIN_USDC} USDC`;
+
+    const sym = usdcBal?.symbol ?? "USDC";
+    if (!usdcBal) return `Balance: -- ${sym}`;
     const amount = Number(usdcBal.displayValue);
     const balStr = Number.isFinite(amount)
-      ? `${amount.toLocaleString(undefined, { maximumFractionDigits: 6 })} ${usdcBal.symbol ?? "USDC"}`
-      : `-- ${usdcBal.symbol ?? "USDC"}`;
-    return insufficient ? "Insufficient balance" : `Balance: ${balStr}`;
-  }, [usdcBal, insufficient]);
+      ? `${amount.toLocaleString(undefined, { maximumFractionDigits: 6 })} ${sym}`
+      : `-- ${sym}`;
+    return `Balance: ${balStr}`;
+  }, [usdcBal, insufficient, belowMin]);
 
   return (
     <Stack
@@ -120,7 +114,7 @@ const TokensSelection = () => {
           tokenIconSrc={usdc.src}
           tokenSymbol="USDC"
           onChange={(v) => setValue(Number.isFinite(v) && v >= 0 ? v : 0)}
-          error={insufficient}
+          error={insufficient || belowMin}
           helperText={usdcHelper}
         />
       </Stack>

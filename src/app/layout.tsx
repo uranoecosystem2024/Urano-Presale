@@ -1,4 +1,5 @@
 import "@/styles/globals.css";
+import "react-toastify/dist/ReactToastify.css";
 import { type Metadata } from "next";
 import { Host_Grotesk } from "next/font/google";
 import { Providers } from "@/app/providers";
