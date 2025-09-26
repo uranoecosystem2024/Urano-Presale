@@ -71,6 +71,14 @@ const Registration = () => {
     }
   }, [connected, progress.step3]);
 
+  useEffect(() => {
+    try {
+      window.dispatchEvent(new Event("urano:progress"));
+    } catch {
+      /* noop */
+    }
+  }, [progress]);
+
   // Locking rules:
   // - Step 3 (Connect wallet) requires Step 1 (email) only.
   // - Step 2 (KYC) requires Step 1 + CURRENT WALLET CONNECTED.
