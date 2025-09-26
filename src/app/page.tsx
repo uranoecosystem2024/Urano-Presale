@@ -6,7 +6,6 @@ import MainSection from '@/components/MainSection/MainSection';
 import MobileHowItWorks from '@/components/mobileHowItWorks';
 import Image from 'next/image';
 import coin1 from '@/assets/images/coin1.webp';
-import coin2 from '@/assets/images/newUranoToken.webp';
 import coin3 from '@/assets/images/coin3.webp';
 
 export default function Home() {

@@ -15,11 +15,14 @@ import {
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import popupbg from "@/assets/images/pop-up-bg.webp";
+import { waitForKycStatus } from "@/utils/kyc";
 
 interface VerifyIdentityModalProps {
   open: boolean;
   onClose: () => void;
   onComplete: () => void;
+  /** Connected wallet address to bind KYC to (used as Persona referenceId). */
+  walletAddress?: `0x${string}`;
 }
 
 type PersonaProps = {
@@ -41,14 +44,15 @@ const PersonaReact = dynamic(async () => {
 const TEMPLATE_ID = process.env.NEXT_PUBLIC_PERSONA_TEMPLATE_ID;
 const ENVIRONMENT_ID = process.env.NEXT_PUBLIC_PERSONA_ENV_ID;
 
-const VerifyIdentityModal: React.FC<VerifyIdentityModalProps> = ({ open, onClose, onComplete }) => {
+const VerifyIdentityModal: React.FC<VerifyIdentityModalProps> = ({ open, onClose, onComplete, walletAddress }) => {
   const theme = useTheme<Theme>();
 
   const [showFlow, setShowFlow] = useState(false);
   const [busy, setBusy] = useState(false);
   const [errorText, setErrorText] = useState<string | null>(null);
 
-  const referenceId = useMemo(() => undefined as string | undefined, []);
+  // Bind Persona session to the connected wallet address
+  const referenceId = useMemo(() => walletAddress ?? undefined, [walletAddress]);
 
   useEffect(() => {
     if (!open) {
@@ -64,10 +68,21 @@ const VerifyIdentityModal: React.FC<VerifyIdentityModalProps> = ({ open, onClose
     setShowFlow(true);
   };
 
-  const handleComplete = (meta: { inquiryId: string; status?: string }) => {
-    // In production, confirm server-side with meta.inquiryId (webhook or /api) before unlocking.
-    onComplete();
-    onClose();
+  const handleComplete = async (_meta: { inquiryId: string; status?: string }) => {
+    try {
+      if (walletAddress) {
+        setBusy(true);
+        const ok = await waitForKycStatus(walletAddress, { tries: 20, delayMs: 2000 });
+        if (!ok) throw new Error("We couldn’t confirm your verification on-chain yet. Please try again shortly.");
+      }
+      onComplete();
+      onClose();
+    } catch (e) {
+      setErrorText(e instanceof Error ? e.message : "Verification could not be confirmed.");
+    } finally {
+      setBusy(false);
+      setShowFlow(false);
+    }
   };
 
   const handleCancel = () => {
@@ -184,7 +199,7 @@ const VerifyIdentityModal: React.FC<VerifyIdentityModalProps> = ({ open, onClose
 
                 <Button
                   variant="contained"
-                  disabled={busy}
+                  disabled={busy || !walletAddress}
                   onClick={startVerification}
                   sx={{
                     mt: "auto",
