@@ -10,10 +10,17 @@ import { useEffect, useMemo, useState } from "react";
 
 type Progress = { step1: boolean; step2: boolean; step3: boolean };
 const STORAGE_KEY = "registrationProgress:v1";
+const AMOUNT_STORAGE_KEY = "urano:purchaseAmount:v1";
 
 const MainSection = () => {
   const theme = useTheme();
-  const [progress, setProgress] = useState<Progress>({ step1: false, step2: false, step3: false });
+
+  const [progress, setProgress] = useState<Progress>({
+    step1: false,
+    step2: false,
+    step3: false,
+  });
+  const [amount, setAmount] = useState<number>(0);
 
   const readProgress = () => {
     try {
@@ -30,43 +37,67 @@ const MainSection = () => {
     }
   };
 
-  useEffect(() => {
-    // initial read
-    readProgress();
+  const readAmount = () => {
+    try {
+      const raw = localStorage.getItem(AMOUNT_STORAGE_KEY);
+      const v = raw ? Number(raw) : 0;
+      setAmount(Number.isFinite(v) ? v : 0);
+    } catch {
+      setAmount(0);
+    }
+  };
 
-    // update on focus (same-tab)
-    const onFocus = () => readProgress();
+  useEffect(() => {
+    // initial reads
+    readProgress();
+    readAmount();
+
+    // same-tab updates
+    const onFocus = () => {
+      readProgress();
+      readAmount();
+    };
     window.addEventListener("focus", onFocus);
 
-    // update on our custom event (emit from Registration after any progress change)
-    const onCustom = () => readProgress();
-    window.addEventListener("urano:progress", onCustom as EventListener);
+    // custom events emitted by Registration / TokensSelection
+    const onProgressEvent = () => readProgress();
+    const onAmountEvent = () => readAmount();
+    window.addEventListener("urano:progress", onProgressEvent as EventListener);
+    window.addEventListener("urano:amount", onAmountEvent as EventListener);
 
-    // very light polling as a safety net (covers same-tab updates without event/focus)
-    const id = window.setInterval(readProgress, 500);
+    // light polling safety net
+    const id = window.setInterval(() => {
+      readProgress();
+      readAmount();
+    }, 500);
 
-    // cross-tab updates
+    // cross-tab via storage
     const onStorage = (e: StorageEvent) => {
       if (e.key === STORAGE_KEY) readProgress();
+      if (e.key === AMOUNT_STORAGE_KEY) readAmount();
     };
     window.addEventListener("storage", onStorage);
 
     return () => {
       window.removeEventListener("focus", onFocus);
-      window.removeEventListener("urano:progress", onCustom as EventListener);
+      window.removeEventListener("urano:progress", onProgressEvent as EventListener);
+      window.removeEventListener("urano:amount", onAmountEvent as EventListener);
       window.removeEventListener("storage", onStorage);
       window.clearInterval(id);
     };
   }, []);
 
-  const allDone = progress.step1 && progress.step3 && progress.step2;
+  const allStepsDone = progress.step1 && progress.step3 && progress.step2;
+  const canBuy = allStepsDone && amount > 0;
 
   const ctaText = useMemo(() => {
     if (!progress.step1) return "Register with Email";
     if (!progress.step3) return "Connect Wallet";
     if (!progress.step2) return "Verify Identity";
+    // all steps done:
+    if (amount <= 0) return "Insert amount to pay";
     return "Buy";
-  }, [progress]);
+  }, [progress, amount]);
 
   return (
     <Stack
@@ -342,8 +373,8 @@ const MainSection = () => {
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              opacity: allDone ? 1 : 0.6,
-              pointerEvents: allDone ? "auto" : "none",
+              opacity: canBuy ? 1 : 0.6,
+              pointerEvents: canBuy ? "auto" : "none",
               "&:hover": {
                 border: `2px solid ${theme.palette.text.primary}`,
                 filter: "brightness(1.2)",
