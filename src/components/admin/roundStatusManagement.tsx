@@ -39,6 +39,11 @@ import {
   type RoundKey,
 } from "@/utils/admin/roundsWrite";
 
+import {
+  readRoundMaxTokensHuman,
+  setRoundMaxTokensHumanTx,
+} from "@/utils/admin/roundMaxTokens";
+
 import { useActiveAccount } from "thirdweb/react";
 import { toast } from "react-toastify";
 
@@ -90,9 +95,8 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
   const [durationMonths, setDurationMonths] = useState("");
   const [tgeDate, setTgeDate] = useState("");
   const [tgeTime, setTgeTime] = useState("");
-  const [seedRound, setSeedRound] = useState("");
-  const [strategicRound, setStrategicRound] = useState("");
-  const [institutionalRound, setInstitutionalRound] = useState("");
+  const [maxTokensHuman, setMaxTokensHuman] = useState("");
+  const [maxTokensLoading, setMaxTokensLoading] = useState(false);
   const [address, setAddress] = useState("");
   const [roundId, setRoundId] = useState<RoundKey | "">(""); // <- select value
   const [maxAllocation, setMaxAllocation] = useState("");
@@ -262,6 +266,58 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
       setRowTxLoading(id, false);
     }
   };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const run = async () => {
+      if (!expandedId) return; // nothing expanded
+      try {
+        setMaxTokensLoading(true);
+        const human = await readRoundMaxTokensHuman(expandedId);
+        if (!cancelled) setMaxTokensHuman(human);
+      } catch (e) {
+        console.error("Failed to read round max tokens:", e);
+        // don't toast here repeatedly; keep UI quiet on expand
+      } finally {
+        if (!cancelled) setMaxTokensLoading(false);
+      }
+    };
+
+    void run();
+    return () => { cancelled = true; };
+  }, [expandedId]);
+
+  const handleSaveMaxTokens = async () => {
+    if (!expandedId) return;
+    if (disabled) return;
+
+    if (!account) {
+      toast.error("No wallet connected. Please connect an authorized wallet.");
+      return;
+    }
+
+    const rowId = expandedId as string;
+    if (txLoadingById[rowId] || anyRowBusy) return;
+
+    try {
+      setRowTxLoading(rowId, true);
+      await setRoundMaxTokensHumanTx(account, expandedId, maxTokensHuman.trim());
+      toast.success(`Max tokens updated for ${expandedId}.`);
+
+      // Re-read to reflect any normalization/rounding by decimals
+      try {
+        const human = await readRoundMaxTokensHuman(expandedId);
+        setMaxTokensHuman(human);
+      } catch { }
+    } catch (e) {
+      console.error(e);
+      toast.error(getErrorMessage(e));
+    } finally {
+      setRowTxLoading(rowId, false);
+    }
+  };
+
 
 
   const handleShowMore = (id: RoundKey) => {
@@ -739,55 +795,43 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                       <Stack gap={0.5} mb={4}>
                         <Typography variant="subtitle1">Round Max Tokens</Typography>
                         <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
-                          Configure vesting terms for all rounds
+                          Set the maximum tokens amount for this round
                         </Typography>
                       </Stack>
                       <Grid container spacing={2} sx={{ mb: 2 }}>
-                        <Grid size={{ xs: 12, md: 3.5 }}>
+                        <Grid size={{ xs: 12, md: 10.5 }}>
                           <TextField
                             fullWidth
-                            label="Seed Round (URANO)"
+                            label="Round Max Tokens (URANO)"
                             placeholder="0"
-                            value={seedRound}
-                            onChange={(e) => setSeedRound(e.target.value)}
-                            disabled={disabled}
+                            value={maxTokensHuman}
+                            onChange={(e) => setMaxTokensHuman(e.target.value)}
+                            disabled={disabled || maxTokensLoading || anyRowBusy || (expandedId ? !!txLoadingById[expandedId] : false)}
                             InputLabelProps={{ shrink: true }}
                             sx={inputSx}
                             type="number"
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12, md: 3.5 }}>
-                          <TextField
-                            fullWidth
-                            label="Strategic Round (URANO)"
-                            placeholder="0"
-                            value={strategicRound}
-                            onChange={(e) => setStrategicRound(e.target.value)}
-                            disabled={disabled}
-                            InputLabelProps={{ shrink: true }}
-                            sx={inputSx}
-                            type="number"
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12, md: 3.5 }}>
-                          <TextField
-                            fullWidth
-                            label="Institutional Round (URANO)"
-                            placeholder="0"
-                            value={institutionalRound}
-                            onChange={(e) => setInstitutionalRound(e.target.value)}
-                            disabled={disabled}
-                            InputLabelProps={{ shrink: true }}
-                            sx={inputSx}
-                            type="number"
+                            helperText={
+                              maxTokensLoading ? "Loading current value…" : undefined
+                            }
                           />
                         </Grid>
                         <Grid size={{ xs: 12, md: 1.5 }}>
-                          <Button sx={{ ...actionBtnSx, width: { xs: "100%", md: "auto" } }}>
+                          <Button
+                            onClick={handleSaveMaxTokens}
+                            disabled={
+                              disabled ||
+                              maxTokensLoading ||
+                              anyRowBusy ||
+                              (expandedId ? !!txLoadingById[expandedId] : false) ||
+                              !maxTokensHuman.trim()
+                            }
+                            sx={{ ...actionBtnSx, width: { xs: "100%", md: "auto" } }}
+                          >
                             Save
                           </Button>
                         </Grid>
                       </Grid>
+
 
                       <Divider sx={{ my: 3, borderBottom: `1px solid ${theme.palette.secondary.main}` }} />
 
