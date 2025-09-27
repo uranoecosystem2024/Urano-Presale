@@ -9,7 +9,6 @@ import InstitutionalRoundAccess from '@/components/admin/institutionalRoundAcces
 import InstitutionalAllowlist from '@/components/admin/institutionalAllowlist';
 import ManualSepaPurchase from '@/components/admin/manualSEPAPurchase';
 import WithdrawUnsoldTokens from '@/components/admin/withdrawUnsoldTokens';
-import { useState } from 'react';
 
 const rounds: RoundStatusItem[] = [
     { id: "seed", title: "Seed Round", active: true },
@@ -21,7 +20,6 @@ const rounds: RoundStatusItem[] = [
 
 export default function Admin() {
     const theme = useTheme();
-    const [publicAccess, setPublicAccess] = useState(true);
 
     return (
         <Stack
@@ -83,8 +81,6 @@ export default function Admin() {
                     gap: 2,
                 }}>
                     <InstitutionalRoundAccess
-                        value={publicAccess}
-                        onChange={setPublicAccess}
                         subtitleOn="Public access enabled"
                         subtitleOff="Public access disabled"
                     />

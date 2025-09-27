@@ -6,9 +6,13 @@ import logo from "@/assets/images/logos/logo-turquoise-1.webp"
 import { useTheme, type Theme } from '@mui/material/styles';
 import arb from "@/assets/images/arbdao.webp"
 import MobileMenu from "@/components/MobileMenu";
+import { ConnectButton, useActiveAccount, useConnectModal } from "thirdweb/react";
+import { client } from "@/lib/thirdwebClient";
 
 const AdminHeader = () => {
     const theme = useTheme<Theme>();
+    const account = useActiveAccount();
+    const { connect } = useConnectModal();
     return (
         <>
             <Stack direction="row" justifyContent="space-between" alignItems="center" width={{ xs: "100vw", lg: "100%" }} sx={{
@@ -42,31 +46,36 @@ const AdminHeader = () => {
                             <Image src={arb} alt="Arb" width={120} height={40} />
                         </Box>
                     </Link>
-                    <Link href="/" underline="none" onClick={(e) => {
-                        e.preventDefault();
-                    }}>
-                        <Box sx={{
-                            background: { xs: theme.palette.uranoGradient, lg: theme.palette.secondary.main },
-                            border: `1px solid ${theme.palette.headerBorder.main}`,
-                            borderRadius: 2,
-                            paddingX: { xs: 1.5, lg: 2 },
-                            paddingY: { xs: 1.5, lg: 1 },
-                            marginLeft: 1,
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            "&:hover": {
-                                background: theme.palette.uranoGradient,
-                                "&:hover .connectWalletLink": {
-                                    color: theme.palette.info.main,
-                                },
-                            },
-                        }}>
-                            <Typography variant="body1" fontWeight={400} className="connectWalletLink" sx={{
-                                color: { xs: theme.palette.background.default, lg: theme.palette.text.disabled }
-                            }}>Connect Wallet</Typography>
-                        </Box>
-                    </Link>
+                    {
+                        !account ? (
+                            <Link href="/" underline="none" onClick={async (e) => {
+                                e.preventDefault();
+                                await connect({ client });
+                            }}>
+                                <Box sx={{
+                                    background: { xs: theme.palette.uranoGradient, lg: theme.palette.secondary.main },
+                                    border: `1px solid ${theme.palette.headerBorder.main}`,
+                                    borderRadius: 2,
+                                    paddingX: { xs: 1.5, lg: 2 },
+                                    paddingY: { xs: 1.5, lg: 1 },
+                                    marginLeft: 1,
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    "&:hover": {
+                                        background: theme.palette.uranoGradient,
+                                        "&:hover .connectWalletLink": {
+                                            color: theme.palette.info.main,
+                                        },
+                                    },
+                                }}>
+                                    <Typography variant="body1" fontWeight={400} className="connectWalletLink" sx={{
+                                        color: { xs: theme.palette.background.default, lg: theme.palette.text.disabled }
+                                    }}>Connect Wallet</Typography>
+                                </Box>
+                            </Link>
+                        ) : <ConnectButton client={client} />
+                    }
                     <MobileMenu />
                 </Stack>
             </Stack>

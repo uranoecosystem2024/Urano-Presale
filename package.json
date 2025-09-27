@@ -34,6 +34,7 @@
     "iconsax-reactjs": "^0.0.8",
     "next": "^15.2.3",
     "persona-react": "^6.2.1",
+    "pino-pretty": "^3.0.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-folder-tabs": "^1.0.0",
