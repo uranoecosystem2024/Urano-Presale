@@ -16,15 +16,6 @@ import { useActiveAccount } from "thirdweb/react";
 import { hasAdminRole } from "@/utils/admin/roles"; // ⬅️ new helper
 import { PiWarningFill } from "react-icons/pi";
 
-
-const rounds: RoundStatusItem[] = [
-    { id: "seed", title: "Seed Round", active: true },
-    { id: "strat", title: "Strategic Round", active: false },
-    { id: "inst", title: "institutional Round", active: false },
-    { id: "priv", title: "Private round", active: false },
-    { id: "comm", title: "Community round", active: false },
-];
-
 export default function Admin() {
     const theme = useTheme();
     const account = useActiveAccount();
@@ -160,7 +151,6 @@ export default function Admin() {
                         }}
                     >
                         <RoundStatusManagement
-                            rounds={rounds}
                             singleActive
                             onChange={(next, changedId) => {
                                 // Wire to contract or API when ready
@@ -182,51 +172,7 @@ export default function Admin() {
                         <InstitutionalRoundAccess subtitleOn="Public access enabled" subtitleOff="Public access disabled" />
                     </Stack>
 
-                    <Stack
-                        sx={{
-                            backgroundColor: theme.palette.presaleCardBg.main,
-                            border: `1px solid ${theme.palette.headerBorder.main}`,
-                            borderRadius: 2,
-                            p: 3,
-                            gap: 2,
-                        }}
-                    >
-                        <InstitutionalAllowlist
-                            rounds={rounds.map((r) => ({ id: r.id, label: r.title }))}
-                            onAdd={(addr, r) => console.log("add", addr, r)}
-                            onRemove={(addr, r) => console.log("remove", addr, r)}
-                        />
-                    </Stack>
-
-                    <Stack
-                        sx={{
-                            backgroundColor: theme.palette.presaleCardBg.main,
-                            border: `1px solid ${theme.palette.headerBorder.main}`,
-                            borderRadius: 2,
-                            p: 3,
-                            gap: 2,
-                        }}
-                    >
-                        <ManualSepaPurchase
-                            rounds={rounds.map((r) => ({ id: r.id, label: r.title }))}
-                            onSubmit={(payload) => console.log("SEPA payload", payload)}
-                        />
-                    </Stack>
-
-                    <Stack
-                        sx={{
-                            backgroundColor: theme.palette.presaleCardBg.main,
-                            border: `1px solid ${theme.palette.headerBorder.main}`,
-                            borderRadius: 2,
-                            p: 3,
-                            gap: 2,
-                        }}
-                    >
-                        <WithdrawUnsoldTokens
-                            rounds={rounds.map((r) => ({ id: r.id, label: r.title }))}
-                            onWithdraw={(addr, roundId) => console.log("withdraw", addr, roundId)}
-                        />
-                    </Stack>
+                    
                 </Stack>
             )}
 
