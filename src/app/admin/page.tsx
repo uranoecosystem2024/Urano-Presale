@@ -6,7 +6,7 @@ import { useTheme } from "@mui/material/styles";
 
 import AdminHeader from "@/components/admin/adminHeader";
 import Footer from "@/components/Footer";
-import RoundStatusManagement, { type RoundStatusItem } from "@/components/admin/roundStatusManagement";
+import RoundStatusManagement from "@/components/admin/roundStatusManagement";
 import InstitutionalRoundAccess from "@/components/admin/institutionalRoundAccess";
 import InstitutionalAllowlist from "@/components/admin/institutionalAllowlist";
 import ManualSepaPurchase from "@/components/admin/manualSEPAPurchase";

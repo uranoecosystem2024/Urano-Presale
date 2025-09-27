@@ -11,20 +11,13 @@ import {
   useTheme,
   Collapse,
   TextField,
-  Popover,
-  InputAdornment,
 } from "@mui/material";
-import Grid from "@mui/material/Grid"; // ✅ Grid2 so `size={{ xs, md }}` works
-import CalendarMonthRoundedIcon from "@mui/icons-material/CalendarMonthRounded";
-import TimerRoundedIcon from "@mui/icons-material/TimerRounded";
+import Grid from "@mui/material/Grid"; // MUI v6 Grid (Grid2) -> supports size={{ xs, md }}
+import dayjs from "dayjs";
 
-// date & time pickers
+// date adapter (even if we use datetime-local, you asked to keep LocalizationProvider)
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
-import { PickersDay } from "@mui/x-date-pickers/PickersDay";
-import { MultiSectionDigitalClock } from "@mui/x-date-pickers/MultiSectionDigitalClock";
-import dayjs, { type Dayjs } from "dayjs";
 
 import { fetchRoundItems } from "@/utils/admin/rounds";
 import {
@@ -38,6 +31,12 @@ import {
   setRoundMaxTokensHumanTx,
 } from "@/utils/admin/roundMaxTokens";
 
+import {
+  readVestingStatus,
+  startVestingFromDatesTx,
+  setVestingEndTimeByKeyFromDateTx,
+} from "@/utils/admin/vesting";
+
 import { useActiveAccount } from "thirdweb/react";
 import { toast } from "react-toastify";
 
@@ -48,7 +47,7 @@ export type RoundStatusItem = {
 };
 
 export type RoundStatusManagementProps = {
-  rounds?: RoundStatusItem[]; // optional; if omitted we load from chain
+  rounds?: RoundStatusItem[];
   singleActive?: boolean;
   disabled?: boolean;
   onChange?: (next: RoundStatusItem[], changedId: string) => void;
@@ -83,55 +82,33 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
   const [loading, setLoading] = useState<boolean>(!rounds);
   const [txLoadingById, setTxLoadingById] = useState<Record<string, boolean>>({});
 
-  // form state (UI placeholders; not wired on-chain in this contract)
+  // UI-only vesting params (not in ABI)
   const [tgePct, setTgePct] = useState("");
   const [cliffDays, setCliffDays] = useState("");
   const [durationMonths, setDurationMonths] = useState("");
-  const [tgeDate, setTgeDate] = useState("");
-  const [tgeTime, setTgeTime] = useState("");
+
+  // Round max tokens
   const [maxTokensHuman, setMaxTokensHuman] = useState("");
   const [maxTokensLoading, setMaxTokensLoading] = useState(false);
 
-  // date/time popovers
-  const [datePopOpen, setDatePopOpen] = useState(false);
-  const [dateAnchor, setDateAnchor] = useState<HTMLElement | null>(null);
-  const [timePopOpen, setTimePopOpen] = useState(false);
-  const [timeAnchor, setTimeAnchor] = useState<HTMLElement | null>(null);
-
-  const openDate = (el: HTMLElement) => {
-    if (!disabled) {
-      setDateAnchor(el);
-      setDatePopOpen(true);
-    }
-  };
-  const closeDate = () => {
-    setDatePopOpen(false);
-    setDateAnchor(null);
-  };
-  const parseTgeDate = (): Dayjs | null => {
-    const d = dayjs(tgeDate, "DD.MM.YY", true);
-    return d.isValid() ? d : null;
-  };
-
-  const parseTgeTime = (): Dayjs | null => {
-    const t = dayjs(tgeTime, "HH.mm", true);
-    return t.isValid() ? t : null;
-  };
-  const [tempTime, setTempTime] = useState<Dayjs>(parseTgeTime() ?? dayjs());
-  const openTime = (el: HTMLElement) => {
-    if (!disabled) {
-      setTimeAnchor(el);
-      setTempTime(parseTgeTime() ?? dayjs());
-      setTimePopOpen(true);
-    }
-  };
-  const closeTime = () => {
-    setTimePopOpen(false);
-    setTimeAnchor(null);
-  };
-
   // which row is expanded
   const [expandedId, setExpandedId] = useState<RoundKey | null>(null);
+
+  // vesting state
+  const [vestingLoading, setVestingLoading] = useState(false);
+  const [vestingActionLoading, setVestingActionLoading] = useState(false);
+  const [vestingStarted, setVestingStarted] = useState<boolean | null>(null);
+
+  // datetime-local ISO strings
+  const [privateEndISO, setPrivateEndISO] = useState<string>("");
+  const [institutionalEndISO, setInstitutionalEndISO] = useState<string>("");
+  const [communityEndISO, setCommunityEndISO] = useState<string>("");
+
+  const [updateLoading, setUpdateLoading] = useState<Record<RoundKey, boolean>>({
+    private: false,
+    institutional: false,
+    community: false,
+  });
 
   // load rounds (from prop or chain)
   useEffect(() => {
@@ -180,27 +157,22 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
 
   const handleToggle = async (id: RoundKey, nextVal: boolean) => {
     if (disabled) return;
-
     if (!account) {
       toast.error("No wallet connected. Please connect an authorized wallet.");
       return;
     }
-
     if (txLoadingById[id] || anyRowBusy) return;
 
     try {
       setRowTxLoading(id, true);
 
       if (singleActive && nextVal) {
-        // ✅ one-by-one deactivate others handled inside roundsWrite
         const res = await toggleRoundActiveExclusive(account, id, true);
-        // Re-sync from chain for correctness
         try {
           const latest = await fetchRoundItems();
           setItems(latest);
           onChange?.(latest, id);
         } catch {
-          // Fallback optimistic UI
           setItems((prev) =>
             prev.map((r) =>
               r.id === id ? { ...r, active: true } : { ...r, active: false }
@@ -215,9 +187,10 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
         }
 
         toast.success(
-          `Activated ${id} round${res.activated
-            ? ` (${Number(res.activated.startTimeUsed)} → ${Number(res.activated.endTimeUsed)})`
-            : ""
+          `Activated ${id} round${
+            res.activated
+              ? ` (${Number(res.activated.startTimeUsed)} → ${Number(res.activated.endTimeUsed)})`
+              : ""
           }.`
         );
         if (res.deactivated.length > 0) {
@@ -226,7 +199,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
         return;
       }
 
-      // Default path: either deactivating, or multi-active allowed
       const result = await toggleRoundActive(account, id, nextVal);
 
       try {
@@ -234,7 +206,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
         setItems(latest);
         onChange?.(latest, id);
       } catch {
-        // Optimistic fallback
         setItems((prev) => {
           let next = prev.map((r) => (r.id === id ? { ...r, active: nextVal } : r));
           if (singleActive && nextVal) {
@@ -258,25 +229,27 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
     }
   };
 
+  // Load max tokens when a row is expanded
   useEffect(() => {
     let cancelled = false;
 
     const run = async () => {
-      if (!expandedId) return; // nothing expanded
+      if (!expandedId) return;
       try {
         setMaxTokensLoading(true);
         const human = await readRoundMaxTokensHuman(expandedId);
         if (!cancelled) setMaxTokensHuman(human);
       } catch (e) {
         console.error("Failed to read round max tokens:", e);
-        // don't toast here repeatedly; keep UI quiet on expand
       } finally {
         if (!cancelled) setMaxTokensLoading(false);
       }
     };
 
     void run();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [expandedId]);
 
   const handleSaveMaxTokens = async () => {
@@ -296,11 +269,12 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
       await setRoundMaxTokensHumanTx(account, expandedId, maxTokensHuman.trim());
       toast.success(`Max tokens updated for ${expandedId} round.`);
 
-      // Re-read to reflect any normalization/rounding by decimals
       try {
         const human = await readRoundMaxTokensHuman(expandedId);
         setMaxTokensHuman(human);
-      } catch { }
+      } catch {
+        /* ignore */
+      }
     } catch (e) {
       console.error(e);
       toast.error(getErrorMessage(e));
@@ -309,7 +283,101 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
     }
   };
 
+  // Load vesting status when expanded
+  useEffect(() => {
+    let cancelled = false;
 
+    const loadVesting = async () => {
+      if (!expandedId) return;
+      try {
+        setVestingLoading(true);
+        const status = await readVestingStatus();
+        if (cancelled) return;
+
+        setVestingStarted(status.started);
+
+        const secToISO = (sec: bigint) =>
+          sec && sec > 0n
+            ? dayjs(Number(sec) * 1000).format("YYYY-MM-DDTHH:mm")
+            : "";
+
+        setPrivateEndISO(secToISO(status.privateEnd));
+        setInstitutionalEndISO(secToISO(status.institutionalEnd));
+        setCommunityEndISO(secToISO(status.communityEnd));
+
+        if (!status.started) {
+          const thirty = dayjs().add(30, "day").minute(0).second(0).millisecond(0);
+          if (!status.privateEnd) setPrivateEndISO(thirty.format("YYYY-MM-DDTHH:mm"));
+          if (!status.institutionalEnd) setInstitutionalEndISO(thirty.format("YYYY-MM-DDTHH:mm"));
+          if (!status.communityEnd) setCommunityEndISO(thirty.format("YYYY-MM-DDTHH:mm"));
+        }
+      } catch (e) {
+        console.error("Failed to read vesting status:", e);
+        toast.error("Failed to read vesting status");
+      } finally {
+        if (!cancelled) setVestingLoading(false);
+      }
+    };
+
+    void loadVesting();
+    return () => {
+      cancelled = true;
+    };
+  }, [expandedId]);
+
+  const handleStartVesting = async () => {
+    if (disabled || vestingStarted) return;
+    if (!account) {
+      toast.error("No wallet connected. Please connect an authorized wallet.");
+      return;
+    }
+
+    try {
+      setVestingActionLoading(true);
+      if (!privateEndISO || !institutionalEndISO || !communityEndISO) {
+        toast.error("Please set end times for all rounds.");
+        return;
+      }
+
+      await startVestingFromDatesTx(account, {
+        privateEnd: dayjs(privateEndISO).toDate(),
+        institutionalEnd: dayjs(institutionalEndISO).toDate(),
+        communityEnd: dayjs(communityEndISO).toDate(),
+      });
+
+      toast.success("Vesting started.");
+      setVestingStarted(true);
+    } catch (e) {
+      console.error(e);
+      toast.error(getErrorMessage(e));
+    } finally {
+      setVestingActionLoading(false);
+    }
+  };
+
+  const handleUpdateEndTime = async (key: RoundKey, iso: string) => {
+    if (!vestingStarted) return;
+    if (disabled) return;
+    if (!account) {
+      toast.error("No wallet connected. Please connect an authorized wallet.");
+      return;
+    }
+    if (!iso) {
+      toast.error("Please select a valid end time.");
+      return;
+    }
+
+    try {
+      setUpdateLoading((prev) => ({ ...prev, [key]: true }));
+      await setVestingEndTimeByKeyFromDateTx(account, key, dayjs(iso).toDate());
+      toast.success(`Updated ${key} vesting end time.`);
+    } catch (e) {
+      console.error(e);
+      toast.error(getErrorMessage(e));
+    } finally {
+      setUpdateLoading((prev) => ({ ...prev, [key]: false }));
+    }
+  };
 
   const handleShowMore = (id: RoundKey) => {
     if (disabled) return;
@@ -488,9 +556,9 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                       </Stack>
                     </Stack>
 
-                    {/* Details (UI only, not mapped to ABI fields except future work) */}
+                    {/* Details */}
                     <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                      {/* Vesting Parameters (not in ABI; UI only) */}
+                      {/* Vesting Parameters (UI-only) */}
                       <Stack gap={0.5} mb={4}>
                         <Typography variant="subtitle1">Vesting Parameters</Typography>
                         <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
@@ -546,243 +614,157 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
 
                       <Divider sx={{ my: 3, borderBottom: `1px solid ${theme.palette.secondary.main}` }} />
 
-                      {/* Start Vesting (UI scaffold; actual on-chain calls are startVesting / set*VestingEndTime) */}
+                      {/* Start / Update Vesting (ABI-compliant) */}
                       <Stack gap={0.5} mb={4}>
-                        <Typography variant="subtitle1">Start Vesting</Typography>
+                        <Typography variant="subtitle1">Vesting</Typography>
                         <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
-                          Set TGE date and start vesting schedule
+                          {vestingStarted
+                            ? "Vesting is active. Update round end times below."
+                            : "Set vesting end times for all rounds, then start vesting."}
                         </Typography>
                       </Stack>
-                      <Grid container spacing={2} sx={{ mb: 2 }}>
-                        <Grid size={{ xs: 12, md: 5.5 }}>
-                          <TextField
-                            fullWidth
-                            label="TGE Date"
-                            placeholder="Select a date"
-                            value={tgeDate}
-                            onClick={(e) => openDate(e.currentTarget as HTMLElement)}
-                            disabled={disabled}
-                            InputLabelProps={{ shrink: true }}
-                            sx={inputSx}
-                            InputProps={{
-                              readOnly: true,
-                              endAdornment: (
-                                <InputAdornment position="end">
-                                  <CalendarMonthRoundedIcon sx={{ color: theme.palette.text.secondary }} />
-                                </InputAdornment>
-                              ),
-                            }}
-                          />
-                          <Popover
-                            open={datePopOpen}
-                            anchorEl={dateAnchor}
-                            onClose={closeDate}
-                            anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                            transformOrigin={{ vertical: "top", horizontal: "left" }}
-                            PaperProps={{
-                              sx: {
-                                bgcolor: theme.palette.background.default,
-                                borderRadius: 2,
-                                boxShadow: `0 8px 24px rgba(0,0,0,.35)`,
-                                border: `1px solid ${theme.palette.headerBorder.main}`,
-                              },
-                            }}
-                          >
-                            <DateCalendar
-                              value={parseTgeDate() ?? null}
-                              onChange={(newVal) => {
-                                if (newVal?.isValid()) {
-                                  setTgeDate(newVal.format("DD.MM.YY"));
-                                }
-                                closeDate();
-                              }}
-                              sx={{
-                                p: 1.5,
-                                "& .MuiPickersCalendarHeader-root": {
-                                  px: 1.5,
-                                  mb: 1,
-                                  "& .MuiTypography-root": { fontWeight: 600 },
-                                  "& .MuiIconButton-root": { borderRadius: 1.25 },
-                                },
-                                "& .MuiDayCalendar-headerSkeleton, & .MuiDayCalendar-weekDayLabel": {
-                                  color: theme.palette.text.secondary,
-                                },
-                                "& .MuiPickersSlideTransition-root": { px: 1 },
-                                "& .MuiDayCalendar-weekContainer": { justifyContent: "space-between" },
-                                "& .MuiSvgIcon-root": { filter: "invert(1)" },
-                                "& .MuiPickersDay-root": {
-                                  borderRadius: 1.25,
-                                  width: 40,
-                                  height: 40,
-                                  margin: "6px 6px",
-                                  color: theme.palette.text.primary,
-                                  "&:hover": {
-                                    background: theme.palette.uranoGradient,
-                                    color: theme.palette.background.default,
-                                  },
-                                  "&.Mui-selected": {
-                                    backgroundColor: theme.palette.uranoGreen1.main + " !important",
-                                    color: theme.palette.common.black,
-                                  },
-                                  "&.Mui-disabled": { opacity: 0.35 },
-                                },
-                              }}
-                              slots={{ day: (props) => <PickersDay {...props} disableMargin /> }}
-                            />
-                          </Popover>
-                        </Grid>
 
-                        <Grid size={{ xs: 12, md: 5 }}>
-                          <TextField
-                            fullWidth
-                            label="TGE Time"
-                            placeholder="Select a time"
-                            value={tgeTime}
-                            onClick={(e) => openTime(e.currentTarget as HTMLElement)}
-                            disabled={disabled}
-                            InputLabelProps={{ shrink: true }}
-                            sx={inputSx}
-                            InputProps={{
-                              readOnly: true,
-                              endAdornment: (
-                                <InputAdornment position="end">
-                                  <TimerRoundedIcon sx={{ color: theme.palette.text.secondary }} />
-                                </InputAdornment>
-                              ),
-                            }}
-                          />
+                      {vestingLoading ? (
+                        <Typography variant="body2" sx={{ color: theme.palette.text.secondary, mb: 2 }}>
+                          Loading vesting status…
+                        </Typography>
+                      ) : (
+                        <>
+                          {!vestingStarted ? (
+                            <>
+                              <Grid container spacing={2} sx={{ mb: 2 }}>
+                                <Grid size={{ xs: 12, md: 4 }}>
+                                  <TextField
+                                    fullWidth
+                                    label="Private End"
+                                    type="datetime-local"
+                                    value={privateEndISO}
+                                    onChange={(e) => setPrivateEndISO(e.target.value)}
+                                    disabled={disabled || vestingActionLoading}
+                                    InputLabelProps={{ shrink: true }}
+                                    sx={inputSx}
+                                  />
+                                </Grid>
+                                <Grid size={{ xs: 12, md: 4 }}>
+                                  <TextField
+                                    fullWidth
+                                    label="Institutional End"
+                                    type="datetime-local"
+                                    value={institutionalEndISO}
+                                    onChange={(e) => setInstitutionalEndISO(e.target.value)}
+                                    disabled={disabled || vestingActionLoading}
+                                    InputLabelProps={{ shrink: true }}
+                                    sx={inputSx}
+                                  />
+                                </Grid>
+                                <Grid size={{ xs: 12, md: 4 }}>
+                                  <TextField
+                                    fullWidth
+                                    label="Community End"
+                                    type="datetime-local"
+                                    value={communityEndISO}
+                                    onChange={(e) => setCommunityEndISO(e.target.value)}
+                                    disabled={disabled || vestingActionLoading}
+                                    InputLabelProps={{ shrink: true }}
+                                    sx={inputSx}
+                                  />
+                                </Grid>
+                              </Grid>
 
-                          <Popover
-                            open={timePopOpen}
-                            anchorEl={timeAnchor}
-                            onClose={closeTime}
-                            anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                            transformOrigin={{ vertical: "top", horizontal: "left" }}
-                            PaperProps={{
-                              sx: {
-                                bgcolor: theme.palette.common.black,
-                                borderRadius: 2,
-                                boxShadow: `0 8px 24px rgba(0,0,0,.35)`,
-                                border: `1px solid ${theme.palette.headerBorder.main}`,
-                                p: 1,
-                                width: 180,
-                                display: "flex",
-                                justifyContent: "center",
-                              },
-                            }}
-                          >
-                            <Stack sx={{ minWidth: 280 }}>
-                              <MultiSectionDigitalClock
-                                ampm
-                                views={["hours", "minutes"]}
-                                minutesStep={5}
-                                value={tempTime}
-                                onChange={(newVal) => {
-                                  if (newVal?.isValid()) setTempTime(newVal);
-                                }}
-                                sx={{
-                                  py: 0.5,
-                                  width: 170,
-                                  bgcolor: "transparent",
-                                  "& .MuiMultiSectionDigitalClock-root": { gap: 1.5 },
-                                  "& .MuiMultiSectionDigitalClockSection-root": {
-                                    bgcolor: "transparent",
-                                    py: 0.5,
-                                    pr: 1.5,
-                                    "&:not(:last-of-type)": {
-                                      borderRight: `1px solid ${theme.palette.headerBorder.main}`,
-                                    },
-                                  },
-                                  "& .MuiMultiSectionDigitalClockSection-root:last-of-type": {
-                                    py: 0.5,
-                                    px: 0.5,
-                                  },
-                                  "& .MuiMultiSectionDigitalClockSection-label": { display: "none" },
-                                  "& .MuiMultiSectionDigitalClockSection-itemsContainer": {
-                                    maxHeight: 300,
-                                    pr: 0.5,
-                                    pl: 0.25,
-                                    scrollPaddingTop: 40,
-                                    scrollPaddingBottom: 40,
-                                    "&::-webkit-scrollbar": { width: 2 },
-                                    "&::-webkit-scrollbar-thumb": {
-                                      backgroundColor: theme.palette.headerBorder.main,
-                                      borderRadius: 8,
-                                    },
-                                  },
-                                  "& .MuiMultiSectionDigitalClockSection-item": {
-                                    fontVariantNumeric: "tabular-nums",
-                                    color: theme.palette.text.primary,
-                                    borderRadius: 1.25,
-                                    mx: 0.5,
-                                    my: 0.4,
-                                    height: 44,
-                                    transition:
-                                      "background .15s ease, color .15s ease, transform .08s ease",
-                                    "&:hover": { background: theme.palette.secondary.main },
-                                    "&.Mui-selected": {
-                                      background: theme.palette.uranoGradient + " !important",
-                                      color: theme.palette.common.black,
-                                      boxShadow: "none",
-                                    },
-                                    "&.Mui-focusVisible": {
-                                      outline: `2px solid ${theme.palette.uranoGreen1.main}`,
-                                      outlineOffset: 1,
-                                    },
-                                  },
-                                  "& .MuiSvgIcon-root": { filter: "invert(1)" },
-                                }}
-                              />
-
-                              {/* Footer button */}
-                              <Stack
-                                direction="row"
-                                alignItems="center"
-                                justifyContent="center"
-                                sx={{
-                                  borderTop: `1px solid ${theme.palette.headerBorder.main}`,
-                                  pt: 1.25,
-                                  px: 1,
-                                }}
-                              >
+                              <Stack direction="row" justifyContent="flex-end" sx={{ mb: 2 }}>
                                 <Button
-                                  fullWidth
-                                  onClick={() => {
-                                    setTgeTime(tempTime.format("HH.mm"));
-                                    closeTime();
-                                  }}
-                                  sx={{
-                                    width: "60%",
-                                    textTransform: "none",
-                                    borderRadius: 2,
-                                    py: 1.25,
-                                    mx: "auto",
-                                    fontSize: 14,
-                                    backgroundColor: theme.palette.secondary.main,
-                                    color: theme.palette.text.primary,
-                                    "&:hover": {
-                                      background: theme.palette.uranoGradient,
-                                      color: theme.palette.background.default,
-                                    },
-                                  }}
+                                  onClick={handleStartVesting}
+                                  disabled={
+                                    disabled ||
+                                    vestingActionLoading ||
+                                    !privateEndISO ||
+                                    !institutionalEndISO ||
+                                    !communityEndISO
+                                  }
+                                  sx={actionBtnSx}
                                 >
-                                  Select
+                                  {vestingActionLoading ? "Starting…" : "Start Vesting"}
                                 </Button>
                               </Stack>
-                            </Stack>
-                          </Popover>
-                        </Grid>
+                            </>
+                          ) : (
+                            <Grid container spacing={2} sx={{ mb: 2 }}>
+                              <Grid size={{ xs: 12, md: 8 }}>
+                                <TextField
+                                  fullWidth
+                                  label="Private End"
+                                  type="datetime-local"
+                                  value={privateEndISO}
+                                  onChange={(e) => setPrivateEndISO(e.target.value)}
+                                  disabled={disabled || updateLoading.private}
+                                  InputLabelProps={{ shrink: true }}
+                                  sx={inputSx}
+                                />
+                              </Grid>
+                              <Grid size={{ xs: 12, md: 4 }}>
+                                <Button
+                                  fullWidth
+                                  onClick={() => handleUpdateEndTime("private", privateEndISO)}
+                                  disabled={disabled || updateLoading.private || !privateEndISO}
+                                  sx={actionBtnSx}
+                                >
+                                  {updateLoading.private ? "Updating…" : "Update Private End"}
+                                </Button>
+                              </Grid>
 
-                        <Grid size={{ xs: 12, md: 1.5 }}>
-                          <Button sx={{ ...actionBtnSx, width: { xs: "100%", md: "auto" } }}>
-                            Save
-                          </Button>
-                        </Grid>
-                      </Grid>
+                              <Grid size={{ xs: 12, md: 8 }}>
+                                <TextField
+                                  fullWidth
+                                  label="Institutional End"
+                                  type="datetime-local"
+                                  value={institutionalEndISO}
+                                  onChange={(e) => setInstitutionalEndISO(e.target.value)}
+                                  disabled={disabled || updateLoading.institutional}
+                                  InputLabelProps={{ shrink: true }}
+                                  sx={inputSx}
+                                />
+                              </Grid>
+                              <Grid size={{ xs: 12, md: 4 }}>
+                                <Button
+                                  fullWidth
+                                  onClick={() => handleUpdateEndTime("institutional", institutionalEndISO)}
+                                  disabled={disabled || updateLoading.institutional || !institutionalEndISO}
+                                  sx={actionBtnSx}
+                                >
+                                  {updateLoading.institutional ? "Updating…" : "Update Institutional End"}
+                                </Button>
+                              </Grid>
+
+                              <Grid size={{ xs: 12, md: 8 }}>
+                                <TextField
+                                  fullWidth
+                                  label="Community End"
+                                  type="datetime-local"
+                                  value={communityEndISO}
+                                  onChange={(e) => setCommunityEndISO(e.target.value)}
+                                  disabled={disabled || updateLoading.community}
+                                  InputLabelProps={{ shrink: true }}
+                                  sx={inputSx}
+                                />
+                              </Grid>
+                              <Grid size={{ xs: 12, md: 4 }}>
+                                <Button
+                                  fullWidth
+                                  onClick={() => handleUpdateEndTime("community", communityEndISO)}
+                                  disabled={disabled || updateLoading.community || !communityEndISO}
+                                  sx={actionBtnSx}
+                                >
+                                  {updateLoading.community ? "Updating…" : "Update Community End"}
+                                </Button>
+                              </Grid>
+                            </Grid>
+                          )}
+                        </>
+                      )}
 
                       <Divider sx={{ my: 3, borderBottom: `1px solid ${theme.palette.secondary.main}` }} />
 
-                      {/* Round Max Tokens (UI placeholders for now) */}
+                      {/* Round Max Tokens */}
                       <Stack gap={0.5} mb={4}>
                         <Typography variant="subtitle1">Round Max Tokens</Typography>
                         <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
@@ -797,13 +779,16 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                             placeholder="0"
                             value={maxTokensHuman}
                             onChange={(e) => setMaxTokensHuman(e.target.value)}
-                            disabled={disabled || maxTokensLoading || anyRowBusy || (expandedId ? !!txLoadingById[expandedId] : false)}
+                            disabled={
+                              disabled ||
+                              maxTokensLoading ||
+                              anyRowBusy ||
+                              (expandedId ? !!txLoadingById[expandedId] : false)
+                            }
                             InputLabelProps={{ shrink: true }}
                             sx={inputSx}
                             type="number"
-                            helperText={
-                              maxTokensLoading ? "Loading current value…" : undefined
-                            }
+                            helperText={maxTokensLoading ? "Loading current value…" : undefined}
                           />
                         </Grid>
                         <Grid size={{ xs: 12, md: 1.5 }}>
@@ -822,7 +807,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                           </Button>
                         </Grid>
                       </Grid>
-
 
                       <Divider sx={{ my: 3, borderBottom: `1px solid ${theme.palette.secondary.main}` }} />
                     </Collapse>
