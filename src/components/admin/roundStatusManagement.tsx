@@ -11,12 +11,6 @@ import {
   useTheme,
   Collapse,
   TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  type SelectChangeEvent,
-  Box,
   Popover,
   InputAdornment,
 } from "@mui/material";
@@ -97,9 +91,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
   const [tgeTime, setTgeTime] = useState("");
   const [maxTokensHuman, setMaxTokensHuman] = useState("");
   const [maxTokensLoading, setMaxTokensLoading] = useState(false);
-  const [address, setAddress] = useState("");
-  const [roundId, setRoundId] = useState<RoundKey | "">(""); // <- select value
-  const [maxAllocation, setMaxAllocation] = useState("");
 
   // date/time popovers
   const [datePopOpen, setDatePopOpen] = useState(false);
@@ -303,7 +294,7 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
     try {
       setRowTxLoading(rowId, true);
       await setRoundMaxTokensHumanTx(account, expandedId, maxTokensHuman.trim());
-      toast.success(`Max tokens updated for ${expandedId}.`);
+      toast.success(`Max tokens updated for ${expandedId} round.`);
 
       // Re-read to reflect any normalization/rounding by decimals
       try {
@@ -834,98 +825,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
 
 
                       <Divider sx={{ my: 3, borderBottom: `1px solid ${theme.palette.secondary.main}` }} />
-
-                      {/* Whitelist Management (UI placeholders; contract has global whitelist only) */}
-                      <Stack gap={0.5} mb={4}>
-                        <Typography variant="subtitle1">Whitelist Management</Typography>
-                        <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
-                          Add or remove addresses from whitelist
-                        </Typography>
-                      </Stack>
-                      <Grid container spacing={2}>
-                        <Grid size={{ xs: 12 }}>
-                          <TextField
-                            fullWidth
-                            label="Address"
-                            placeholder="Enter address"
-                            value={address}
-                            onChange={(e) => setAddress(e.target.value)}
-                            disabled={disabled}
-                            InputLabelProps={{ shrink: true }}
-                            sx={inputSx}
-                          />
-                        </Grid>
-
-                        <Grid size={{ xs: 12, md: 6 }}>
-                          <FormControl fullWidth disabled={disabled} sx={inputSx}>
-                            <InputLabel id="round-select-label" shrink>
-                              Round
-                            </InputLabel>
-                            <Select
-                              labelId="round-select-label"
-                              value={roundId}
-                              onChange={(e: SelectChangeEvent<string>) =>
-                                setRoundId(e.target.value as RoundKey)
-                              }
-                              displayEmpty
-                              sx={{ "& .MuiSelect-icon": { filter: "invert(1)" } }}
-                              renderValue={(val) =>
-                                val ? (
-                                  items.find((rr) => rr.id === val as RoundKey)?.title ?? val
-                                ) : (
-                                  <Box component="span" sx={{ color: theme.palette.text.secondary }}>
-                                    Select round
-                                  </Box>
-                                )
-                              }
-                              label="Round"
-                            >
-                              {items.map((opt) => (
-                                <MenuItem key={opt.id} value={opt.id}>
-                                  {opt.title}
-                                </MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
-                        </Grid>
-
-                        <Grid size={{ xs: 12, md: 6 }}>
-                          <TextField
-                            fullWidth
-                            label="Max Allocation (URANO)"
-                            placeholder="0"
-                            value={maxAllocation}
-                            onChange={(e) => setMaxAllocation(e.target.value)}
-                            disabled={disabled}
-                            InputLabelProps={{ shrink: true }}
-                            sx={inputSx}
-                            type="number"
-                          />
-                        </Grid>
-
-                        <Grid size={{ xs: 12, md: 6 }}>
-                          <Button
-                            fullWidth
-                            sx={{ ...actionBtnSx, "&:hover": { background: theme.palette.error.main } }}
-                          >
-                            Remove
-                          </Button>
-                        </Grid>
-                        <Grid size={{ xs: 12, md: 6 }}>
-                          <Button
-                            fullWidth
-                            sx={{
-                              ...actionBtnSx,
-                              "&:hover": {
-                                background: theme.palette.uranoGradient,
-                                color: theme.palette.info.main,
-                              },
-                            }}
-                          >
-                            Add
-                          </Button>
-                        </Grid>
-                      </Grid>
                     </Collapse>
                   </Stack>
 
