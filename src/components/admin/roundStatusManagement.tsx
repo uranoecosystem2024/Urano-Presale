@@ -689,10 +689,10 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                             </>
                           ) : (
                             <Grid container spacing={2} sx={{ mb: 2 }}>
-                              <Grid size={{ xs: 12, md: 8 }}>
+                              <Grid size={{ xs: 12, md: 9 }}>
                                 <TextField
                                   fullWidth
-                                  label="Private End"
+                                  label="Private round vesting end"
                                   type="datetime-local"
                                   value={privateEndISO}
                                   onChange={(e) => setPrivateEndISO(e.target.value)}
@@ -701,21 +701,21 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                                   sx={inputSx}
                                 />
                               </Grid>
-                              <Grid size={{ xs: 12, md: 4 }}>
+                              <Grid size={{ xs: 12, md: 3 }}>
                                 <Button
                                   fullWidth
                                   onClick={() => handleUpdateEndTime("private", privateEndISO)}
                                   disabled={disabled || updateLoading.private || !privateEndISO}
                                   sx={actionBtnSx}
                                 >
-                                  {updateLoading.private ? "Updating…" : "Update Private End"}
+                                  {updateLoading.private ? "Updating…" : "Update"}
                                 </Button>
                               </Grid>
 
-                              <Grid size={{ xs: 12, md: 8 }}>
+                              <Grid size={{ xs: 12, md: 9 }}>
                                 <TextField
                                   fullWidth
-                                  label="Institutional End"
+                                  label="Institutional round vesting end"
                                   type="datetime-local"
                                   value={institutionalEndISO}
                                   onChange={(e) => setInstitutionalEndISO(e.target.value)}
@@ -724,21 +724,21 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                                   sx={inputSx}
                                 />
                               </Grid>
-                              <Grid size={{ xs: 12, md: 4 }}>
+                              <Grid size={{ xs: 12, md: 3 }}>
                                 <Button
                                   fullWidth
                                   onClick={() => handleUpdateEndTime("institutional", institutionalEndISO)}
                                   disabled={disabled || updateLoading.institutional || !institutionalEndISO}
                                   sx={actionBtnSx}
                                 >
-                                  {updateLoading.institutional ? "Updating…" : "Update Institutional End"}
+                                  {updateLoading.institutional ? "Updating…" : "Update"}
                                 </Button>
                               </Grid>
 
-                              <Grid size={{ xs: 12, md: 8 }}>
+                              <Grid size={{ xs: 12, md: 9 }}>
                                 <TextField
                                   fullWidth
-                                  label="Community End"
+                                  label="Community round vesting end"
                                   type="datetime-local"
                                   value={communityEndISO}
                                   onChange={(e) => setCommunityEndISO(e.target.value)}
@@ -747,14 +747,14 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                                   sx={inputSx}
                                 />
                               </Grid>
-                              <Grid size={{ xs: 12, md: 4 }}>
+                              <Grid size={{ xs: 12, md: 3 }}>
                                 <Button
                                   fullWidth
                                   onClick={() => handleUpdateEndTime("community", communityEndISO)}
                                   disabled={disabled || updateLoading.community || !communityEndISO}
                                   sx={actionBtnSx}
                                 >
-                                  {updateLoading.community ? "Updating…" : "Update Community End"}
+                                  {updateLoading.community ? "Updating…" : "Update"}
                                 </Button>
                               </Grid>
                             </Grid>

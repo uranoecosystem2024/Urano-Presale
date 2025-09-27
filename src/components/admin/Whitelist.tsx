@@ -25,6 +25,10 @@ import {
   removeFromWhitelistTx,
 } from "@/utils/admin/whitelist";
 
+import UploadWhitelistCsvModal, {
+  type WhitelistCsvEntry as CsvEntry,
+} from "@/components/admin/WhitelistImportModal";
+
 export type WhitelistProps = {
   title?: string;
   subtitle?: string;
@@ -58,6 +62,15 @@ export default function Whitelist({
 }: WhitelistProps) {
   const theme = useTheme();
   const account = useActiveAccount();
+  const [openUploadModal, setOpenUploadModal] = useState<boolean>(false)
+
+  function OpeningUploadModal(){
+    setOpenUploadModal(true)
+  }
+
+  function closeUpload(){
+    setOpenUploadModal(false)
+  }
 
   const [address, setAddress] = useState<string>(initialAddress);
   const [amountHuman, setAmountHuman] = useState<string>(initialAmount);
@@ -176,6 +189,31 @@ export default function Whitelist({
     }
   };
 
+  const handleImportConfirm = async (rows: CsvEntry[]) => {
+    if (!account) {
+      toast.error("No wallet connected. Please connect an authorized wallet.");
+      return;
+    }
+    if (rows.length === 0) {
+      toast.info("No rows to import.");
+      return;
+    }
+
+    try {
+      setBusy(true);
+      await addToWhitelistHumanTx(account, rows);
+      toast.success(`Imported ${rows.length} whitelist ${rows.length === 1 ? "entry" : "entries"}.`);
+      // Optionally notify with the first address
+      const first = rows[0]?.address;
+      if (first) onAdded?.(first);
+    } catch (e: unknown) {
+      console.error(e);
+      toast.error(getErrorMessage(e) ?? "Failed to import CSV.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Stack gap={2} width="100%">
@@ -199,10 +237,7 @@ export default function Whitelist({
                 backgroundColor: theme.palette.secondary.main,
                 border: `1px solid ${theme.palette.headerBorder.main}`,
               }}
-              onClick={() => {
-                // to be implemented later
-                console.log("Import CSV");
-              }}
+              onClick={() => {OpeningUploadModal()}}
             >
               <Typography
                 variant="body1"
@@ -299,6 +334,16 @@ export default function Whitelist({
           )}
         </Stack>
       </Stack>
+      <UploadWhitelistCsvModal
+        open={openUploadModal}
+        onClose={closeUpload}
+        onConfirm={(rows) => {
+          // keep onConfirm's type as () => void by not returning the Promise
+          void handleImportConfirm(rows);
+        }}
+        title="Import Whitelist CSV"
+        subtitle='Columns required: "address", "amount", "release"'
+      />
     </LocalizationProvider>
   );
 }
