@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Stack, Typography, Box } from "@mui/material";
+import { Stack, Typography, Box, ButtonBase } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { IoChevronForward } from "react-icons/io5";
 import SubscriptionModal from "../SubscriptionModal";
@@ -212,6 +212,7 @@ const Registration = () => {
       >
         {/* Step 1 */}
         <Stack
+          component={ButtonBase}
           width={{ xs: "100%", lg: "35%" }}
           direction={"row"}
           alignItems={"center"}
@@ -220,6 +221,7 @@ const Registration = () => {
           onClick={handleClickStep1}
           aria-disabled={locked.step1}
           role="button"
+          id="hello"
         >
           <StepBadge n={1} />
           <Typography
@@ -229,6 +231,7 @@ const Registration = () => {
               fontSize: { xs: "1rem", lg: "0.75rem" },
               color: theme.palette.text.primary,
               width: "80%",
+              textAlign: "left"
             }}
           >
             Register with Email
