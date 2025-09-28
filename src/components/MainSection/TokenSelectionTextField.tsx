@@ -7,8 +7,9 @@ import {
   Button,
   Avatar,
   Box,
-  type Theme,
+  useTheme,
   type SxProps,
+  type Theme,
 } from "@mui/material";
 
 type StablecoinFieldProps = {
@@ -19,9 +20,7 @@ type StablecoinFieldProps = {
   tokenIconSrc?: string;
   onPickToken?: () => void;
   sx?: SxProps<Theme>;
-  /** optional inline status below the field */
   helperText?: React.ReactNode;
-  /** toggles error styling & color for helperText */
   error?: boolean;
 };
 
@@ -36,6 +35,8 @@ export default function StablecoinField({
   helperText,
   error = false,
 }: StablecoinFieldProps) {
+  const theme = useTheme();
+
   // --- auto-fit font size to ensure the full number is always visible ---
   const inputRef = React.useRef<HTMLInputElement | null>(null);
   const [fontSize, setFontSize] = React.useState(18); // px
@@ -85,6 +86,8 @@ export default function StablecoinField({
   }, [fit]);
   // ----------------------------------------------------------------------
 
+  const inputBg = "#151515"; // matches your card background in this field
+
   return (
     <TextField
       fullWidth
@@ -103,18 +106,7 @@ export default function StablecoinField({
           fontWeight: fontSize < 12 ? 400 : 500,
           letterSpacing: fontSize < 12 ? -0.2 : 0,
           fontVariantNumeric: "tabular-nums",
-        },
-        sx: {
-          textAlign: { xs: "right", lg: "right" },
-          "& .MuiOutlinedInput-root": {
-            pl: 0,
-            pr: 0,
-          },
-          "& .MuiOutlinedInput-root.MuiInputBase-adornedStart": { pl: 0 },
-          "& .MuiOutlinedInput-root.MuiInputBase-adornedEnd": { pr: 0 },
-          "& .MuiFormHelperText-root": {
-            margin: "0px !important",
-          },
+          textAlign: "right",
         },
         "aria-label": label,
         title: String(value ?? ""),
@@ -139,7 +131,7 @@ export default function StablecoinField({
               <Avatar
                 src={tokenIconSrc}
                 alt={tokenSymbol}
-                sx={{ width: 24, height: 24 }}
+                sx={{ width: 24, height: 24, marginLeft: 2 }}
                 imgProps={{ draggable: false }}
               />
               <Box component="span" sx={{ fontWeight: 400, fontSize: 16 }}>
@@ -150,8 +142,9 @@ export default function StablecoinField({
         ),
       }}
       sx={{
+        // Input surface + border behavior
         "& .MuiOutlinedInput-root": {
-          bgcolor: "#151515",
+          bgcolor: inputBg,
           width: "100%",
           borderRadius: 2,
           height: 56,
@@ -159,14 +152,48 @@ export default function StablecoinField({
           "& fieldset": { borderColor: "#2A2A2A" },
           "&:hover fieldset": { borderColor: "#3A3A3A" },
           "&.Mui-focused fieldset": { borderColor: "#6BE2C2" },
-          "& .MuiOutlinedInput-input": {},
+
+          // remove side paddings when adorned
+          "&.MuiInputBase-adornedStart": { pl: 0 },
+          "&.MuiInputBase-adornedEnd": { pr: 0 },
         },
-        "& .MuiInputLabel-outlined": {
+
+        // Input text (so we can control alignment without relying on inputProps.sx)
+        "& .MuiOutlinedInput-input": {
+          textAlign: "right",
+        },
+
+        // Helper text spacing
+        "& .MuiFormHelperText-root": {
+          margin: "0 !important",
+        },
+
+        // Label base colors
+        "& .MuiInputLabel-root": {
           color: "rgba(255,255,255,0.6)",
         },
-        "& .MuiInputLabel-outlined.Mui-focused": {
+        "& .MuiInputLabel-root.Mui-focused": {
           color: "rgba(255,255,255,0.7)",
         },
+
+        // Make the floating label look like it cuts the border
+        "& .MuiInputLabel-root.MuiInputLabel-shrink": {
+          px: 0.75, // horizontal padding for breathing room
+          borderRadius: 0.5,
+          backgroundColor: inputBg, // match input bg so it "cuts" the outline
+          lineHeight: 1.2,
+          color: theme.palette.common.white,
+        },
+
+        // Let the notch fit the padded label
+        "& .MuiOutlinedInput-notchedOutline legend": {
+          maxWidth: "40px",
+        },
+        "& .MuiOutlinedInput-notchedOutline legend > span": {
+          paddingLeft: 6,
+          paddingRight: 6,
+        },
+
         ...sx,
       }}
       placeholder="0"

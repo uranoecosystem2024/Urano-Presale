@@ -102,6 +102,7 @@ export default function Whitelist({
   }, [initialRound]);
 
   const inputSx = {
+    // Input surface + border behavior
     "& .MuiOutlinedInput-root": {
       background: theme.palette.background.paper,
       borderRadius: 2,
@@ -109,14 +110,37 @@ export default function Whitelist({
       "&:hover fieldset": { borderColor: theme.palette.text.primary },
       "&.Mui-focused fieldset": { borderColor: theme.palette.uranoGreen1.main },
     },
+
+    // Placeholder opacity
     "& .MuiInputBase-input::placeholder": { opacity: 0.7 },
+
+    // Label styles
     "& .MuiInputLabel-root": {
       color: theme.palette.common.white,
       "&.Mui-focused": { color: theme.palette.common.white },
-      "&.MuiInputLabel-shrink": { color: theme.palette.common.white },
+      "&.MuiInputLabel-shrink": {
+        color: theme.palette.common.white,
+        // Make the floating label look like it cuts the border
+        px: 0.75,                   // horizontal padding for breathing room
+        borderRadius: 0.5,          // soften corners
+        backgroundColor: theme.palette.background.paper, // match input bg
+        lineHeight: 1.2,            // avoids clipping with padding
+      },
       "&.Mui-disabled": { color: theme.palette.text.disabled },
     },
+
+    // Let the notch fit the padded label
+    "& .MuiOutlinedInput-notchedOutline legend": {
+      maxWidth: "60px", // override MUI's tiny animation width
+    },
+
+    // (Optional) add a little inner padding to the legend’s span for perfect notch sizing
+    "& .MuiOutlinedInput-notchedOutline legend > span": {
+      paddingLeft: 6,
+      paddingRight: 6,
+    },
   } as const;
+
 
   const actionBtnSx = {
     textTransform: "none",
