@@ -14,21 +14,19 @@ import {
   Paper,
 } from "@mui/material";
 import type { Theme } from "@mui/material/styles";
-
 import { parse } from "csv-parse/sync";
-
-import dayjs, { type Dayjs } from "dayjs";
+import type { RoundKey } from "@/utils/admin/whitelist";
 
 export type WhitelistCsvEntry = {
   address: `0x${string}`;
   preAssignedTokens: string; // human-readable string
-  releaseDate: Date;
+  whitelistRound: RoundKey | number; // enum key or uint8 index
 };
 
 type RawCsvRow = {
   address?: string | null;
   amount?: string | number | null;
-  release?: string | number | null;
+  round?: string | number | null; // new: round column
 };
 
 export type UploadWhitelistCsvModalProps = {
@@ -45,64 +43,42 @@ function isAddressLike(a?: string | null): a is `0x${string}` {
   return s.startsWith("0x") && s.length === 42;
 }
 
-function toDate(input: string | number | null | undefined): Date | null {
+/** round names we accept (case-insensitive) */
+const ROUND_OPTIONS: ReadonlyArray<{ key: RoundKey; labels: string[] }> = [
+  { key: "seed",           labels: ["seed"] },
+  { key: "private",        labels: ["private"] },
+  { key: "institutional",  labels: ["institutional", "inst", "institution"] },
+  { key: "strategic",      labels: ["strategic", "strat"] },
+  { key: "community",      labels: ["community", "public"] },
+];
+
+const LABEL_TO_ROUND_KEY: Record<string, RoundKey> = ROUND_OPTIONS
+  .flatMap(({ key, labels }) => labels.map((l) => [l.toLowerCase(), key] as const))
+  .reduce((acc, [label, key]) => {
+    acc[label] = key;
+    return acc;
+  }, {} as Record<string, RoundKey>);
+
+/** Parse a round value from CSV (name or number). Returns RoundKey or uint8 number, otherwise null. */
+function parseRoundValue(input: string | number | null | undefined): RoundKey | number | null {
   if (input == null) return null;
 
   if (typeof input === "number") {
-    // treat as ms if >= 1e12, else seconds
-    return input < 1e12 ? new Date(input * 1000) : new Date(input);
+    return Number.isFinite(input) && input >= 0 && input <= 255 ? input : null;
   }
 
   const raw = String(input).trim();
   if (!raw) return null;
 
-  const candidates: (string | Dayjs)[] = [
-    dayjs(raw),
-    dayjs(raw, "YYYY-MM-DD HH:mm", true),
-    dayjs(raw, "YYYY/MM/DD HH:mm", true),
-    dayjs(raw, "DD-MM-YYYY HH:mm", true),
-    dayjs(raw, "DD/MM/YYYY HH:mm", true),
-    dayjs(raw, "YYYY-MM-DD", true),
-    dayjs(raw, "DD/MM/YYYY", true),
-  ];
-
-  for (const d of candidates) {
-    const dd = dayjs(d);
-    if (dd.isValid()) return dd.toDate();
-  }
-  return null;
-}
-
-function validateRow(row: RawCsvRow): {
-  valid: boolean;
-  normalized?: WhitelistCsvEntry;
-  errors: string[];
-} {
-  const errs: string[] = [];
-
-  const addr = row.address?.toString().trim();
-  if (!isAddressLike(addr)) errs.push("Invalid or missing address (must be 0x… and 42 chars).");
-
-  const amountStr = row.amount?.toString().trim() ?? "";
-  if (!amountStr) errs.push("Missing amount.");
-  else if (!/^\d+(\.\d+)?$/.test(amountStr)) errs.push("Amount must be a positive number.");
-
-  const release = toDate(row.release ?? null);
-  if (!release) errs.push("Invalid or missing release date/time.");
-
-  if (errs.length > 0 || !addr || !release || !amountStr) {
-    return { valid: false, errors: errs };
+  // numeric string?
+  if (/^\d+$/.test(raw)) {
+    const n = Number(raw);
+    return Number.isFinite(n) && n >= 0 && n <= 255 ? n : null;
   }
 
-  return {
-    valid: true,
-    normalized: {
-      address: addr as `0x${string}`,
-      preAssignedTokens: amountStr,
-      releaseDate: release,
-    },
-    errors: [],
-  };
+  // label string
+  const key = LABEL_TO_ROUND_KEY[raw.toLowerCase()];
+  return key ?? null;
 }
 
 /** Safe object check (not null, not array) */
@@ -119,12 +95,46 @@ function getString(obj: unknown, key: string): string | undefined {
   return undefined;
 }
 
+function validateRow(row: RawCsvRow): {
+  valid: boolean;
+  normalized?: WhitelistCsvEntry;
+  errors: string[];
+} {
+  const errs: string[] = [];
+
+  const addr = row.address?.toString().trim();
+  if (!isAddressLike(addr)) errs.push("Invalid or missing address (must be 0x… and 42 chars).");
+
+  const amountStr = row.amount?.toString().trim() ?? "";
+  if (!amountStr) errs.push("Missing amount.");
+  else if (!/^\d+(\.\d+)?$/.test(amountStr) || Number(amountStr) <= 0) {
+    errs.push("Amount must be a positive number.");
+  }
+
+  const roundParsed = parseRoundValue(row.round ?? null);
+  if (roundParsed == null) errs.push("Invalid or missing round (use name or uint8 index).");
+
+  if (errs.length > 0 || !addr || !amountStr || roundParsed == null) {
+    return { valid: false, errors: errs };
+  }
+
+  return {
+    valid: true,
+    normalized: {
+      address: addr as `0x${string}`,
+      preAssignedTokens: amountStr,
+      whitelistRound: roundParsed,
+    },
+    errors: [],
+  };
+}
+
 export default function UploadWhitelistCsvModal({
   open,
   onClose,
   onConfirm,
   title = "Import CSV for whitelisting",
-  subtitle = "Upload a CSV with columns: address, amount, release",
+  subtitle = "Upload a CSV with columns: address, amount, round",
 }: UploadWhitelistCsvModalProps) {
   const theme = useTheme<Theme>();
   const [fileName, setFileName] = useState<string>("");
@@ -158,15 +168,20 @@ export default function UploadWhitelistCsvModal({
       const inv: Array<{ row: RawCsvRow; errors: string[] }> = [];
 
       for (const raw of rows) {
-        // Safely access possible header-case variants
+        // Accept common header variants
         const address = getString(raw, "address") ?? getString(raw, "Address") ?? null;
         const amountStr = (getString(raw, "amount") ?? getString(raw, "Amount") ?? "").trim();
-        const releaseStr = (getString(raw, "release") ?? getString(raw, "Release") ?? "").trim();
+        const roundStr =
+          (getString(raw, "round") ??
+            getString(raw, "Round") ??
+            getString(raw, "whitelistRound") ??
+            getString(raw, "WhitelistRound") ??
+            "")?.trim() ?? "";
 
         const r: RawCsvRow = {
           address,
           amount: amountStr,
-          release: releaseStr,
+          round: roundStr,
         };
 
         const check = validateRow(r);
@@ -197,6 +212,25 @@ export default function UploadWhitelistCsvModal({
     onConfirm?.(valid);
     resetAndClose();
   };
+
+  // Pretty-print the round for preview
+  function roundToLabel(r: RoundKey | number): string {
+    if (typeof r === "number") return String(r);
+    switch (r) {
+      case "seed":
+        return "Seed";
+      case "private":
+        return "Private";
+      case "institutional":
+        return "Institutional";
+      case "strategic":
+        return "Strategic";
+      case "community":
+        return "Community";
+      default:
+        return String(r);
+    }
+  }
 
   return (
     <Modal open={open} onClose={resetAndClose}>
@@ -342,7 +376,7 @@ export default function UploadWhitelistCsvModal({
                     <tr>
                       <th>Address</th>
                       <th>Amount (URANO)</th>
-                      <th>Release</th>
+                      <th>Round</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -350,7 +384,7 @@ export default function UploadWhitelistCsvModal({
                       <tr key={`${r.address}-${i}`}>
                         <td>{r.address}</td>
                         <td>{r.preAssignedTokens}</td>
-                        <td>{dayjs(r.releaseDate).format("YYYY-MM-DD HH:mm")}</td>
+                        <td>{roundToLabel(r.whitelistRound)}</td>
                       </tr>
                     ))}
                     {valid.length > 50 && (

@@ -7,6 +7,7 @@ import { useTheme } from "@mui/material/styles";
 import AdminHeader from "@/components/admin/adminHeader";
 import Footer from "@/components/Footer";
 import RoundStatusManagement from "@/components/admin/roundStatusManagement";
+import GlobalVestingParams from "@/components/admin/globalVestingParams";
 import InstitutionalRoundAccess from "@/components/admin/institutionalRoundAccess";
 import Whitelist from "@/components/admin/Whitelist";
 import WithdrawUnsoldTokens from "@/components/admin/withdrawUnsoldTokens";
@@ -159,6 +160,22 @@ export default function Admin() {
                                 console.log({ changedId, next });
                             }}
                             onShowMore={(id) => console.log("show more for", id)}
+                        />
+                    </Stack>
+
+                    <Stack
+                        sx={{
+                            backgroundColor: theme.palette.presaleCardBg.main,
+                            border: `1px solid ${theme.palette.headerBorder.main}`,
+                            borderRadius: 2,
+                            p: 3,
+                            gap: 2,
+                        }}
+                    >
+                        <GlobalVestingParams
+                            title="Global Vesting Parameters"
+                            subtitle="Set the TGE date and start vesting (applies globally)."
+                            disabled={checkingRole || !isAdmin}
                         />
                     </Stack>
 

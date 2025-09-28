@@ -240,6 +240,50 @@ export const presaleAbi = [
         "inputs": [
             {
                 "indexed": true,
+                "internalType": "enum Presale.RoundType",
+                "name": "round",
+                "type": "uint8"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "cliffPeriodMonths",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "vestingDurationMonths",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "tgeUnlockPercentage",
+                "type": "uint256"
+            }
+        ],
+        "name": "RoundVestingParametersUpdated",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "tgeTime",
+                "type": "uint256"
+            }
+        ],
+        "name": "TGETimeSet",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
                 "internalType": "address",
                 "name": "user",
                 "type": "address"
@@ -253,7 +297,7 @@ export const presaleAbi = [
             {
                 "indexed": false,
                 "internalType": "uint256",
-                "name": "amount",
+                "name": "tokenAmount",
                 "type": "uint256"
             }
         ],
@@ -278,7 +322,7 @@ export const presaleAbi = [
             {
                 "indexed": false,
                 "internalType": "uint256",
-                "name": "amount",
+                "name": "tokenAmount",
                 "type": "uint256"
             },
             {
@@ -302,6 +346,12 @@ export const presaleAbi = [
         "inputs": [
             {
                 "indexed": true,
+                "internalType": "address",
+                "name": "buyer",
+                "type": "address"
+            },
+            {
+                "indexed": true,
                 "internalType": "enum Presale.RoundType",
                 "name": "round",
                 "type": "uint8"
@@ -309,11 +359,17 @@ export const presaleAbi = [
             {
                 "indexed": false,
                 "internalType": "uint256",
-                "name": "endTime",
+                "name": "tokenAmount",
+                "type": "uint256"
+            },
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "usdcAmount",
                 "type": "uint256"
             }
         ],
-        "name": "VestingEndTimeSet",
+        "name": "TokensReserved",
         "type": "event"
     },
     {
@@ -415,6 +471,29 @@ export const presaleAbi = [
     {
         "inputs": [
             {
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            },
+            {
+                "internalType": "enum Presale.RoundType",
+                "name": "round",
+                "type": "uint8"
+            },
+            {
+                "internalType": "uint256",
+                "name": "usdcAmount",
+                "type": "uint256"
+            }
+        ],
+        "name": "addPurchase",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "address[]",
                 "name": "users",
                 "type": "address[]"
@@ -425,9 +504,9 @@ export const presaleAbi = [
                 "type": "uint256[]"
             },
             {
-                "internalType": "uint256[]",
-                "name": "releaseDates",
-                "type": "uint256[]"
+                "internalType": "enum Presale.RoundType[]",
+                "name": "whitelistRounds",
+                "type": "uint8[]"
             }
         ],
         "name": "addToWhitelist",
@@ -485,6 +564,45 @@ export const presaleAbi = [
     {
         "inputs": [
             {
+                "internalType": "uint256",
+                "name": "totalVestedTokens",
+                "type": "uint256"
+            },
+            {
+                "internalType": "enum Presale.RoundType",
+                "name": "round",
+                "type": "uint8"
+            }
+        ],
+        "name": "calculateVestedAmount",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "vestedAmount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tgeAmount",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "cliffEndTime",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "vestingEndTime",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "enum Presale.RoundType",
                 "name": "round",
                 "type": "uint8"
@@ -528,11 +646,6 @@ export const presaleAbi = [
             },
             {
                 "internalType": "uint256",
-                "name": "maxPurchase_",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
                 "name": "totalRaised_",
                 "type": "uint256"
             },
@@ -564,6 +677,21 @@ export const presaleAbi = [
             {
                 "internalType": "uint256",
                 "name": "vestingEndTime_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "cliffPeriodMonths_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "vestingDurationMonths_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tgeUnlockPercentage_",
                 "type": "uint256"
             }
         ],
@@ -591,11 +719,6 @@ export const presaleAbi = [
             },
             {
                 "internalType": "uint256",
-                "name": "maxPurchase_",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
                 "name": "totalRaised_",
                 "type": "uint256"
             },
@@ -627,6 +750,21 @@ export const presaleAbi = [
             {
                 "internalType": "uint256",
                 "name": "vestingEndTime_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "cliffPeriodMonths_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "vestingDurationMonths_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tgeUnlockPercentage_",
                 "type": "uint256"
             }
         ],
@@ -707,7 +845,94 @@ export const presaleAbi = [
             },
             {
                 "internalType": "uint256",
-                "name": "maxPurchase_",
+                "name": "totalRaised_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "startTime_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "endTime_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "totalTokensSold_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "maxTokensToSell_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bool",
+                "name": "isPublic_",
+                "type": "bool"
+            },
+            {
+                "internalType": "uint256",
+                "name": "vestingEndTime_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "cliffPeriodMonths_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "vestingDurationMonths_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tgeUnlockPercentage_",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes32",
+                "name": "role",
+                "type": "bytes32"
+            }
+        ],
+        "name": "getRoleAdmin",
+        "outputs": [
+            {
+                "internalType": "bytes32",
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getSeedRoundInfo",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "isActive_",
+                "type": "bool"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tokenPrice_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "minPurchase_",
                 "type": "uint256"
             },
             {
@@ -744,25 +969,21 @@ export const presaleAbi = [
                 "internalType": "uint256",
                 "name": "vestingEndTime_",
                 "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
+            },
             {
-                "internalType": "bytes32",
-                "name": "role",
-                "type": "bytes32"
-            }
-        ],
-        "name": "getRoleAdmin",
-        "outputs": [
+                "internalType": "uint256",
+                "name": "cliffPeriodMonths_",
+                "type": "uint256"
+            },
             {
-                "internalType": "bytes32",
-                "name": "",
-                "type": "bytes32"
+                "internalType": "uint256",
+                "name": "vestingDurationMonths_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tgeUnlockPercentage_",
+                "type": "uint256"
             }
         ],
         "stateMutability": "view",
@@ -795,6 +1016,79 @@ export const presaleAbi = [
             {
                 "internalType": "uint256",
                 "name": "totalRaised_",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getStrategicRoundInfo",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "isActive_",
+                "type": "bool"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tokenPrice_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "minPurchase_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "totalRaised_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "startTime_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "endTime_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "totalTokensSold_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "maxTokensToSell_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "bool",
+                "name": "isPublic_",
+                "type": "bool"
+            },
+            {
+                "internalType": "uint256",
+                "name": "vestingEndTime_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "cliffPeriodMonths_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "vestingDurationMonths_",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tgeUnlockPercentage_",
                 "type": "uint256"
             }
         ],
@@ -885,9 +1179,9 @@ export const presaleAbi = [
                 "type": "uint256[]"
             },
             {
-                "internalType": "bool[]",
+                "internalType": "uint256[]",
                 "name": "claimed",
-                "type": "bool[]"
+                "type": "uint256[]"
             }
         ],
         "stateMutability": "view",
@@ -919,9 +1213,33 @@ export const presaleAbi = [
                 "type": "uint256[]"
             },
             {
-                "internalType": "bool[]",
+                "internalType": "uint256[]",
                 "name": "claimed",
-                "type": "bool[]"
+                "type": "uint256[]"
+            },
+            {
+                "internalType": "uint256[]",
+                "name": "claimableAmounts",
+                "type": "uint256[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "user",
+                "type": "address"
+            }
+        ],
+        "name": "getWhitelistClaimable",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "claimableAmount",
+                "type": "uint256"
             }
         ],
         "stateMutability": "view",
@@ -1215,11 +1533,6 @@ export const presaleAbi = [
             },
             {
                 "internalType": "uint256",
-                "name": "maxPurchase",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
                 "name": "totalRaised",
                 "type": "uint256"
             },
@@ -1252,22 +1565,24 @@ export const presaleAbi = [
                 "internalType": "uint256",
                 "name": "vestingEndTime",
                 "type": "uint256"
-            }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-    },
-    {
-        "inputs": [
+            },
             {
                 "internalType": "uint256",
-                "name": "endTime",
+                "name": "cliffPeriodMonths",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "vestingDurationMonths",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "tgeUnlockPercentage",
                 "type": "uint256"
             }
         ],
-        "name": "setCommunityVestingEndTime",
-        "outputs": [],
-        "stateMutability": "nonpayable",
+        "stateMutability": "view",
         "type": "function"
     },
     {
@@ -1304,19 +1619,6 @@ export const presaleAbi = [
     {
         "inputs": [
             {
-                "internalType": "uint256",
-                "name": "endTime",
-                "type": "uint256"
-            }
-        ],
-        "name": "setInstitutionalVestingEndTime",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
                 "internalType": "address[]",
                 "name": "users",
                 "type": "address[]"
@@ -1328,19 +1630,6 @@ export const presaleAbi = [
             }
         ],
         "name": "setKYCVerified",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "endTime",
-                "type": "uint256"
-            }
-        ],
-        "name": "setPrivateVestingEndTime",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
@@ -1395,17 +1684,7 @@ export const presaleAbi = [
         "inputs": [
             {
                 "internalType": "uint256",
-                "name": "privateEndTime",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "institutionalEndTime",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "communityEndTime",
+                "name": "_tgeTime",
                 "type": "uint256"
             }
         ],
@@ -1428,6 +1707,19 @@ export const presaleAbi = [
                 "internalType": "bool",
                 "name": "",
                 "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "tgeTime",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
             }
         ],
         "stateMutability": "view",
@@ -1525,6 +1817,34 @@ export const presaleAbi = [
         "type": "function"
     },
     {
+        "inputs": [
+            {
+                "internalType": "enum Presale.RoundType",
+                "name": "round",
+                "type": "uint8"
+            },
+            {
+                "internalType": "uint256",
+                "name": "newCliffPeriodMonths",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "newVestingDurationMonths",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "newTgeUnlockPercentage",
+                "type": "uint256"
+            }
+        ],
+        "name": "updateRoundVestingParameters",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
         "inputs": [],
         "name": "usdc",
         "outputs": [
@@ -1592,9 +1912,9 @@ export const presaleAbi = [
                 "type": "uint256"
             },
             {
-                "internalType": "bool",
-                "name": "claimed",
-                "type": "bool"
+                "internalType": "uint256",
+                "name": "claimedTokens",
+                "type": "uint256"
             }
         ],
         "stateMutability": "view",
@@ -1663,9 +1983,9 @@ export const presaleAbi = [
                 "type": "uint256"
             },
             {
-                "internalType": "uint256",
-                "name": "releaseDate",
-                "type": "uint256"
+                "internalType": "enum Presale.RoundType",
+                "name": "whitelistRound",
+                "type": "uint8"
             }
         ],
         "stateMutability": "view",

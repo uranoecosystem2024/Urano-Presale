@@ -12,10 +12,8 @@ import {
   Collapse,
   TextField,
 } from "@mui/material";
-import Grid from "@mui/material/Grid"; // MUI v6 Grid (Grid2) -> supports size={{ xs, md }}
-import dayjs from "dayjs";
+import Grid from "@mui/material/Grid";
 
-// date adapter (even if we use datetime-local, you asked to keep LocalizationProvider)
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
@@ -23,7 +21,7 @@ import { fetchRoundItems } from "@/utils/admin/rounds";
 import {
   toggleRoundActive,
   toggleRoundActiveExclusive,
-  type RoundKey,
+  type RoundKey as RoundsWriteRoundKey,
 } from "@/utils/admin/roundsWrite";
 
 import {
@@ -32,16 +30,21 @@ import {
 } from "@/utils/admin/roundMaxTokens";
 
 import {
-  readVestingStatus,
-  startVestingFromDatesTx,
-  setVestingEndTimeByKeyFromDateTx,
+  updateRoundVestingParametersTx,
 } from "@/utils/admin/vesting";
 
 import { useActiveAccount } from "thirdweb/react";
 import { toast } from "react-toastify";
 
+// ---------- UI-only round key union (all 5 rounds) ----------
+type UiRoundKey = "seed" | "private" | "institutional" | "strategic" | "community";
+
+// type-only imports to align parameter types across modules
+import type { RoundKey as RoundKeyMax } from "@/utils/admin/roundMaxTokens";
+import type { RoundKey as RoundKeyVesting } from "@/utils/admin/vesting";
+
 export type RoundStatusItem = {
-  id: RoundKey; // "private" | "institutional" | "community"
+  id: UiRoundKey;
   title: string;
   active: boolean;
 };
@@ -66,6 +69,52 @@ function getErrorMessage(err: unknown): string {
   }
 }
 
+// ---------- helpers for toggle result details (typed, no any) ----------
+const isUiRoundKey = (v: unknown): v is UiRoundKey =>
+  typeof v === "string" &&
+  (["seed", "private", "institutional", "strategic", "community"] as const).includes(
+    v as UiRoundKey
+  );
+
+type DeactivatedEntry = { round: UiRoundKey };
+function parseDeactivated(input: unknown): DeactivatedEntry[] {
+  if (!Array.isArray(input)) return [];
+  return input
+    .map((x): DeactivatedEntry | null => {
+      if (typeof x !== "object" || x === null) return null;
+      if (!("round" in x)) return null;
+      const round = (x as Record<string, unknown>).round;
+      return isUiRoundKey(round) ? { round } : null;
+    })
+    .filter((x): x is DeactivatedEntry => x !== null);
+}
+
+type ActivatedInfo = { startTimeUsed?: number | bigint; endTimeUsed?: number | bigint };
+function parseActivated(input: unknown): ActivatedInfo | null {
+  if (typeof input !== "object" || input === null) return null;
+  const obj = input as Record<string, unknown>;
+  const isNumLike = (v: unknown): v is number | bigint =>
+    typeof v === "number" || typeof v === "bigint";
+  const startTimeUsed = obj.startTimeUsed;
+  const endTimeUsed = obj.endTimeUsed;
+  if (isNumLike(startTimeUsed) || isNumLike(endTimeUsed)) {
+    return {
+      startTimeUsed: isNumLike(startTimeUsed) ? startTimeUsed : undefined,
+      endTimeUsed: isNumLike(endTimeUsed) ? endTimeUsed : undefined,
+    };
+  }
+  return null;
+}
+
+// show all 5 in the UI
+const UI_KEYS: readonly UiRoundKey[] = [
+  "seed",
+  "private",
+  "institutional",
+  "strategic",
+  "community",
+] as const;
+
 const RoundStatusManagement = memo(function RoundStatusManagement({
   rounds,
   singleActive = true,
@@ -82,33 +131,22 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
   const [loading, setLoading] = useState<boolean>(!rounds);
   const [txLoadingById, setTxLoadingById] = useState<Record<string, boolean>>({});
 
-  // UI-only vesting params (not in ABI)
-  const [tgePct, setTgePct] = useState("");
-  const [cliffDays, setCliffDays] = useState("");
-  const [durationMonths, setDurationMonths] = useState("");
+  // Vesting parameters (per expanded round)
+  const [tgePct, setTgePct] = useState(""); // integer 0..100
+  const [cliffMonths, setCliffMonths] = useState(""); // months (int)
+  const [durationMonths, setDurationMonths] = useState(""); // months (int)
 
-  // Round max tokens
+  // Round max tokens (per expanded round)
   const [maxTokensHuman, setMaxTokensHuman] = useState("");
   const [maxTokensLoading, setMaxTokensLoading] = useState(false);
 
   // which row is expanded
-  const [expandedId, setExpandedId] = useState<RoundKey | null>(null);
+  const [expandedId, setExpandedId] = useState<UiRoundKey | null>(null);
 
-  // vesting state
-  const [vestingLoading, setVestingLoading] = useState(false);
-  const [vestingActionLoading, setVestingActionLoading] = useState(false);
-  const [vestingStarted, setVestingStarted] = useState<boolean | null>(null);
-
-  // datetime-local ISO strings
-  const [privateEndISO, setPrivateEndISO] = useState<string>("");
-  const [institutionalEndISO, setInstitutionalEndISO] = useState<string>("");
-  const [communityEndISO, setCommunityEndISO] = useState<string>("");
-
-  const [updateLoading, setUpdateLoading] = useState<Record<RoundKey, boolean>>({
-    private: false,
-    institutional: false,
-    community: false,
-  });
+  const [updateParamsLoading, setUpdateParamsLoading] = useState<Record<UiRoundKey, boolean>>(
+    () =>
+      Object.fromEntries(UI_KEYS.map((k) => [k, false])) as Record<UiRoundKey, boolean>
+  );
 
   // load rounds (from prop or chain)
   useEffect(() => {
@@ -142,7 +180,7 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
     return idx >= 0 ? { id: items[idx]?.id ?? null, index: idx } : null;
   }, [items]);
 
-  // collapse if needed
+  // collapse non-first-active rows
   useEffect(() => {
     if (!firstActive || expandedId !== firstActive.id) setExpandedId(null);
   }, [firstActive, expandedId]);
@@ -155,7 +193,7 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
     [txLoadingById]
   );
 
-  const handleToggle = async (id: RoundKey, nextVal: boolean) => {
+  const handleToggle = async (id: UiRoundKey, nextVal: boolean) => {
     if (disabled) return;
     if (!account) {
       toast.error("No wallet connected. Please connect an authorized wallet.");
@@ -167,7 +205,12 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
       setRowTxLoading(id, true);
 
       if (singleActive && nextVal) {
-        const res = await toggleRoundActiveExclusive(account, id, true);
+        const res = await toggleRoundActiveExclusive(
+          account,
+          id as RoundsWriteRoundKey,
+          true
+        );
+
         try {
           const latest = await fetchRoundItems();
           setItems(latest);
@@ -186,20 +229,27 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
           );
         }
 
+        const act = parseActivated((res as { activated?: unknown }).activated);
+        const start = act?.startTimeUsed;
+        const end = act?.endTimeUsed;
+
         toast.success(
-          `Activated ${id} round${
-            res.activated
-              ? ` (${Number(res.activated.startTimeUsed)} → ${Number(res.activated.endTimeUsed)})`
-              : ""
-          }.`
+          `Activated ${id} round${start != null && end != null ? ` (${Number(start)} → ${Number(end)})` : ""}`
         );
-        if (res.deactivated.length > 0) {
-          toast.info(`Deactivated ${res.deactivated.map((d) => d.round).join(", ")}.`);
+
+        const deactivated = parseDeactivated((res as { deactivated?: unknown }).deactivated);
+        if (deactivated.length > 0) {
+          toast.info(`Deactivated ${deactivated.map((d) => d.round).join(", ")}.`);
         }
+
         return;
       }
 
-      const result = await toggleRoundActive(account, id, nextVal);
+      const result = await toggleRoundActive(
+        account,
+        id as RoundsWriteRoundKey,
+        nextVal
+      );
 
       try {
         const latest = await fetchRoundItems();
@@ -216,9 +266,13 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
         });
       }
 
+      const act2 = parseActivated(result as unknown);
+      const start2 = act2?.startTimeUsed;
+      const end2 = act2?.endTimeUsed;
+
       toast.success(
         nextVal
-          ? `${id} round activated. Window: ${Number(result.startTimeUsed)} → ${Number(result.endTimeUsed)}`
+          ? `Activated ${id} round${start2 != null && end2 != null ? ` (${Number(start2)} → ${Number(end2)})` : ""}`
           : `${id} round deactivated.`
       );
     } catch (e: unknown) {
@@ -229,7 +283,7 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
     }
   };
 
-  // Load max tokens when a row is expanded
+  // When a row expands, load round-specific extras (max tokens)
   useEffect(() => {
     let cancelled = false;
 
@@ -237,7 +291,7 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
       if (!expandedId) return;
       try {
         setMaxTokensLoading(true);
-        const human = await readRoundMaxTokensHuman(expandedId);
+        const human = await readRoundMaxTokensHuman(expandedId as RoundKeyMax);
         if (!cancelled) setMaxTokensHuman(human);
       } catch (e) {
         console.error("Failed to read round max tokens:", e);
@@ -266,14 +320,18 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
 
     try {
       setRowTxLoading(rowId, true);
-      await setRoundMaxTokensHumanTx(account, expandedId, maxTokensHuman.trim());
+      await setRoundMaxTokensHumanTx(
+        account,
+        expandedId as RoundKeyMax,
+        maxTokensHuman.trim()
+      );
       toast.success(`Max tokens updated for ${expandedId} round.`);
 
       try {
-        const human = await readRoundMaxTokensHuman(expandedId);
+        const human = await readRoundMaxTokensHuman(expandedId as RoundKeyMax);
         setMaxTokensHuman(human);
       } catch {
-        /* ignore */
+        // ignore
       }
     } catch (e) {
       console.error(e);
@@ -283,103 +341,55 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
     }
   };
 
-  // Load vesting status when expanded
-  useEffect(() => {
-    let cancelled = false;
-
-    const loadVesting = async () => {
-      if (!expandedId) return;
-      try {
-        setVestingLoading(true);
-        const status = await readVestingStatus();
-        if (cancelled) return;
-
-        setVestingStarted(status.started);
-
-        const secToISO = (sec: bigint) =>
-          sec && sec > 0n
-            ? dayjs(Number(sec) * 1000).format("YYYY-MM-DDTHH:mm")
-            : "";
-
-        setPrivateEndISO(secToISO(status.privateEnd));
-        setInstitutionalEndISO(secToISO(status.institutionalEnd));
-        setCommunityEndISO(secToISO(status.communityEnd));
-
-        if (!status.started) {
-          const thirty = dayjs().add(30, "day").minute(0).second(0).millisecond(0);
-          if (!status.privateEnd) setPrivateEndISO(thirty.format("YYYY-MM-DDTHH:mm"));
-          if (!status.institutionalEnd) setInstitutionalEndISO(thirty.format("YYYY-MM-DDTHH:mm"));
-          if (!status.communityEnd) setCommunityEndISO(thirty.format("YYYY-MM-DDTHH:mm"));
-        }
-      } catch (e) {
-        console.error("Failed to read vesting status:", e);
-        toast.error("Failed to read vesting status");
-      } finally {
-        if (!cancelled) setVestingLoading(false);
-      }
-    };
-
-    void loadVesting();
-    return () => {
-      cancelled = true;
-    };
-  }, [expandedId]);
-
-  const handleStartVesting = async () => {
-    if (disabled || vestingStarted) return;
-    if (!account) {
-      toast.error("No wallet connected. Please connect an authorized wallet.");
-      return;
-    }
-
-    try {
-      setVestingActionLoading(true);
-      if (!privateEndISO || !institutionalEndISO || !communityEndISO) {
-        toast.error("Please set end times for all rounds.");
-        return;
-      }
-
-      await startVestingFromDatesTx(account, {
-        privateEnd: dayjs(privateEndISO).toDate(),
-        institutionalEnd: dayjs(institutionalEndISO).toDate(),
-        communityEnd: dayjs(communityEndISO).toDate(),
-      });
-
-      toast.success("Vesting started.");
-      setVestingStarted(true);
-    } catch (e) {
-      console.error(e);
-      toast.error(getErrorMessage(e));
-    } finally {
-      setVestingActionLoading(false);
-    }
-  };
-
-  const handleUpdateEndTime = async (key: RoundKey, iso: string) => {
-    if (!vestingStarted) return;
+  const handleSaveVestingParams = async () => {
+    if (!expandedId) return;
     if (disabled) return;
     if (!account) {
       toast.error("No wallet connected. Please connect an authorized wallet.");
       return;
     }
-    if (!iso) {
-      toast.error("Please select a valid end time.");
+
+    const key = expandedId;
+    if (txLoadingById[key] || anyRowBusy) return;
+
+    const tgeNum = Number(tgePct);
+    const cliffNum = Number(cliffMonths);
+    const durationNum = Number(durationMonths);
+
+    if (!Number.isFinite(tgeNum) || tgeNum < 0 || tgeNum > 100) {
+      toast.error("TGE % must be an integer between 0 and 100.");
+      return;
+    }
+    if (!Number.isFinite(cliffNum) || cliffNum < 0) {
+      toast.error("Cliff months must be a non-negative integer.");
+      return;
+    }
+    if (!Number.isFinite(durationNum) || durationNum <= 0) {
+      toast.error("Duration months must be a positive integer.");
       return;
     }
 
     try {
-      setUpdateLoading((prev) => ({ ...prev, [key]: true }));
-      await setVestingEndTimeByKeyFromDateTx(account, key, dayjs(iso).toDate());
-      toast.success(`Updated ${key} vesting end time.`);
+      setUpdateParamsLoading((prev) => ({ ...prev, [key]: true }));
+      await updateRoundVestingParametersTx(
+        account,
+        key as RoundKeyVesting,
+        {
+          cliffPeriodMonths: BigInt(Math.round(cliffNum)),
+          vestingDurationMonths: BigInt(Math.round(durationNum)),
+          tgeUnlockPercentage: BigInt(Math.round(tgeNum)),
+        }
+      );
+      toast.success(`Updated vesting parameters for ${key} round.`);
     } catch (e) {
       console.error(e);
       toast.error(getErrorMessage(e));
     } finally {
-      setUpdateLoading((prev) => ({ ...prev, [key]: false }));
+      setUpdateParamsLoading((prev) => ({ ...prev, [key]: false }));
     }
   };
 
-  const handleShowMore = (id: RoundKey) => {
+  const handleShowMore = (id: UiRoundKey) => {
     if (disabled) return;
     if (firstActive?.id !== id) return; // only first active can open
     setExpandedId((prev) => (prev === id ? null : id));
@@ -556,13 +566,13 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                       </Stack>
                     </Stack>
 
-                    {/* Details */}
+                    {/* Details (per-round settings only) */}
                     <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                      {/* Vesting Parameters (UI-only) */}
+                      {/* Vesting Parameters (per-round) */}
                       <Stack gap={0.5} mb={4}>
-                        <Typography variant="subtitle1">Vesting Parameters</Typography>
+                        <Typography variant="subtitle1">Round Vesting Parameters</Typography>
                         <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
-                          Configure vesting terms for all rounds
+                          Configure vesting terms for this round
                         </Typography>
                       </Stack>
                       <Grid container spacing={2} sx={{ mb: 2 }}>
@@ -573,194 +583,51 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                             placeholder="0"
                             value={tgePct}
                             onChange={(e) => setTgePct(e.target.value)}
-                            disabled={disabled}
+                            disabled={disabled || updateParamsLoading[r.id]}
                             InputLabelProps={{ shrink: true }}
                             sx={inputSx}
                             type="number"
+                            inputProps={{ step: 1, min: 0, max: 100 }}
                           />
                         </Grid>
                         <Grid size={{ xs: 12, md: 3.5 }}>
                           <TextField
                             fullWidth
-                            label="Cliff Days"
+                            label="Cliff (months)"
                             placeholder="0"
-                            value={cliffDays}
-                            onChange={(e) => setCliffDays(e.target.value)}
-                            disabled={disabled}
+                            value={cliffMonths}
+                            onChange={(e) => setCliffMonths(e.target.value)}
+                            disabled={disabled || updateParamsLoading[r.id]}
                             InputLabelProps={{ shrink: true }}
                             sx={inputSx}
                             type="number"
+                            inputProps={{ step: 1, min: 0, max: 100 }}
                           />
                         </Grid>
                         <Grid size={{ xs: 12, md: 3.5 }}>
                           <TextField
                             fullWidth
-                            label="Duration Months"
+                            label="Duration (months)"
                             placeholder="0"
                             value={durationMonths}
                             onChange={(e) => setDurationMonths(e.target.value)}
-                            disabled={disabled}
+                            disabled={disabled || updateParamsLoading[r.id]}
                             InputLabelProps={{ shrink: true }}
                             sx={inputSx}
                             type="number"
+                            inputProps={{ step: 1, min: 0, max: 100 }}
                           />
                         </Grid>
                         <Grid size={{ xs: 12, md: 1.5 }}>
-                          <Button sx={{ ...actionBtnSx, width: { xs: "100%", md: "auto" } }}>
-                            Save
+                          <Button
+                            onClick={handleSaveVestingParams}
+                            disabled={disabled || updateParamsLoading[r.id]}
+                            sx={{ ...actionBtnSx, width: { xs: "100%", md: "auto" } }}
+                          >
+                            {updateParamsLoading[r.id] ? "Saving…" : "Save"}
                           </Button>
                         </Grid>
                       </Grid>
-
-                      <Divider sx={{ my: 3, borderBottom: `1px solid ${theme.palette.secondary.main}` }} />
-
-                      {/* Start / Update Vesting (ABI-compliant) */}
-                      <Stack gap={0.5} mb={4}>
-                        <Typography variant="subtitle1">Vesting</Typography>
-                        <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
-                          {vestingStarted
-                            ? "Vesting is active. Update round end times below."
-                            : "Set vesting end times for all rounds, then start vesting."}
-                        </Typography>
-                      </Stack>
-
-                      {vestingLoading ? (
-                        <Typography variant="body2" sx={{ color: theme.palette.text.secondary, mb: 2 }}>
-                          Loading vesting status…
-                        </Typography>
-                      ) : (
-                        <>
-                          {!vestingStarted ? (
-                            <>
-                              <Grid container spacing={2} sx={{ mb: 2 }}>
-                                <Grid size={{ xs: 12, md: 4 }}>
-                                  <TextField
-                                    fullWidth
-                                    label="Private End"
-                                    type="datetime-local"
-                                    value={privateEndISO}
-                                    onChange={(e) => setPrivateEndISO(e.target.value)}
-                                    disabled={disabled || vestingActionLoading}
-                                    InputLabelProps={{ shrink: true }}
-                                    sx={inputSx}
-                                  />
-                                </Grid>
-                                <Grid size={{ xs: 12, md: 4 }}>
-                                  <TextField
-                                    fullWidth
-                                    label="Institutional End"
-                                    type="datetime-local"
-                                    value={institutionalEndISO}
-                                    onChange={(e) => setInstitutionalEndISO(e.target.value)}
-                                    disabled={disabled || vestingActionLoading}
-                                    InputLabelProps={{ shrink: true }}
-                                    sx={inputSx}
-                                  />
-                                </Grid>
-                                <Grid size={{ xs: 12, md: 4 }}>
-                                  <TextField
-                                    fullWidth
-                                    label="Community End"
-                                    type="datetime-local"
-                                    value={communityEndISO}
-                                    onChange={(e) => setCommunityEndISO(e.target.value)}
-                                    disabled={disabled || vestingActionLoading}
-                                    InputLabelProps={{ shrink: true }}
-                                    sx={inputSx}
-                                  />
-                                </Grid>
-                              </Grid>
-
-                              <Stack direction="row" justifyContent="flex-end" sx={{ mb: 2 }}>
-                                <Button
-                                  onClick={handleStartVesting}
-                                  disabled={
-                                    disabled ||
-                                    vestingActionLoading ||
-                                    !privateEndISO ||
-                                    !institutionalEndISO ||
-                                    !communityEndISO
-                                  }
-                                  sx={actionBtnSx}
-                                >
-                                  {vestingActionLoading ? "Starting…" : "Start Vesting"}
-                                </Button>
-                              </Stack>
-                            </>
-                          ) : (
-                            <Grid container spacing={2} sx={{ mb: 2 }}>
-                              <Grid size={{ xs: 12, md: 9 }}>
-                                <TextField
-                                  fullWidth
-                                  label="Private round vesting end"
-                                  type="datetime-local"
-                                  value={privateEndISO}
-                                  onChange={(e) => setPrivateEndISO(e.target.value)}
-                                  disabled={disabled || updateLoading.private}
-                                  InputLabelProps={{ shrink: true }}
-                                  sx={inputSx}
-                                />
-                              </Grid>
-                              <Grid size={{ xs: 12, md: 3 }}>
-                                <Button
-                                  fullWidth
-                                  onClick={() => handleUpdateEndTime("private", privateEndISO)}
-                                  disabled={disabled || updateLoading.private || !privateEndISO}
-                                  sx={actionBtnSx}
-                                >
-                                  {updateLoading.private ? "Updating…" : "Update"}
-                                </Button>
-                              </Grid>
-
-                              <Grid size={{ xs: 12, md: 9 }}>
-                                <TextField
-                                  fullWidth
-                                  label="Institutional round vesting end"
-                                  type="datetime-local"
-                                  value={institutionalEndISO}
-                                  onChange={(e) => setInstitutionalEndISO(e.target.value)}
-                                  disabled={disabled || updateLoading.institutional}
-                                  InputLabelProps={{ shrink: true }}
-                                  sx={inputSx}
-                                />
-                              </Grid>
-                              <Grid size={{ xs: 12, md: 3 }}>
-                                <Button
-                                  fullWidth
-                                  onClick={() => handleUpdateEndTime("institutional", institutionalEndISO)}
-                                  disabled={disabled || updateLoading.institutional || !institutionalEndISO}
-                                  sx={actionBtnSx}
-                                >
-                                  {updateLoading.institutional ? "Updating…" : "Update"}
-                                </Button>
-                              </Grid>
-
-                              <Grid size={{ xs: 12, md: 9 }}>
-                                <TextField
-                                  fullWidth
-                                  label="Community round vesting end"
-                                  type="datetime-local"
-                                  value={communityEndISO}
-                                  onChange={(e) => setCommunityEndISO(e.target.value)}
-                                  disabled={disabled || updateLoading.community}
-                                  InputLabelProps={{ shrink: true }}
-                                  sx={inputSx}
-                                />
-                              </Grid>
-                              <Grid size={{ xs: 12, md: 3 }}>
-                                <Button
-                                  fullWidth
-                                  onClick={() => handleUpdateEndTime("community", communityEndISO)}
-                                  disabled={disabled || updateLoading.community || !communityEndISO}
-                                  sx={actionBtnSx}
-                                >
-                                  {updateLoading.community ? "Updating…" : "Update"}
-                                </Button>
-                              </Grid>
-                            </Grid>
-                          )}
-                        </>
-                      )}
 
                       <Divider sx={{ my: 3, borderBottom: `1px solid ${theme.palette.secondary.main}` }} />
 
@@ -788,6 +655,7 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                             InputLabelProps={{ shrink: true }}
                             sx={inputSx}
                             type="number"
+                            inputProps={{ step: 1, min: 0 }}
                             helperText={maxTokensLoading ? "Loading current value…" : undefined}
                           />
                         </Grid>
@@ -807,8 +675,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                           </Button>
                         </Grid>
                       </Grid>
-
-                      <Divider sx={{ my: 3, borderBottom: `1px solid ${theme.palette.secondary.main}` }} />
                     </Collapse>
                   </Stack>
 

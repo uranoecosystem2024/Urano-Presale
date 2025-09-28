@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Stack,
@@ -8,26 +8,20 @@ import {
   Button,
   TextField,
   useTheme,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
 } from "@mui/material";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
-
-// date & time picker
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-import dayjs, { type Dayjs } from "dayjs";
-
 import { useActiveAccount } from "thirdweb/react";
 import { toast } from "react-toastify";
 
 import {
   addToWhitelistHumanTx,
   removeFromWhitelistTx,
+  type RoundKey,
 } from "@/utils/admin/whitelist";
-
-import UploadWhitelistCsvModal, {
-  type WhitelistCsvEntry as CsvEntry,
-} from "@/components/admin/WhitelistImportModal";
 
 export type WhitelistProps = {
   title?: string;
@@ -35,7 +29,8 @@ export type WhitelistProps = {
   disabled?: boolean;
   initialAddress?: string;
   initialAmount?: string;
-  initialRelease?: Date;
+  /** Default whitelist round (enum key or uint8). */
+  initialRound?: RoundKey | number;
   onAdded?: (address: `0x${string}`) => void;
   onRemoved?: (address: `0x${string}`) => void;
 };
@@ -50,35 +45,61 @@ function getErrorMessage(err: unknown): string {
   }
 }
 
+function isAddressLike(a: string): a is `0x${string}` {
+  return a?.startsWith("0x") && a.length === 42;
+}
+
+const ROUND_OPTIONS: { label: string; value: RoundKey }[] = [
+  { label: "Seed", value: "seed" },
+  { label: "Private", value: "private" },
+  { label: "Institutional", value: "institutional" },
+  { label: "Strategic", value: "strategic" },
+  { label: "Community", value: "community" },
+];
+
+// enum index <-> key maps (keep in sync with contract)
+const INDEX_TO_ROUND: Record<number, RoundKey> = {
+  0: "seed",
+  1: "private",
+  2: "institutional",
+  3: "strategic",
+  4: "community",
+};
+const ROUND_TO_INDEX: Record<RoundKey, number> = {
+  seed: 0,
+  private: 1,
+  institutional: 2,
+  strategic: 3,
+  community: 4,
+};
+
 export default function Whitelist({
   title = "Whitelist",
   subtitle = "Add addresses to the URANO whitelist",
   disabled = false,
   initialAddress = "",
   initialAmount = "",
-  initialRelease,
+  initialRound = "private",
   onAdded,
   onRemoved,
 }: WhitelistProps) {
   const theme = useTheme();
   const account = useActiveAccount();
-  const [openUploadModal, setOpenUploadModal] = useState<boolean>(false)
-
-  function OpeningUploadModal(){
-    setOpenUploadModal(true)
-  }
-
-  function closeUpload(){
-    setOpenUploadModal(false)
-  }
 
   const [address, setAddress] = useState<string>(initialAddress);
   const [amountHuman, setAmountHuman] = useState<string>(initialAmount);
-  const [releaseDT, setReleaseDT] = useState<Dayjs | null>(
-    initialRelease ? dayjs(initialRelease) : dayjs()
+
+  // Keep round in state as RoundKey only; normalize numeric initialRound
+  const [round, setRound] = useState<RoundKey>(
+    typeof initialRound === "number" ? INDEX_TO_ROUND[initialRound] ?? "private" : initialRound
   );
 
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    // If initialRound prop changes later, normalize again
+    setRound(typeof initialRound === "number" ? INDEX_TO_ROUND[initialRound] ?? "private" : initialRound);
+  }, [initialRound]);
 
   const inputSx = {
     "& .MuiOutlinedInput-root": {
@@ -111,16 +132,11 @@ export default function Whitelist({
     },
   } as const;
 
-  function isAddressLike(a: string): a is `0x${string}` {
-    return a?.startsWith("0x") && a.length === 42;
-  }
-
   const canSubmitAdd =
     !!account &&
     !!address.trim() &&
     isAddressLike(address.trim()) &&
     !!amountHuman.trim() &&
-    !!releaseDT?.isValid?.() &&
     !disabled &&
     !busy;
 
@@ -141,10 +157,6 @@ export default function Whitelist({
       toast.error("Enter a pre-assigned tokens amount.");
       return;
     }
-    if (!releaseDT?.isValid?.()) {
-      toast.error("Select a valid release date and time.");
-      return;
-    }
 
     try {
       setBusy(true);
@@ -152,7 +164,8 @@ export default function Whitelist({
         {
           address: addr,
           preAssignedTokens: amountHuman.trim(),
-          releaseDate: releaseDT, // accepts Date/dayjs/number
+          // you can pass the enum index or the key; util accepts both
+          whitelistRound: ROUND_TO_INDEX[round],
         },
       ]);
       toast.success("Address added to whitelist.");
@@ -189,161 +202,143 @@ export default function Whitelist({
     }
   };
 
-  const handleImportConfirm = async (rows: CsvEntry[]) => {
-    if (!account) {
-      toast.error("No wallet connected. Please connect an authorized wallet.");
-      return;
-    }
-    if (rows.length === 0) {
-      toast.info("No rows to import.");
-      return;
-    }
-
-    try {
-      setBusy(true);
-      await addToWhitelistHumanTx(account, rows);
-      toast.success(`Imported ${rows.length} whitelist ${rows.length === 1 ? "entry" : "entries"}.`);
-      // Optionally notify with the first address
-      const first = rows[0]?.address;
-      if (first) onAdded?.(first);
-    } catch (e: unknown) {
-      console.error(e);
-      toast.error(getErrorMessage(e) ?? "Failed to import CSV.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
   return (
-    <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Stack gap={2} width="100%">
-        <Stack gap={4}>
-          <Stack direction="row" alignItems="start" justifyContent="space-between">
-            <Stack gap={0.5}>
-              <Typography variant="h6" sx={{ color: theme.palette.text.primary }}>
-                {title}
-              </Typography>
-              <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
-                {subtitle}
-              </Typography>
-            </Stack>
-
-            <Button
-              disabled={disabled || busy}
-              startIcon={<DownloadRoundedIcon />}
-              sx={{
-                ...actionBtnSx,
-                py: 1.25,
-                backgroundColor: theme.palette.secondary.main,
-                border: `1px solid ${theme.palette.headerBorder.main}`,
-              }}
-              onClick={() => {OpeningUploadModal()}}
-            >
-              <Typography
-                variant="body1"
-                fontWeight={400}
-                sx={{ whiteSpace: "nowrap", display: { xs: "none", md: "block" } }}
-              >
-                Import CSV
-              </Typography>
-              <Typography
-                variant="body1"
-                fontWeight={400}
-                sx={{ whiteSpace: "nowrap", display: { xs: "block", md: "none" } }}
-              >
-                Import
-              </Typography>
-            </Button>
+    <Stack gap={2} width="100%">
+      <Stack gap={4}>
+        <Stack direction="row" alignItems="start" justifyContent="space-between">
+          <Stack gap={0.5}>
+            <Typography variant="h6" sx={{ color: theme.palette.text.primary }}>
+              {title}
+            </Typography>
+            <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+              {subtitle}
+            </Typography>
           </Stack>
 
-          {/* Inputs */}
-          <Stack direction={{ xs: "column", md: "row" }} gap={2}>
-            <TextField
-              fullWidth
-              label="Address"
-              placeholder="0x..."
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              disabled={disabled || busy}
-              InputLabelProps={{ shrink: true }}
-              sx={inputSx}
-            />
-
-            <TextField
-              fullWidth
-              label="Pre-assigned Tokens (URANO)"
-              placeholder="e.g. 100000"
-              value={amountHuman}
-              onChange={(e) => setAmountHuman(e.target.value)}
-              disabled={disabled || busy}
-              InputLabelProps={{ shrink: true }}
-              sx={inputSx}
-              type="number"
-            />
-          </Stack>
-
-          <DateTimePicker
-            label="Release Date & Time (TGE unlock for this user)"
-            value={releaseDT}
-            onChange={(v) => setReleaseDT(v)}
+          <Button
             disabled={disabled || busy}
-            slotProps={{
-              textField: {
-                fullWidth: true,
-                sx: inputSx,
-                InputLabelProps: { shrink: true },
-                helperText:
-                  "User can start claiming after this moment (stored on-chain in unix seconds).",
-              },
+            startIcon={<DownloadRoundedIcon />}
+            sx={{
+              ...actionBtnSx,
+              py: 1.25,
+              backgroundColor: theme.palette.secondary.main,
+              border: `1px solid ${theme.palette.headerBorder.main}`,
             }}
+            onClick={() => {
+              // Hook up CSV import here if/when you add it
+              toast.info("CSV import coming soon.");
+            }}
+          >
+            <Typography
+              variant="body1"
+              fontWeight={400}
+              sx={{ whiteSpace: "nowrap", display: { xs: "none", md: "block" } }}
+            >
+              Import CSV
+            </Typography>
+            <Typography
+              variant="body1"
+              fontWeight={400}
+              sx={{ whiteSpace: "nowrap", display: { xs: "block", md: "none" } }}
+            >
+              Import
+            </Typography>
+          </Button>
+        </Stack>
+
+        {/* Inputs */}
+        <Stack direction={{ xs: "column", md: "row" }} gap={2}>
+          <TextField
+            fullWidth
+            label="Address"
+            placeholder="0x..."
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            disabled={disabled || busy}
+            InputLabelProps={{ shrink: true }}
+            sx={inputSx}
           />
 
-          {/* Actions */}
-          <Stack direction={{ xs: "column", md: "row" }} gap={2}>
-            <Button
-              fullWidth
-              sx={{
-                ...actionBtnSx,
-                "&:hover": { background: theme.palette.error.main },
-              }}
-              disabled={!canSubmitRemove}
-              onClick={handleRemove}
-            >
-              Remove
-            </Button>
-
-            <Button
-              fullWidth
-              sx={{
-                ...actionBtnSx,
-                "&:hover": { background: theme.palette.uranoGradient, color: theme.palette.info.main },
-              }}
-              disabled={!canSubmitAdd}
-              onClick={handleAdd}
-            >
-              Add
-            </Button>
-          </Stack>
-
-          {!account && (
-            <Box>
-              <Typography variant="caption" sx={{ color: theme.palette.text.secondary }}>
-                Connect an admin wallet to manage the whitelist.
-              </Typography>
-            </Box>
-          )}
+          <TextField
+            fullWidth
+            label="Pre-assigned Tokens (URANO)"
+            placeholder="e.g. 100000"
+            value={amountHuman}
+            onChange={(e) => setAmountHuman(e.target.value)}
+            disabled={disabled || busy}
+            InputLabelProps={{ shrink: true }}
+            sx={inputSx}
+            type="number"
+          />
         </Stack>
+
+        {/* Round selector (RoundKey only) */}
+        <FormControl fullWidth disabled={disabled || busy}>
+          <InputLabel id="whitelist-round-label" shrink sx={{ color: theme.palette.common.white }}>
+            Whitelist Round
+          </InputLabel>
+          <Select
+            labelId="whitelist-round-label"
+            value={round}
+            onChange={(e) => setRound(e.target.value as RoundKey)}
+            displayEmpty
+            sx={{
+              ...inputSx,
+              '& .MuiSelect-icon': {
+                color: (theme) => theme.palette.common.white, // chevron color
+              },
+              '&.Mui-disabled .MuiSelect-icon': {
+                color: (theme) => theme.palette.text.disabled, // optional: nicer when disabled
+              },
+            }}
+            label="Whitelist Round"
+          >
+            {ROUND_OPTIONS.map((opt) => (
+              <MenuItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </MenuItem>
+            ))}
+          </Select>
+          <Typography variant="caption" sx={{ mt: 0.5, color: theme.palette.text.secondary }}>
+            Select which round this user belongs to. (Impacts pricing/vesting rules.)
+          </Typography>
+        </FormControl>
+
+        {/* Actions */}
+        <Stack direction={{ xs: "column", md: "row" }} gap={2}>
+          <Button
+            fullWidth
+            sx={{
+              ...actionBtnSx,
+              "&:hover": { background: theme.palette.error.main },
+            }}
+            disabled={!canSubmitRemove}
+            onClick={handleRemove}
+          >
+            Remove
+          </Button>
+
+          <Button
+            fullWidth
+            sx={{
+              ...actionBtnSx,
+              "&:hover": { background: theme.palette.uranoGradient, color: theme.palette.info.main },
+            }}
+            disabled={!canSubmitAdd}
+            onClick={handleAdd}
+          >
+            Add
+          </Button>
+        </Stack>
+
+        {!account && (
+          <Box>
+            <Typography variant="caption" sx={{ color: theme.palette.text.secondary }}>
+              Connect an admin wallet to manage the whitelist.
+            </Typography>
+          </Box>
+        )}
       </Stack>
-      <UploadWhitelistCsvModal
-        open={openUploadModal}
-        onClose={closeUpload}
-        onConfirm={(rows) => {
-          // keep onConfirm's type as () => void by not returning the Promise
-          void handleImportConfirm(rows);
-        }}
-        title="Import Whitelist CSV"
-        subtitle='Columns required: "address", "amount", "release"'
-      />
-    </LocalizationProvider>
+    </Stack>
   );
 }

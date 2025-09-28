@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Stack,
   Typography,
@@ -24,7 +24,7 @@ export type WithdrawUnsoldTokensProps = {
   title?: string;
   subtitle?: string;
   disabled?: boolean;
-  loading?: boolean; // optional external busy flag if you have one
+  loading?: boolean;
   initialAmount?: string;
   onWithdrawSuccess?: (params: { amount: string; txHash: `0x${string}` }) => void;
 };
@@ -32,11 +32,7 @@ export type WithdrawUnsoldTokensProps = {
 function getErrorMessage(err: unknown): string {
   if (err instanceof Error) return err.message;
   if (typeof err === "string") return err;
-  try {
-    return JSON.stringify(err);
-  } catch {
-    return "Unknown error";
-  }
+  try { return JSON.stringify(err); } catch { return "Unknown error"; }
 }
 
 export default function WithdrawUnsoldTokens({
@@ -53,9 +49,10 @@ export default function WithdrawUnsoldTokens({
   const [amountHuman, setAmountHuman] = useState(initialAmount);
   const [treasury, setTreasury] = useState<`0x${string}` | "">("");
   const [balanceHuman, setBalanceHuman] = useState<string>("");
+  const [balanceRaw, setBalanceRaw] = useState<bigint | null>(null);
+  const [decimals, setDecimals] = useState<number | null>(null);
   const [busy, setBusy] = useState(false);
 
-  // style tokens (kept consistent with your other admin components)
   const inputSx = {
     "& .MuiOutlinedInput-root": {
       background: theme.palette.background.paper,
@@ -88,56 +85,66 @@ export default function WithdrawUnsoldTokens({
     },
   } as const;
 
-  // Load treasury + current contract token balance
+  // Load treasury, token decimals, and current presale token balance
   useEffect(() => {
     let cancelled = false;
-
     const run = async () => {
       try {
-        const [tre, bal] = await Promise.all([
+        const [tre, dec, balRaw] = await Promise.all([
           getTreasuryAddress(),
-          readContractTokenBalanceHuman(),
+          getTokenDecimals(),
+          readContractTokenBalanceRaw(),
         ]);
+        const balHuman = await readContractTokenBalanceHuman();
+
         if (!cancelled) {
           setTreasury(tre);
-          setBalanceHuman(bal);
+          setDecimals(dec);
+          setBalanceRaw(balRaw);
+          setBalanceHuman(balHuman);
         }
       } catch (e) {
-
-        // quiet fail in UI; admin still can try actions
-        console.error("Failed to read treasury/balance:", e);
+        console.error("Failed to read treasury/decimals/balance:", e);
       }
     };
-
     void run();
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, []);
 
-  // Validate amount > 0 and not exceeding contract balance (soft check)
+  const amountExceedsBalance = useMemo(() => {
+    if (!decimals || balanceRaw === null) return false;
+    const trimmed = amountHuman.trim();
+    if (!trimmed || !/^\d+(\.\d+)?$/.test(trimmed)) return false;
+    try {
+      const rawAmt = toUnits(trimmed, decimals);
+      return rawAmt > balanceRaw;
+    } catch {
+      return false;
+    }
+  }, [amountHuman, decimals, balanceRaw]);
+
   const canSubmit = useMemo(() => {
     if (disabled || loading || busy) return false;
     const amt = amountHuman.trim();
-    if (!amt) return false;
-    // quick numeric check
-    if (!/^\d+(\.\d+)?$/.test(amt)) return false;
+    if (!amt || !/^\d+(\.\d+)?$/.test(amt)) return false;
     if (Number(amt) <= 0) return false;
+    if (amountExceedsBalance) return false;
     return true;
-  }, [amountHuman, disabled, loading, busy]);
+  }, [amountHuman, disabled, loading, busy, amountExceedsBalance]);
 
   const refreshBalance = async () => {
     try {
-      const b = await readContractTokenBalanceHuman();
-      setBalanceHuman(b);
-    } catch {
-      // ignore
-    }
+      const [balHuman, balRaw] = await Promise.all([
+        readContractTokenBalanceHuman(),
+        readContractTokenBalanceRaw(),
+      ]);
+      setBalanceHuman(balHuman);
+      setBalanceRaw(balRaw);
+    } catch { /* ignore */ }
   };
 
   const handleWithdraw = async () => {
     if (!canSubmit) return;
-
     if (!account) {
       toast.error("No wallet connected. Please connect an authorized wallet.");
       return;
@@ -146,30 +153,26 @@ export default function WithdrawUnsoldTokens({
     try {
       setBusy(true);
 
-      // Optional pre-check to avoid obvious “exceeds balance” tries:
+      // Final pre-check using raw values (defensive; UI already disabled if it exceeds)
       try {
-        const [decimals, rawBal] = await Promise.all([
-          getTokenDecimals(),
-          readContractTokenBalanceRaw(),
-        ]);
-        const rawAmt = toUnits(amountHuman.trim(), decimals);
+        const dec = decimals ?? (await getTokenDecimals());
+        const rawBal = balanceRaw ?? (await readContractTokenBalanceRaw());
+        const rawAmt = toUnits(amountHuman.trim(), dec);
         if (rawAmt > rawBal) {
           toast.error("Amount exceeds the contract’s token balance.");
           setBusy(false);
           return;
         }
       } catch {
-        // if read fails, let contract validation handle it
+        // Let the contract enforce if reads fail
       }
 
       const txHash = await withdrawUnsoldTokensHumanTx(account, amountHuman.trim());
-      toast.success("Withdrawal sent. Waiting for confirmation…");
+      toast.success("Withdrawal confirmed.");
 
-      // After confirmation, utils already awaited receipt. Refresh balance.
       await refreshBalance();
-
+      setAmountHuman(""); // clear input after success
       onWithdrawSuccess?.({ amount: amountHuman.trim(), txHash });
-      toast.success("Unsold tokens withdrawn to Treasury.");
     } catch (e) {
       console.error(e);
       toast.error(getErrorMessage(e));
@@ -205,9 +208,9 @@ export default function WithdrawUnsoldTokens({
         />
         <TextField
           fullWidth
-          label="Contract Balance (URANO)"
+          label="Contract Balance ($URANO, read-only)"
           value={balanceHuman || "—"}
-          InputProps={{ readOnly: true }}
+          InputProps={{ readOnly: true}}
           InputLabelProps={{ shrink: true }}
           sx={{ ...inputSx, flex: 1, minWidth: 220 }}
         />
@@ -226,6 +229,8 @@ export default function WithdrawUnsoldTokens({
           InputLabelProps={{ shrink: true }}
           sx={{ ...inputSx, flex: 1, minWidth: 220 }}
           type="number"
+          error={amountExceedsBalance}
+          helperText={amountExceedsBalance ? "Amount exceeds contract balance." : " "}
         />
 
         <Button

@@ -144,7 +144,7 @@ export default function InstitutionalRoundAccess({
         </Typography>
         {!isControlled && !canEdit && (
           <Typography variant="caption" sx={{ color: theme.palette.text.secondary }}>
-            Connect a wallet with <b>admin</b> role to edit.
+            Connect a wallet with <b>admin</b> or <b>manager</b> role to edit.
           </Typography>
         )}
       </Stack>
