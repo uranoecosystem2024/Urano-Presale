@@ -362,6 +362,44 @@ const MainSection = () => {
             <span style={{ fontWeight: 600, color: theme.palette.uranoGreen1.main }}>$URANO</span>
           </Typography>
         </Stack>
+        <Stack gap={1.5} display={{ xs: "none", lg: "flex" }}>
+          <Stack direction={"row"} gap={1} alignItems={"center"}>
+            <Typography variant="h6" sx={{
+              fontSize: "1rem",
+              fontWeight: 500,
+              color: theme.palette.text.primary,
+            }}>
+              Shape The Future – <span style={{ fontWeight: 300, color: theme.palette.darkerText.main }}>Gain governance rights to influence Urano’s direction</span>
+            </Typography>
+          </Stack>
+          <Stack direction={"row"} gap={1} alignItems={"center"}>
+            <Typography variant="h6" sx={{
+              fontSize: "1rem",
+              fontWeight: 500,
+              color: theme.palette.text.primary,
+            }}>
+              Early Access – <span style={{ fontWeight: 300, color: theme.palette.darkerText.main }}>Get priority entry to exclusive RWA offerings</span>
+            </Typography>
+          </Stack>
+          <Stack direction={"row"} gap={1} alignItems={"center"}>
+            <Typography variant="h6" sx={{
+              fontSize: "1rem",
+              fontWeight: 500,
+              color: theme.palette.text.primary,
+            }}>
+              Staking Rewards – <span style={{ fontWeight: 300, color: theme.palette.darkerText.main }}>Unlock dynamic incentives through staking <span style={{ fontWeight: 600, color: theme.palette.uranoGreen1.main }}>$URANO</span></span>
+            </Typography>
+          </Stack>
+          <Stack direction={"row"} gap={1} alignItems={"center"}>
+            <Typography variant="h6" sx={{
+              fontSize: "1rem",
+              fontWeight: 500,
+              color: theme.palette.text.primary,
+            }}>
+              Revenue-sharing Pool – <span style={{ fontWeight: 300, color: theme.palette.darkerText.main }}>Access protocol fees distributed to key contributors</span>
+            </Typography>
+          </Stack>
+        </Stack>
 
         <Stack
           display={{ xs: "flex", lg: "none" }}
