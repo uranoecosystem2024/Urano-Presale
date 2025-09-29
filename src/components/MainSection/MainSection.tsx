@@ -399,6 +399,30 @@ const MainSection = () => {
               Revenue-sharing Pool – <span style={{ fontWeight: 300, color: theme.palette.darkerText.main }}>Access protocol fees distributed to key contributors</span>
             </Typography>
           </Stack>
+          <Link href="https://www.uranoecosystem.com/token" underline="none" target="_blank" sx={{
+            display: { xs: "none", lg: "flex" },
+            width: "fit-content",
+          }}>
+            <Box sx={{
+              width: "fit-content",
+              background: theme.palette.uranoGradient,
+              border: `2px solid ${theme.palette.headerBorder.main}`,
+              borderRadius: 2,
+              paddingX: { xs: 1.5, lg: 5 },
+              paddingY: { xs: 1.5, lg: 1 },
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              "&:hover": {
+                border: `2px solid ${theme.palette.text.primary}`,
+                filter: "brightness(1.2)",
+              },
+            }}>
+              <Typography variant="body1" fontWeight={400} sx={{
+                color: theme.palette.background.default
+              }}>Learn More</Typography>
+            </Box>
+          </Link>
         </Stack>
 
         <Stack gap={1.5} display={{ xs: "flex", lg: "none" }}>
