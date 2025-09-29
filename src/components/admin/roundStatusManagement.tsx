@@ -631,7 +631,7 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                         <Grid size={{ xs: 12, md: 3.5 }}>
                           <TextField
                             fullWidth
-                            label="Duration (months)"
+                            label="Vesting"
                             placeholder="0"
                             value={durationMonths}
                             onChange={(e) => setDurationMonths(e.target.value)}
