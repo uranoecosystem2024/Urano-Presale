@@ -7,7 +7,15 @@ import { IoChevronForward } from "react-icons/io5";
 import SubscriptionModal from "../SubscriptionModal";
 import ErrorModal from "../ErrorModal";
 import VerifyIdentityModal from "@/components/VerifyIdentityModal";
-import { useConnectModal, useActiveAccount, useWalletDetailsModal } from "thirdweb/react";
+import {
+  useConnectModal,
+  useActiveAccount,
+  useWalletDetailsModal,
+  useActiveWalletChain,
+  useSwitchActiveWalletChain,
+  useNetworkSwitcherModal,
+} from "thirdweb/react";
+import { sepolia } from "thirdweb/chains";
 import { client } from "@/lib/thirdwebClient";
 import { fetchKycStatus } from "@/utils/kyc";
 
@@ -38,6 +46,12 @@ const Registration = () => {
   const account = useActiveAccount();
   const address = account?.address as `0x${string}` | undefined;
   const connected = Boolean(address);
+
+  const activeChain = useActiveWalletChain();
+  const onSepolia = activeChain?.id === sepolia.id;
+
+  const switchChain = useSwitchActiveWalletChain();
+  const networkSwitcher = useNetworkSwitcherModal();
 
   const [progress, setProgress] = useState<Progress>({
     step1: false,
@@ -81,14 +95,14 @@ const Registration = () => {
 
   // Locking rules:
   // - Step 3 (Connect wallet) requires Step 1 (email) only.
-  // - Step 2 (KYC) requires Step 1 + CURRENT WALLET CONNECTED.
+  // - Step 2 (KYC) requires Step 1 + CURRENT WALLET CONNECTED ON SEPOLIA.
   const locked = useMemo(
     () => ({
       step1: false,
-      step2: !(progress.step1 && connected),
+      step2: !(progress.step1 && connected && onSepolia),
       step3: !progress.step1,
     }),
-    [progress.step1, connected]
+    [progress.step1, connected, onSepolia]
   );
 
   const showLockError = (title: string, message: string) => {
@@ -96,6 +110,35 @@ const Registration = () => {
     setErrorModalMessage(message);
     setErrorModalOpen(true);
   };
+
+  const ensureSepoliaOrPrompt = async () => {
+    if (!connected || onSepolia) return true;
+    try {
+      await switchChain(sepolia);
+      return true;
+    } catch {
+      void networkSwitcher.open({
+        client,
+        sections: [{ label: "Recommended", chains: [sepolia] }],
+      });
+      return false;
+    }
+  };
+
+  // Hard guard: if connected but on the wrong chain, try to switch immediately.
+  useEffect(() => {
+    if (!connected || !activeChain) return;
+  
+    if (activeChain.id !== sepolia.id) {
+      void switchChain(sepolia).catch(() => {
+        void networkSwitcher.open({
+          client,
+          sections: [{ label: "Recommended", chains: [sepolia] }],
+        });
+      });
+    }
+  }, [connected, activeChain?.id, switchChain, networkSwitcher, activeChain]);
+  
 
   const handleClickStep1 = () => setOpenStep1(true);
 
@@ -107,20 +150,32 @@ const Registration = () => {
       );
       return;
     }
-    // If already connected, open Thirdweb wallet details
+
+    // Already connected → if wrong chain, switch; else open wallet details
     if (connected) {
+      if (!onSepolia) {
+        const ok = await ensureSepoliaOrPrompt();
+        if (!ok) {
+          showLockError("Wrong network", "Please switch to Sepolia to continue.");
+          return;
+        }
+      }
       handleWalletDetailsModalOpen();
       return;
     }
-    await connect({ client });
-    // step3 UI will sync via the effect above
+
+    // Not connected → open connect modal pinned to Sepolia
+    await connect({ client, chain: sepolia });
+    // step3 UI syncs via the effect above
   };
 
   const handleClickStep2 = async () => {
     if (locked.step2) {
       const why = !progress.step1
         ? "step 1 (Register with Email)"
-        : "step 2 (Connect your wallet)";
+        : !connected
+        ? "step 2 (Connect your wallet)"
+        : "switch to the Sepolia network";
       showLockError(
         "Previous steps incomplete",
         `Please complete ${why} before verifying your identity.`
@@ -128,13 +183,12 @@ const Registration = () => {
       return;
     }
 
-    // If wallet is currently disconnected, show error (do NOT open connect modal here)
-    if (!connected) {
-      showLockError(
-        "Wallet disconnected",
-        "Please reconnect your wallet (step 2) before verifying your identity."
-      );
-      return;
+    if (!onSepolia) {
+      const ok = await ensureSepoliaOrPrompt();
+      if (!ok) {
+        showLockError("Wrong network", "Please switch to Sepolia to verify your identity.");
+        return;
+      }
     }
 
     // Pre-check: already KYC-verified on-chain?
@@ -149,7 +203,7 @@ const Registration = () => {
         return;
       }
     } catch {
-      // If the API fails, proceed to Persona flow
+      // proceed to Persona flow even if status check fails
     }
 
     setOpenStep2(true);
@@ -157,7 +211,6 @@ const Registration = () => {
 
   const completeStep1 = () => setProgress((p) => ({ ...p, step1: true }));
   const completeStep2 = () => setProgress((p) => ({ ...p, step2: true }));
-  // step3 syncs automatically with `connected`
 
   const getStepBoxSx = (isLocked: boolean, isDone: boolean) => ({
     background: theme.palette.background.paper,
@@ -169,9 +222,7 @@ const Registration = () => {
     }`,
     cursor: "pointer",
     opacity: isLocked ? 0.75 : 1,
-    "&:hover": {
-      border: `1px solid ${theme.palette.uranoGreen1.main}`,
-    },
+    "&:hover": { border: `1px solid ${theme.palette.uranoGreen1.main}` },
   });
 
   const StepBadge: React.FC<{ n: 1 | 2 | 3 }> = ({ n }) => (
@@ -231,7 +282,7 @@ const Registration = () => {
               fontSize: { xs: "1rem", lg: "0.75rem" },
               color: theme.palette.text.primary,
               width: "80%",
-              textAlign: "left"
+              textAlign: "left",
             }}
           >
             Register with Email
