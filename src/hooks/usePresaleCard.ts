@@ -9,6 +9,7 @@ type PresaleCardState = {
   loading: boolean;
   error: string | null;
   roundLabel: string | null;
+  rawTokenPrice: number | null;
   currentPriceStr: string | null;
   usdcDecimals: number;
   info: ActiveRoundResult["info"];
@@ -27,6 +28,7 @@ export function usePresaleCardData({ priceFractionDigits = 5 }: UsePresaleCardDa
     loading: true,
     error: null,
     roundLabel: null,
+    rawTokenPrice: null,
     currentPriceStr: null,
     usdcDecimals: 6,
     info: null,
@@ -52,6 +54,7 @@ export function usePresaleCardData({ priceFractionDigits = 5 }: UsePresaleCardDa
             loading: false,
             error: null,
             roundLabel: label,
+            rawTokenPrice: Number(info.tokenPrice),
             currentPriceStr: price,
             usdcDecimals,
             info,
@@ -61,6 +64,7 @@ export function usePresaleCardData({ priceFractionDigits = 5 }: UsePresaleCardDa
             loading: false,
             error: null,
             roundLabel: null,
+            rawTokenPrice: null,
             currentPriceStr: null,
             usdcDecimals,
             info: null,

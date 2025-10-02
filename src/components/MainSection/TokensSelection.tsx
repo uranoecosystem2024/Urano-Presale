@@ -14,8 +14,9 @@ import { getBalance } from "thirdweb/extensions/erc20";
 import { sepolia } from "thirdweb/chains";
 import { client } from "@/lib/thirdwebClient";
 import { parseUnits } from "viem";
+import { usePresaleCardData } from "@/hooks/usePresaleCard";
 
-const RATE = 33.3; // 1 USDC = 33.3 URANO (example)
+//const RATE = 33.3; // 1 USDC = 33.3 URANO (example)
 const MIN_USDC = 100;
 const AMOUNT_STORAGE_KEY = "urano:purchaseAmount:v1";
 const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_ADDRESS_SEPOLIA as `0x${string}` | undefined;
@@ -25,6 +26,7 @@ const TokensSelection = () => {
   const theme = useTheme();
   const [value, setValue] = useState<number>(0);
   const [convertedValue, setConvertedValue] = useState<number>(0);
+  const { loading, rawTokenPrice } = usePresaleCardData({ priceFractionDigits: 5 });
 
   const account = useActiveAccount();
   const address = account?.address as `0x${string}` | undefined;
@@ -56,10 +58,10 @@ const TokensSelection = () => {
 
   // Compute URANO received from USDC
   useEffect(() => {
-    const raw = Number(value || 0) * RATE;
+    const raw = loading ? 0 : Number(value || 0) * (rawTokenPrice ?? 0);
     const rounded = Number(raw.toFixed(2));
     setConvertedValue(rounded);
-  }, [value]);
+  }, [value, loading, rawTokenPrice]);
 
   // Publish amount so the CTA approves exactly what the user typed
   useEffect(() => {
