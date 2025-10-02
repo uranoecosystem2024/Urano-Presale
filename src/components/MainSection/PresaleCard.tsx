@@ -95,14 +95,6 @@ const PresaleCard = () => {
 
             </Stack>
             <Stack width={"100%"} gap={1} position={"relative"} zIndex={5}>
-                <Typography variant="subtitle1" sx={{
-                    fontWeight: 400,
-                    fontSize: "0.875rem",
-                    color: theme.palette.text.primary,
-                    fontStyle: "italic",
-                }}>
-                    Status
-                </Typography>
                 <Stack width={"100%"}>
                     <StatusBar />
                 </Stack>
