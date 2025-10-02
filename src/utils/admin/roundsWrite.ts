@@ -8,30 +8,23 @@ import {
 } from "thirdweb";
 import type { Account } from "thirdweb/wallets";
 import { client } from "@/lib/thirdwebClient";
-import { sepolia } from "thirdweb/chains";
 import { presaleAbi } from "@/lib/abi/presale";
+import { PRESALE_ADDRESS, PRESALE_CHAIN } from "@/lib/presaleConfig";
 
 /**
- * All rounds present in the new ABI.
+ * All rounds present in the ABI/contract enum:
+ * enum RoundType { Seed=0, Private=1, Institutional=2, Strategic=3, Community=4 }
  */
 export type RoundKey = "seed" | "private" | "institutional" | "strategic" | "community";
 
-const PRESALE_ADDR = process.env
-  .NEXT_PUBLIC_PRESALE_SMART_CONTRACT_ADDRESS as `0x${string}`;
-
 const presale = getContract({
   client,
-  chain: sepolia,
-  address: PRESALE_ADDR,
+  chain: PRESALE_CHAIN,
+  address: PRESALE_ADDRESS,
   abi: presaleAbi,
 });
 
-/**
- * ⚠️ Confirm these indices match your Solidity enum order.
- * Based on the ABI (presence/order of get*RoundInfo helpers), a common order is:
- * enum RoundType { Seed=0, Private=1, Institutional=2, Strategic=3, Community=4 }
- * If your enum differs, update this map accordingly.
- */
+/** Confirm these indices match your Solidity enum */
 export const ROUND_ENUM_INDEX: Record<RoundKey, number> = {
   seed: 0,
   private: 1,
@@ -48,11 +41,10 @@ function ensureEnumMapping(key: RoundKey): number {
   return idx;
 }
 
-const ALL_ROUND_KEYS: RoundKey[] = ["seed", "private", "institutional", "strategic", "community"];
+export const ALL_ROUND_KEYS: RoundKey[] = ["seed", "private", "institutional", "strategic", "community"];
 
 /**
- * NEW ABI tuple layout for get*RoundInfo():
- *
+ * Tuple layout for get*RoundInfo():
  * isActive_, tokenPrice_, minPurchase_, totalRaised_, startTime_, endTime_,
  * totalTokensSold_, maxTokensToSell_, isPublic_, vestingEndTime_,
  * cliffPeriodMonths_, vestingDurationMonths_, tgeUnlockPercentage_
@@ -107,7 +99,7 @@ export async function readRoundInfoByKey(key: RoundKey): Promise<RoundInfoTuple>
         method: "getCommunityRoundInfo",
       })) as RoundInfoTuple;
   }
-  // Exhaustiveness guard (should be unreachable)
+  // Exhaustiveness guard
   throw new Error(`Unsupported round key: ${key as string}`);
 }
 
@@ -123,7 +115,7 @@ export async function setRoundStatusTx(
   const idx = ensureEnumMapping(key);
   const tx = prepareContractCall({
     contract: presale,
-    method: "setRoundStatus",
+    method: "setRoundStatus", // <-- function name from ABI
     params: [idx, isActive, startTimeSec, endTimeSec],
   });
   const sent = await sendTransaction({ account, transaction: tx });
@@ -168,7 +160,7 @@ export async function toggleRoundActive(
 ): Promise<{ statusTx: `0x${string}`; startTimeUsed: bigint; endTimeUsed: bigint }> {
   const info = await readRoundInfoByKey(key);
 
-  // NEW ABI: startTime_ at index 4, endTime_ at index 5
+  // startTime_/endTime_ at indexes 4/5
   let startTime = info[4];
   let endTime = info[5];
 
@@ -236,7 +228,7 @@ export async function toggleRoundActiveExclusive(
 
     if (!isActive) continue;
 
-    // NEW ABI: startTime/endTime indexes are 4/5
+    // start/end at 4/5
     const n = normalizeTimesFuture(info[4], info[5]);
     const txHash = await setRoundStatusTx(account, other, false, n.start, n.end);
 

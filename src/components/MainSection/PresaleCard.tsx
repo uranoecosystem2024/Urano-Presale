@@ -8,10 +8,14 @@ import vector1 from "@/assets/images/Vector1.webp";
 import vector2 from "@/assets/images/Vector2.webp";
 import vector3 from "@/assets/images/Vector3.webp";
 import StatusBar from "@/components/MainSection/statusBar";
+import { usePresaleCardData } from "@/hooks/usePresaleCard";
+
 const PresaleCard = () => {
     const theme = useTheme();
+    const { loading, roundLabel, currentPriceStr } = usePresaleCardData({ priceFractionDigits: 5 });
+
     return (
-        <Stack width={"100%"} alignItems={"center"} borderRadius={{xs: 2.5, lg: 2}} padding={2} gap={2} sx={{
+        <Stack width={"100%"} alignItems={"center"} borderRadius={{ xs: 2.5, lg: 2 }} padding={2} gap={2} sx={{
             border: "1px solid transparent",
             background: `
                 linear-gradient(${theme.palette.presaleCardBg.main}, ${theme.palette.presaleCardBg.main}) padding-box,
@@ -26,7 +30,7 @@ const PresaleCard = () => {
             <Image src={vector3} alt="vector3" width={230} height={230} style={{ position: "absolute", top: 0, right: 0, zIndex: 0 }} />
             <Typography className="conthrax" variant="h5" sx={{
                 fontWeight: 600,
-                fontSize: {xs: "1.25rem", lg: "1.5rem"},
+                fontSize: { xs: "1.25rem", lg: "1.5rem" },
                 background: theme.palette.uranoGradient,
                 backgroundClip: 'text',
                 WebkitBackgroundClip: 'text',
@@ -49,7 +53,7 @@ const PresaleCard = () => {
                         fontSize: "1rem",
                         color: theme.palette.text.primary,
                     }}>
-                        $0.03000
+                        {loading ? "Loading…" : currentPriceStr ?? "—"}
                     </Typography>
                 </Stack>
                 <Stack alignItems={"center"} gap={0.5}>
@@ -67,7 +71,7 @@ const PresaleCard = () => {
                         textAlign: "center",
                         color: theme.palette.text.primary,
                     }}>
-                        Private
+                        {loading ? "Loading…" : roundLabel ?? "—"}
                     </Typography>
                 </Stack>
                 <Stack alignItems={"end"} gap={0.5}>
