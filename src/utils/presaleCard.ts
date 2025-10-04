@@ -5,17 +5,17 @@ import { presaleAbi } from "@/lib/abi/presale";
 import { PRESALE_ADDRESS, PRESALE_CHAIN } from "@/lib/presaleConfig";
 
 /** Round keys in Solidity enum order. */
-export type RoundKey = "seed" | "private" | "institutional" | "strategic" | "community";
+export type RoundKey = "strategic" | "seed" | "private" | "institutional" | "community";
 
 export const ROUND_ENUM_INDEX: Record<RoundKey, number> = {
-  seed: 0,
-  private: 1,
-  institutional: 2,
-  strategic: 3,
+  strategic: 0,
+  seed: 1,
+  private: 2,
+  institutional: 3,
   community: 4,
 };
 
-const ALL_KEYS: readonly RoundKey[] = ["seed", "private", "institutional", "strategic", "community"] as const;
+const ALL_KEYS: readonly RoundKey[] = ["strategic", "seed", "private", "institutional", "community"] as const;
 
 // One-time sanity log to verify the card reads the SAME adsdr/chain as admin.
 if (typeof window !== "undefined" && process.env.NEXT_PUBLIC_DEBUG_PRESALE === "true") {

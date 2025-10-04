@@ -14,7 +14,7 @@ import { presaleAbi } from "@/lib/abi/presale";
 /**
  * All rounds supported by the new ABI.
  */
-export type RoundKey = "seed" | "private" | "institutional" | "strategic" | "community";
+export type RoundKey = "strategic" | "seed" | "private" | "institutional" | "community";
 
 /**
  * Map your UI keys to the Solidity enum indices.
@@ -23,14 +23,14 @@ export type RoundKey = "seed" | "private" | "institutional" | "strategic" | "com
  *   0=Seed, 1=Private, 2=Institutional, 3=Strategic, 4=Community
  */
 export const ROUND_ENUM_INDEX: Record<RoundKey, number> = {
-  seed: 0,
-  private: 1,
-  institutional: 2,
-  strategic: 3,
+  strategic: 0,
+  seed: 1,
+  private: 2,
+  institutional: 3,
   community: 4,
 };
 
-const ALL_ROUND_KEYS: RoundKey[] = ["seed", "private", "institutional", "strategic", "community"];
+const ALL_ROUND_KEYS: RoundKey[] = ["strategic", "seed", "private", "institutional", "community"];
 
 /** Address of the Presale contract (must be defined in your .env) */
 const PRESALE_ADDR = process.env

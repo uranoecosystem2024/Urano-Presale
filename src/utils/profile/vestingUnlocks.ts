@@ -5,14 +5,15 @@ import { sepolia } from "thirdweb/chains";
 import { presaleAbi } from "@/lib/abi/presale";
 
 // Reuse the same enum mapping used elsewhere
-export type RoundKey = "seed" | "private" | "institutional" | "strategic" | "community";
+export type RoundKey = "strategic" | "seed" | "private" | "institutional" | "community";
 export const ROUND_ENUM_INDEX: Record<RoundKey, number> = {
-  seed: 0,
-  private: 1,
-  institutional: 2,
-  strategic: 3,
+  strategic: 0,
+  seed: 1,
+  private: 2,
+  institutional: 3,
   community: 4,
 };
+
 
 const PRESALE_ADDR = process.env
   .NEXT_PUBLIC_PRESALE_SMART_CONTRACT_ADDRESS as `0x${string}`;
@@ -63,8 +64,8 @@ export async function getTokenDecimals(): Promise<number> {
 
 /** Tiny helper to find the active round key */
 export async function readActiveRoundKey(): Promise<RoundKey | null> {
-  const keys: RoundKey[] = ["seed", "private", "institutional", "strategic", "community"];
-  const methods: Record<RoundKey, "getSeedRoundInfo" | "getPrivateRoundInfo" | "getInstitutionalRoundInfo" | "getStrategicRoundInfo" | "getCommunityRoundInfo"> = {
+  const keys: RoundKey[] = ["strategic", "seed", "private", "institutional", "community"];
+  const methods: Record<RoundKey, "getStrategicRoundInfo" | "getSeedRoundInfo" | "getPrivateRoundInfo" | "getInstitutionalRoundInfo" | "getCommunityRoundInfo"> = {
     seed: "getSeedRoundInfo",
     private: "getPrivateRoundInfo",
     institutional: "getInstitutionalRoundInfo",

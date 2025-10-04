@@ -46,10 +46,10 @@ const mockUsdc = getContract({
  * If your contract differs, update the numeric values below.
  */
 export const RoundType = {
-  SEED: 0,
-  PRIVATE: 1,
-  INSTITUTIONAL: 2,
-  STRATEGIC: 3,
+  STRATEGIC: 0,
+  SEED: 1,
+  PRIVATE: 2,
+  INSTITUTIONAL: 3,
   COMMUNITY: 4,
 } as const;
 

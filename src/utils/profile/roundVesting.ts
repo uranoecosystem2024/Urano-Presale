@@ -5,7 +5,7 @@ import { sepolia } from "thirdweb/chains";
 import { presaleAbi } from "@/lib/abi/presale";
 
 /** Contract rounds (must match Solidity enum order) */
-export type RoundKey = "seed" | "private" | "institutional" | "strategic" | "community";
+export type RoundKey = "strategic" | "seed" | "private" | "institutional" | "community";
 
 const PRESALE_ADDR = process.env
   .NEXT_PUBLIC_PRESALE_SMART_CONTRACT_ADDRESS as `0x${string}`;
@@ -77,7 +77,7 @@ export type ActiveVestingSummary = {
  * If none active: returns null-like values with label "—".
  */
 export async function readActiveRoundVestingSummary(): Promise<ActiveVestingSummary> {
-  const rounds: RoundKey[] = ["seed", "private", "institutional", "strategic", "community"];
+  const rounds: RoundKey[] = ["strategic", "seed", "private", "institutional", "community"];
 
   // Fetch all round infos concurrently
   const infos = await Promise.all(rounds.map((r) => readRoundInfoByKey(r)));

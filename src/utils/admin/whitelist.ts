@@ -23,7 +23,7 @@ const ERC20_ABI = [
 ] as const;
 
 /** All rounds supported by the new ABI */
-export type RoundKey = "seed" | "private" | "institutional" | "strategic" | "community";
+export type RoundKey = "strategic" | "seed" | "private" | "institutional" | "community";
 
 /**
  * Map UI round keys to Solidity enum indices.
@@ -31,10 +31,10 @@ export type RoundKey = "seed" | "private" | "institutional" | "strategic" | "com
  * Commonly (inferred from the ABI helpers): 0=Seed,1=Private,2=Institutional,3=Strategic,4=Community
  */
 export const ROUND_ENUM_INDEX: Record<RoundKey, number> = {
-  seed: 0,
-  private: 1,
-  institutional: 2,
-  strategic: 3,
+  strategic: 0,
+  seed: 1,
+  private: 2,
+  institutional: 3,
   community: 4,
 };
 

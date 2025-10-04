@@ -7,10 +7,10 @@ import type { RoundStatusItem } from "@/components/admin/roundStatusManagement";
 
 /** 0=Seed, 1=Private, 2=Institutional, 3=Strategic, 4=Community */
 export const ROUND_ENUM_INDEX = {
-  seed: 0,
-  private: 1,
-  institutional: 2,
-  strategic: 3,
+  strategic: 0,
+  seed: 1,
+  private: 2,
+  institutional: 3,
   community: 4,
 } as const;
 
@@ -60,7 +60,7 @@ async function readRoundByIndex(index: number): Promise<RoundsStruct> {
 
 /** Returns admin UI items with `active` flags per round (stable order). */
 export async function fetchRoundItems(): Promise<RoundStatusItem[]> {
-  const ORDER: AllRoundKey[] = ["seed", "private", "institutional", "strategic", "community"];
+  const ORDER: AllRoundKey[] = ["strategic", "seed", "private", "institutional", "community"];
 
   const results = await Promise.all(
     ORDER.map(async (key) => {

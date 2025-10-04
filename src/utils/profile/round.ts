@@ -23,7 +23,7 @@ export async function readActiveRoundSummary(): Promise<{
   tokenPriceRaw: bigint | null;
   usdcDecimals: number;
 }> {
-  const rounds = ["seed", "private", "institutional", "strategic", "community"] as const;
+  const rounds = ["strategic", "seed", "private", "institutional", "community"] as const;
 
   // fetch all rounds in parallel
   const infos = await Promise.all(rounds.map((r) => readRoundInfoByKey(r)));

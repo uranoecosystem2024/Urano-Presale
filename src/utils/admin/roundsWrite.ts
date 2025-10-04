@@ -15,7 +15,7 @@ import { PRESALE_ADDRESS, PRESALE_CHAIN } from "@/lib/presaleConfig";
  * All rounds present in the ABI/contract enum:
  * enum RoundType { Seed=0, Private=1, Institutional=2, Strategic=3, Community=4 }
  */
-export type RoundKey = "seed" | "private" | "institutional" | "strategic" | "community";
+export type RoundKey = "strategic" | "seed" | "private" | "institutional" | "community";
 
 const presale = getContract({
   client,
@@ -26,10 +26,10 @@ const presale = getContract({
 
 /** Confirm these indices match your Solidity enum */
 export const ROUND_ENUM_INDEX: Record<RoundKey, number> = {
-  seed: 0,
-  private: 1,
-  institutional: 2,
-  strategic: 3,
+  strategic: 0,
+  seed: 1,
+  private: 2,
+  institutional: 3,
   community: 4,
 };
 
@@ -41,7 +41,7 @@ function ensureEnumMapping(key: RoundKey): number {
   return idx;
 }
 
-export const ALL_ROUND_KEYS: RoundKey[] = ["seed", "private", "institutional", "strategic", "community"];
+export const ALL_ROUND_KEYS: RoundKey[] = ["strategic", "seed", "private", "institutional", "community"];
 
 /**
  * Tuple layout for get*RoundInfo():

@@ -5,7 +5,7 @@ import { client } from "@/lib/thirdwebClient";
 import { PRESALE_ADDRESS, PRESALE_CHAIN } from "@/lib/presaleConfig";
 
 /** Contract enum layout: 0=Seed, 1=Private, 2=Institutional, 3=Strategic, 4=Community */
-export type RoundKey = "seed" | "private" | "institutional" | "strategic" | "community";
+export type RoundKey = "strategic" | "seed" | "private" | "institutional" | "community";
 
 export const ROUND_LABEL: Record<RoundKey, string> = {
   seed: "Seed",
@@ -96,7 +96,7 @@ export type PresaleProgress = {
  * and compute purchased % = totalTokensSold / maxTokensToSell.
  */
 export async function readPresaleProgress(): Promise<PresaleProgress> {
-  const order = ["seed", "private", "institutional", "strategic", "community"] as const;
+  const order = ["strategic", "seed", "private", "institutional", "community"] as const;
 
   const all = await Promise.all(order.map((k) => readRoundInfoByKey(k)));
 
