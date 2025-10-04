@@ -17,6 +17,7 @@ import { client } from "@/lib/thirdwebClient";
 import { parseUnits } from "viem";
 import {
   getOrCreateInviteCode,
+  getActiveRoundIndexStrict,
   approveUsdcSpending,
   buyPresaleTokens,
 } from "@/utils/presaleActions";
@@ -269,7 +270,8 @@ const MainSection = () => {
 
       setLoadingPhase("buy");
       const { code } = await getOrCreateInviteCode(account);
-      const { txHash: buyTx } = await buyPresaleTokens(account, ROUND_ID, amount, code);
+      const idx = await getActiveRoundIndexStrict()
+      const { txHash: buyTx } = await buyPresaleTokens(account, idx, amount, code);
 
       // SUCCESS TOAST (no 6-digit code shown)
       toast.success(

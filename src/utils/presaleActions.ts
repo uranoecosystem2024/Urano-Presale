@@ -39,11 +39,9 @@ const mockUsdc = getContract({
 });
 
 /**
- * RoundType mapping — keep this aligned with the Solidity enum order.
- * Based on the presence of getSeed/Private/Institutional/Strategic/CommunityRoundInfo,
- * the most likely enum is:
- *   0 = Seed, 1 = Private, 2 = Institutional, 3 = Strategic, 4 = Community
- * If your contract differs, update the numeric values below.
+ * RoundType mapping — must match Solidity enum order:
+ * enum RoundType { Strategic, Seed, Private, Institutional, Community }
+ * => 0,1,2,3,4 respectively.
  */
 export const RoundType = {
   STRATEGIC: 0,
@@ -63,34 +61,156 @@ function resolveRound(round: RoundLike): number {
 }
 
 /**
- * Optional: quick sanity helper to fetch round info for UX checks/logging.
- * (Not required for the write calls to succeed.)
+ * Strong types for round info getters (they all share the same layout).
+ * Matches the ABI return order for get*RoundInfo()
  */
-export async function getRoundInfo(round: RoundLike) {
+export type RoundInfo = {
+  isActive_: boolean;
+  tokenPrice_: bigint;
+  minPurchase_: bigint;
+  totalRaised_: bigint;
+  startTime_: bigint;
+  endTime_: bigint;
+  totalTokensSold_: bigint;
+  maxTokensToSell_: bigint;
+  isPublic_: boolean;
+  vestingEndTime_: bigint;
+  cliffPeriodMonths_: bigint;
+  vestingDurationMonths_: bigint;
+  tgeUnlockPercentage_: bigint;
+};
+
+/** Tuple type returned by the ABI getters */
+type RoundInfoTuple = readonly [
+  boolean, // isActive_
+  bigint,  // tokenPrice_
+  bigint,  // minPurchase_
+  bigint,  // totalRaised_
+  bigint,  // startTime_
+  bigint,  // endTime_
+  bigint,  // totalTokensSold_
+  bigint,  // maxTokensToSell_
+  boolean, // isPublic_
+  bigint,  // vestingEndTime_
+  bigint,  // cliffPeriodMonths_
+  bigint,  // vestingDurationMonths_
+  bigint   // tgeUnlockPercentage_
+];
+
+/** Minimal subset used to detect "open" rounds */
+type RoundInfoLite = Pick<
+  RoundInfo,
+  "isActive_" | "startTime_" | "endTime_" | "totalTokensSold_" | "maxTokensToSell_"
+>;
+
+/** Map the tuple into a named-object RoundInfo */
+function mapRoundTuple(t: RoundInfoTuple): RoundInfo {
+  return {
+    isActive_: t[0],
+    tokenPrice_: t[1],
+    minPurchase_: t[2],
+    totalRaised_: t[3],
+    startTime_: t[4],
+    endTime_: t[5],
+    totalTokensSold_: t[6],
+    maxTokensToSell_: t[7],
+    isPublic_: t[8],
+    vestingEndTime_: t[9],
+    cliffPeriodMonths_: t[10],
+    vestingDurationMonths_: t[11],
+    tgeUnlockPercentage_: t[12],
+  };
+}
+
+/**
+ * Read round info by index with a consistent, strongly-typed return
+ */
+export async function getRoundInfo(round: RoundLike): Promise<RoundInfo> {
   const idx = resolveRound(round);
-  switch (idx) {
-    case RoundType.SEED:
-      return readContract({ contract: presale, method: "getSeedRoundInfo" });
-    case RoundType.PRIVATE:
-      return readContract({ contract: presale, method: "getPrivateRoundInfo" });
-    case RoundType.INSTITUTIONAL:
-      return readContract({
-        contract: presale,
-        method: "getInstitutionalRoundInfo",
-      });
-    case RoundType.STRATEGIC:
-      return readContract({
-        contract: presale,
-        method: "getStrategicRoundInfo",
-      });
-    case RoundType.COMMUNITY:
-      return readContract({
-        contract: presale,
-        method: "getCommunityRoundInfo",
-      });
-    default:
-      throw new Error(`Unknown round index: ${idx}`);
+
+  if (idx === RoundType.STRATEGIC) {
+    const res = (await readContract({
+      contract: presale,
+      method: "getStrategicRoundInfo",
+    })) as RoundInfoTuple;
+    return mapRoundTuple(res);
   }
+  if (idx === RoundType.SEED) {
+    const res = (await readContract({
+      contract: presale,
+      method: "getSeedRoundInfo",
+    })) as RoundInfoTuple;
+    return mapRoundTuple(res);
+  }
+  if (idx === RoundType.PRIVATE) {
+    const res = (await readContract({
+      contract: presale,
+      method: "getPrivateRoundInfo",
+    })) as RoundInfoTuple;
+    return mapRoundTuple(res);
+  }
+  if (idx === RoundType.INSTITUTIONAL) {
+    const res = (await readContract({
+      contract: presale,
+      method: "getInstitutionalRoundInfo",
+    })) as RoundInfoTuple;
+    return mapRoundTuple(res);
+  }
+  if (idx === RoundType.COMMUNITY) {
+    const res = (await readContract({
+      contract: presale,
+      method: "getCommunityRoundInfo",
+    })) as RoundInfoTuple;
+    return mapRoundTuple(res);
+  }
+
+  throw new Error(`Unknown round index: ${idx}`);
+}
+
+/** Read one round’s info and return a lite shape */
+async function readRoundLite(index: number): Promise<RoundInfoLite> {
+  const info = await getRoundInfo(index);
+  return {
+    isActive_: info.isActive_,
+    startTime_: info.startTime_,
+    endTime_: info.endTime_,
+    totalTokensSold_: info.totalTokensSold_,
+    maxTokensToSell_: info.maxTokensToSell_,
+  };
+}
+
+/**
+ * Returns the first open round index (or null if none).
+ * Open = isActive && now in [startTime, endTime] && not sold out
+ */
+export async function getActiveRoundIndex(): Promise<number | null> {
+  const now = BigInt(Math.floor(Date.now() / 1000));
+  const order = [
+    RoundType.STRATEGIC,
+    RoundType.SEED,
+    RoundType.PRIVATE,
+    RoundType.INSTITUTIONAL,
+    RoundType.COMMUNITY,
+  ];
+
+  for (const idx of order) {
+    const r = await readRoundLite(idx);
+    const withinTime = now >= r.startTime_ && now <= r.endTime_;
+    const hasCapacity = r.totalTokensSold_ < r.maxTokensToSell_;
+    if (r.isActive_ && withinTime && hasCapacity) {
+      return idx;
+    }
+  }
+  return null;
+}
+
+/** Same as above but throws a helpful error if none is active */
+export async function getActiveRoundIndexStrict(): Promise<number> {
+  const idx = await getActiveRoundIndex();
+  if (idx === null) {
+    throw new Error("No active presale round is currently open.");
+  }
+  return idx;
 }
 
 /** Utility: generate a random 6-digit numeric string (000000–999999) */
@@ -101,29 +221,23 @@ const gen6 = () =>
 let cachedUsdcDecimals: number | null = null;
 async function getUsdcDecimals(): Promise<number> {
   if (cachedUsdcDecimals !== null) return cachedUsdcDecimals;
+
   const raw = (await readContract({
     contract: mockUsdc,
     method: "decimals",
   })) as number | bigint;
+
   const n = typeof raw === "bigint" ? Number(raw) : raw;
   if (!Number.isFinite(n) || n <= 0) {
     throw new Error("Invalid USDC decimals read from contract");
   }
+
   cachedUsdcDecimals = n;
   return n;
 }
 
 /**
  * Get the existing invite code for a wallet, or create a new unique 6-digit one and register it.
- *
- * - Checks on-chain via `getUserInviteCode(address)`.
- * - If empty, generates a code, ensures uniqueness via `getInviteCodeOwner(code) == address(0)`,
- *   then calls `registerInviteCode(code)`.
- *
- * Returns:
- *  - code: the code string
- *  - created: whether a new code was created in this call
- *  - txHash?: present only when a new code was registered
  */
 export async function getOrCreateInviteCode(
   account: Account
@@ -149,8 +263,7 @@ export async function getOrCreateInviteCode(
   for (let i = 0; i < 10; i++) {
     const code = gen6();
 
-    // Optional: ensure numeric-only invite codes if your backend/UX expects that.
-    // (Contract accepts string; we enforce a 6-digit numeric format for consistency.)
+    // Optional: enforce numeric format in dapp UX; contract allows any non-empty <=10 chars
     if (!/^\d{6}$/.test(code)) continue;
 
     const owner = (await readContract({
@@ -179,10 +292,7 @@ export async function getOrCreateInviteCode(
 }
 
 /**
- * Approves the PRESALE contract to spend the given amount of mock USDC
- * (human amount like 10, 25.5, etc.). Reads decimals from the token.
- *
- * Returns tx hash & the base-unit amount approved.
+ * Approves the PRESALE contract to spend the given amount of mock USDC.
  */
 export async function approveUsdcSpending(
   account: Account,
@@ -211,11 +321,6 @@ export async function approveUsdcSpending(
 
 /**
  * Executes the presale purchase.
- * - round: accepts either a number (uint8) or a RoundName (e.g. "COMMUNITY").
- * - humanUsdcAmount: user-typed amount (e.g. 100 for 100 USDC)
- * - inviteCode: the 6-digit code (must be non-empty & already registered/owned by caller)
- *
- * Checks allowance before calling `buyTokens` and throws if insufficient.
  */
 export async function buyPresaleTokens(
   account: Account,
@@ -230,9 +335,6 @@ export async function buyPresaleTokens(
     throw new Error("USDC amount must be greater than 0");
   if (!inviteCode || inviteCode.trim().length === 0)
     throw new Error("Invite code is required");
-
-  // Optional: enforce numeric 6-digit format in the dapp UX layer
-  // if (!/^\d{6}$/.test(inviteCode)) throw new Error("Invalid invite code format");
 
   const decimals = await getUsdcDecimals();
   const usdcAmount = parseUnits(humanUsdcAmount.toString(), decimals);
