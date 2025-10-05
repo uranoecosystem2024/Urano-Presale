@@ -11,7 +11,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { useActiveAccount, useReadContract } from "thirdweb/react";
 import { getContract } from "thirdweb";
-import { getBalance } from "thirdweb/extensions/erc20"; // ⬅ allowance import removed
+import { getBalance } from "thirdweb/extensions/erc20";
 import { sepolia } from "thirdweb/chains";
 import { client } from "@/lib/thirdwebClient";
 import { parseUnits } from "viem";
@@ -30,19 +30,9 @@ type Progress = { step1: boolean; step2: boolean; step3: boolean };
 const STORAGE_KEY = "registrationProgress:v1";
 const AMOUNT_STORAGE_KEY = "urano:purchaseAmount:v1";
 const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_ADDRESS_SEPOLIA as `0x${string}` | undefined;
-const PRESALE_ADDRESS = process.env.NEXT_PUBLIC_PRESALE_SMART_CONTRACT_ADDRESS as
-  | `0x${string}`
-  | undefined;
-
-// constants
 const MIN_USDC = 100;
 const ZERO: `0x${string}` = "0x0000000000000000000000000000000000000000";
-const ROUND_ID = 0;
-
-// explorer link helper
 const txUrl = (hash?: string) => (hash ? `https://sepolia.etherscan.io/tx/${hash}` : undefined);
-
-// animated dots for loading
 const AnimatedDots = () => (
   <span
     style={{

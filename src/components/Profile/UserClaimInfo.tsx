@@ -12,6 +12,8 @@ import {
   prepareWhitelistClaimTx,
 } from "@/utils/profile/userClaimInfo";
 
+import { formatCompactDecimalString } from "@/utils/compactDecimal";
+
 type UserClaimInfoProps = {
   addressOverride?: `0x${string}`;
 };
@@ -79,6 +81,16 @@ export default function UserClaimInfo({ addressOverride }: UserClaimInfoProps) {
 
   const claimableNum = Number(claimable.replace(/,/g, ""));
 
+  const compactClaimableTokens = useMemo(
+    () => formatCompactDecimalString(claimable, 2),
+    [claimable]
+  );
+
+  const compactClaimedTokens = useMemo(
+    () => formatCompactDecimalString(claimed, 2),
+    [claimed]
+  );
+
   return (
     <Stack
       direction={{ xs: "column-reverse", lg: "row" }}
@@ -127,7 +139,7 @@ export default function UserClaimInfo({ addressOverride }: UserClaimInfoProps) {
               WebkitTextFillColor: "transparent",
             }}
           >
-            {address ? `${claimable} $URANO` : "—"}
+            {address ? `${compactClaimableTokens} $URANO` : "—"}
           </Typography>
         </Stack>
 
@@ -173,7 +185,7 @@ export default function UserClaimInfo({ addressOverride }: UserClaimInfoProps) {
               {claiming
                 ? "Claiming…"
                 : address
-                ? `Claim ${claimable} $URANO`
+                ? `Claim ${compactClaimableTokens} $URANO`
                 : "Connect Wallet"}
             </Typography>
           </Box>
@@ -226,7 +238,7 @@ export default function UserClaimInfo({ addressOverride }: UserClaimInfoProps) {
               WebkitTextFillColor: "transparent",
             }}
           >
-            {address ? `${claimed} $URANO` : "—"}
+            {address ? `${compactClaimedTokens} $URANO` : "—"}
           </Typography>
         </Stack>
       </Stack>

@@ -10,6 +10,8 @@ import {
   fromUnits,
 } from "@/utils/profile/bought";
 
+import { formatCompactDecimalString } from "@/utils/compactDecimal";
+
 type BoughtUranoProps = {
   /** Optional: override address; defaults to connected wallet */
   addressOverride?: `0x${string}`;
@@ -31,7 +33,7 @@ export default function BoughtUrano({
   title = "Total $URANO Bought",
 }: BoughtUranoProps) {
   const theme = useTheme();
-  const account = useActiveAccount();
+  const account = useActiveAccount(); 
 
   const address = useMemo(
     () => addressOverride ?? (account?.address as `0x${string}` | undefined),
@@ -85,6 +87,11 @@ export default function BoughtUrano({
     };
   }, [address]);
 
+  const compactTokens = useMemo(
+    () => formatCompactDecimalString(totalTokens, 2),
+    [totalTokens]
+  );
+
   return (
     <Stack
       width={{ xs: "100%", lg: "50%" }}
@@ -119,7 +126,7 @@ export default function BoughtUrano({
             WebkitTextFillColor: "transparent",
           }}
         >
-          {address ? `${totalTokens || "0"} $URANO` : "—"}
+          {address ? `${compactTokens || "0"} $URANO` : "—"}
         </Typography>
 
         <Stack direction="row" alignItems="center" gap={1.5}>
