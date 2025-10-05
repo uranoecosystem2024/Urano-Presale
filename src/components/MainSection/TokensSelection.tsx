@@ -26,7 +26,7 @@ const TokensSelection = () => {
   const theme = useTheme();
   const [value, setValue] = useState<number>(0);
   const [convertedValue, setConvertedValue] = useState<number>(0);
-  const { loading, rawTokenPrice } = usePresaleCardData({ priceFractionDigits: 5 });
+  const { loading, rawTokenPrice, usdcDecimals } = usePresaleCardData({ priceFractionDigits: 5 });
 
   const account = useActiveAccount();
   const address = account?.address as `0x${string}` | undefined;
@@ -58,10 +58,16 @@ const TokensSelection = () => {
 
   // Compute URANO received from USDC
   useEffect(() => {
-    const raw = loading ? 0 : Number(value || 0) * (rawTokenPrice ?? 0);
-    const rounded = Number(raw.toFixed(2));
-    setConvertedValue(rounded);
-  }, [value, loading, rawTokenPrice]);
+    if (loading || !rawTokenPrice || rawTokenPrice <= 0) {
+      setConvertedValue(0);
+      return;
+    }
+    const dec = usdcDecimals ?? 6; // fallback to 6 just in case
+    // tokens = usdc * 10^usdcDecimals / tokenPriceRaw
+    const tokens = (Number(value || 0) * Math.pow(10, dec)) / Number(rawTokenPrice);
+    setConvertedValue(Number(tokens.toFixed(2)));
+  }, [value, loading, rawTokenPrice, usdcDecimals]);
+
 
   // Publish amount so the CTA approves exactly what the user typed
   useEffect(() => {
