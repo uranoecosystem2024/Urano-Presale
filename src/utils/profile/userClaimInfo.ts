@@ -1,14 +1,17 @@
 // utils/profile/userClaimInfo.ts
-import {
-  getContract,
-  readContract,
-  prepareContractCall,
-} from "thirdweb";
+"use client";
+
+import { getContract, readContract, prepareContractCall } from "thirdweb";
+import type { PreparedTransaction } from "thirdweb";
 import { client } from "@/lib/thirdwebClient";
 import { sepolia } from "thirdweb/chains";
 import { presaleAbi } from "@/lib/abi/presale";
 
-// ===== Addresses & Contracts =====
+/** Reusable type for this contract’s prepared txs */
+type PresalePreparedTx = PreparedTransaction<typeof presaleAbi>;
+
+/* ============================== Contracts ============================== */
+
 const PRESALE_ADDR = process.env
   .NEXT_PUBLIC_PRESALE_SMART_CONTRACT_ADDRESS as `0x${string}`;
 
@@ -19,7 +22,7 @@ const presale = getContract({
   abi: presaleAbi,
 });
 
-// Minimal ERC20 ABI for decimals()
+/** Minimal ERC20 ABI to read decimals() */
 const ERC20_DECIMALS_ABI = [
   {
     inputs: [],
@@ -30,47 +33,27 @@ const ERC20_DECIMALS_ABI = [
   },
 ] as const;
 
-// ===== ABI-Typed Tuples (match your Solidity return shapes) =====
+/* ============================== Types ============================== */
 
-// rounds(uint8) returns:
-type RoundStructTuple = [
-  isActive: boolean,
-  tokenPrice: bigint,
-  minPurchase: bigint,
-  totalRaised: bigint,
-  startTime: bigint,
-  endTime: bigint,
-  totalTokensSold: bigint,
-  maxTokensToSell: bigint,
-  isPublic: boolean,
-  vestingEndTime: bigint,
-  cliffPeriodMonths: bigint,
-  vestingDurationMonths: bigint,
-  tgeUnlockPercentage: bigint
-];
-
-// whitelist(address) returns:
-type WhitelistTuple = [
-  isWhitelisted: boolean,
-  preAssignedTokens: bigint,
-  claimedTokens: bigint,
-  whitelistRound: bigint // enum values come back as uint8 -> bigint
-];
-
-// getUserPurchases(address,uint8) returns:
-type PurchasesTuple = [
+type PurchasesTuple = readonly [
   amounts: bigint[],
   usdcAmounts: bigint[],
   timestamps: bigint[],
   claimed: bigint[]
 ];
 
-// ===== Known round ids in your enum Presale.RoundType =====
-// (Seed=0, Private=1, Strategic=2, Institutional=3, Community=4)
-// Adjust if your enum differs.
+type VestsTuple = readonly [
+  amounts: bigint[],
+  unlockTimes: bigint[],
+  claimed: bigint[],
+  claimableAmounts: bigint[]
+];
+
+/** Round ids as stored on-chain (enum order) */
 const ROUND_IDS = [0, 1, 2, 3, 4] as const;
 
-// ===== Helpers =====
+/* ============================== Helpers ============================== */
+
 export function formatTokenAmount(amountRaw: bigint, decimals: number): string {
   const base = 10n ** BigInt(decimals);
   const intPart = amountRaw / base;
@@ -101,94 +84,113 @@ async function getTokenDecimals(): Promise<number> {
 
     return typeof dec === "bigint" ? Number(dec) : dec;
   } catch {
-    return 18;
+    return 18; // sensible fallback for ERC20s
   }
 }
 
-function sumBigints(arr: readonly bigint[]): bigint {
-  let acc = 0n;
-  for (const v of arr) acc += v;
-  return acc;
-}
+/* ============================== WHITELIST FLOW ============================== */
 
-async function getActiveRoundId(): Promise<number | undefined> {
-  const now = BigInt(Math.floor(Date.now() / 1000));
-  for (const id of ROUND_IDS) {
-    const info = (await readContract({
-      contract: presale,
-      method: "rounds",
-      params: [id],
-    })) as RoundStructTuple;
-
-    const isActive = info[0];
-    if (!isActive) continue;
-
-    const start = info[4];
-    const end = info[5];
-
-    const startOk = start === 0n || now >= start;
-    const endOk = end === 0n || now <= end;
-
-    if (startOk && endOk) return id;
-  }
-  return undefined;
-}
-
-async function getWhitelistRoundForUser(user: `0x${string}`): Promise<number | undefined> {
-  try {
-    const wl = (await readContract({
-      contract: presale,
-      method: "whitelist",
-      params: [user],
-    }));
-
-    const round = Number(wl[3]);
-    return Number.isFinite(round) ? round : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-// ===== Reads =====
 export async function readWhitelistClaimSummary(user: `0x${string}`): Promise<{
   claimableRaw: bigint;
   claimedRaw: bigint;
+  preAssignedRaw: bigint;
   tokenDecimals: number;
 }> {
-  // 1) Determine round id (prefer active, fallback to user's whitelist round)
-  let roundId = await getActiveRoundId();
-  roundId ??= await getWhitelistRoundForUser(user);
-  if (roundId === undefined) {
-    const tokenDecimals = await getTokenDecimals();
-    return { claimableRaw: 0n, claimedRaw: 0n, tokenDecimals };
-  }
-
-  // 2) Read purchases for that round
-  const [amounts, _usdcAmounts, _timestamps, claimed] = (await readContract({
-    contract: presale,
-    method: "getUserPurchases",
-    params: [user, roundId],
-  })) as PurchasesTuple;
-
-  // 3) Compute totals
-  const totalAmounts = sumBigints(amounts);
-  const totalClaimed = sumBigints(claimed);
-
-  const rawUnclaimed = totalAmounts - totalClaimed;
-  const claimableRaw = rawUnclaimed >= 0n ? rawUnclaimed : 0n;
-
-  // 4) Token decimals
   const tokenDecimals = await getTokenDecimals();
 
-  return { claimableRaw, claimedRaw: totalClaimed, tokenDecimals };
+  const [isWhitelisted, preAssignedRaw, claimedRaw] = (await readContract({
+    contract: presale,
+    method: "whitelist",
+    params: [user],
+  }));
+
+  // If not whitelisted, everything is 0
+  if (!isWhitelisted) {
+    return { claimableRaw: 0n, claimedRaw: 0n, preAssignedRaw: 0n, tokenDecimals };
+  }
+
+  const claimableRaw = (await readContract({
+    contract: presale,
+    method: "getWhitelistClaimable",
+    params: [user],
+  }));
+
+  return { claimableRaw, claimedRaw, preAssignedRaw, tokenDecimals };
 }
 
-
-// ===== Claim TX =====
-export async function prepareWhitelistClaimTx() {
+export function prepareWhitelistClaimTx(): PresalePreparedTx {
   return prepareContractCall({
     contract: presale,
-    method: "claimWhitelistTokens" as const,
-    params: [] as const,
+    method: "claimWhitelistTokens",
+    params: [],
   });
+}
+
+/* ============================== PURCHASED FLOW ============================== */
+
+export async function readPurchasedClaimSummary(user: `0x${string}`): Promise<{
+  claimableRaw: bigint; // sum of current claimable across all rounds
+  claimedRaw: bigint;   // sum of already claimed across all rounds
+  tokenDecimals: number;
+  items: Array<{
+    round: number;
+    purchaseIndex: number;
+    claimable: bigint;  // per purchase claimable now
+  }>;
+}> {
+  const tokenDecimals = await getTokenDecimals();
+
+  const items: Array<{ round: number; purchaseIndex: number; claimable: bigint }> = [];
+  let totalClaimable = 0n;
+  let totalClaimed = 0n;
+
+  for (const round of ROUND_IDS) {
+    const [amounts, , , claimed] = (await readContract({
+      contract: presale,
+      method: "getUserPurchases",
+      params: [user, round],
+    })) as PurchasesTuple;
+
+    if (amounts.length === 0) continue;
+
+    const [, , , claimables] = (await readContract({
+      contract: presale,
+      method: "getUserVestingInfo",
+      params: [user, round],
+    })) as VestsTuple;
+
+    const n = Math.min(amounts.length, claimables.length, claimed.length);
+    for (let i = 0; i < n; i++) {
+      const c = claimables[i] ?? 0n;
+      const cl = claimed[i] ?? 0n;
+      if (c > 0n) {
+        items.push({ round, purchaseIndex: i, claimable: c });
+        totalClaimable += c;
+      }
+      totalClaimed += cl;
+    }
+  }
+
+  return { claimableRaw: totalClaimable, claimedRaw: totalClaimed, tokenDecimals, items };
+}
+
+/** One prepared tx per purchase with claimable > 0 */
+export async function preparePurchasedClaimTxs(
+  user: `0x${string}`
+): Promise<PresalePreparedTx[]> {
+  const { items } = await readPurchasedClaimSummary(user);
+
+  const txs: PresalePreparedTx[] = [];
+  for (const it of items) {
+    if (it.claimable > 0n) {
+      txs.push(
+        prepareContractCall({
+          contract: presale,
+          method: "claimTokens",
+          params: [it.round, BigInt(it.purchaseIndex)],
+        })
+      );
+    }
+  }
+  return txs;
 }
