@@ -8,13 +8,18 @@ import {
   Button,
   useTheme,
   Divider,
+  FormHelperText,
 } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
 import { useActiveAccount } from "thirdweb/react";
 
-import { readVestingStatus, startVestingFromDateTx } from "@/utils/admin/vesting";
+import {
+  readVestingStatus,
+  startVestingFromDateTx,
+  readEarliestAllowedTgeSec,
+} from "@/utils/admin/vesting";
 
 function getErrorMessage(err: unknown): string {
   if (err instanceof Error) return err.message;
@@ -45,6 +50,9 @@ export default function GlobalVestingVestingParams({
   const [started, setStarted] = useState<boolean | null>(null);
   const [tgeISO, setTgeISO] = useState<string>("");
 
+  // earliest allowed TGE (max(endTime) across rounds), seconds since epoch
+  const [earliestAllowedSec, setEarliestAllowedSec] = useState<bigint>(0n);
+
   const [derivedEnds, setDerivedEnds] = useState<{
     seedEnd?: string;
     privateEnd?: string;
@@ -54,7 +62,6 @@ export default function GlobalVestingVestingParams({
   }>({});
 
   const inputSx = {
-    // Input surface + border behavior
     "& .MuiOutlinedInput-root": {
       background: theme.palette.background.paper,
       borderRadius: 2,
@@ -62,31 +69,22 @@ export default function GlobalVestingVestingParams({
       "&:hover fieldset": { borderColor: theme.palette.text.primary },
       "&.Mui-focused fieldset": { borderColor: theme.palette.uranoGreen1.main },
     },
-
-    // Placeholder opacity
     "& .MuiInputBase-input::placeholder": { opacity: 0.7 },
-
-    // Label styles
     "& .MuiInputLabel-root": {
       color: theme.palette.common.white,
       "&.Mui-focused": { color: theme.palette.common.white },
       "&.MuiInputLabel-shrink": {
         color: theme.palette.common.white,
-        // Make the floating label look like it cuts the border
-        px: 0.75,                   // horizontal padding for breathing room
-        borderRadius: 0.5,          // soften corners
-        backgroundColor: theme.palette.background.paper, // match input bg
-        lineHeight: 1.2,            // avoids clipping with padding
+        px: 0.75,
+        borderRadius: 0.5,
+        backgroundColor: theme.palette.background.paper,
+        lineHeight: 1.2,
       },
       "&.Mui-disabled": { color: theme.palette.text.disabled },
     },
-
-    // Let the notch fit the padded label
     "& .MuiOutlinedInput-notchedOutline legend": {
-      maxWidth: "60px", // override MUI's tiny animation width
+      maxWidth: "60px",
     },
-
-    // (Optional) add a little inner padding to the legend’s span for perfect notch sizing
     "& .MuiOutlinedInput-notchedOutline legend > span": {
       paddingLeft: 6,
       paddingRight: 6,
@@ -111,32 +109,40 @@ export default function GlobalVestingVestingParams({
     [theme]
   );
 
-  // Load global vesting status (+ derived end times)
+  const fmtSec = (sec?: bigint) =>
+    sec && sec > 0n ? dayjs(Number(sec) * 1000).format("YYYY-MM-DD HH:mm") : "—";
+
+  // Load global vesting status, derived ends, and earliest allowed TGE
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
       try {
         setLoading(true);
-        const status = await readVestingStatus();
+        const [status, earliest] = await Promise.all([
+          readVestingStatus(),
+          readEarliestAllowedTgeSec(),
+        ]);
         if (cancelled) return;
 
         setStarted(status.started);
-
-        const fmt = (sec: bigint) =>
-          sec && sec > 0n ? dayjs(Number(sec) * 1000).format("YYYY-MM-DD HH:mm") : "—";
+        setEarliestAllowedSec(earliest);
 
         setDerivedEnds({
-          seedEnd: fmt(status.ends.seed),
-          privateEnd: fmt(status.ends.private),
-          institutionalEnd: fmt(status.ends.institutional),
-          strategicEnd: fmt(status.ends.strategic),
-          communityEnd: fmt(status.ends.community),
+          seedEnd: fmtSec(status.ends.seed),
+          privateEnd: fmtSec(status.ends.private),
+          institutionalEnd: fmtSec(status.ends.institutional),
+          strategicEnd: fmtSec(status.ends.strategic),
+          communityEnd: fmtSec(status.ends.community),
         });
 
-        // suggest a near-future TGE if not started
+        // suggest a near-future TGE (>= earliest allowed, rounded to minute)
         if (!status.started) {
-          const defaultTge = dayjs().add(1, "hour").second(0).millisecond(0);
-          setTgeISO(defaultTge.format("YYYY-MM-DDTHH:mm"));
+          const minMillis = Number(earliest > 0n ? earliest * 1000n : 0n);
+          const oneHourAhead = dayjs().add(1, "hour");
+          const suggested = dayjs(Math.max(oneHourAhead.valueOf(), minMillis))
+            .second(0)
+            .millisecond(0);
+          setTgeISO(suggested.format("YYYY-MM-DDTHH:mm"));
         }
       } catch (e) {
         console.error("Failed to read vesting status:", e);
@@ -152,7 +158,7 @@ export default function GlobalVestingVestingParams({
     };
   }, []);
 
-  // single-field save: start vesting with provided TGE
+  // Save: start vesting with provided (or adjusted) TGE
   const saveTgeAndStart = async () => {
     if (disabled || started) return;
     if (!account) {
@@ -165,7 +171,19 @@ export default function GlobalVestingVestingParams({
     }
     try {
       setActionLoading(true);
-      await startVestingFromDateTx(account, dayjs(tgeISO).toDate());
+
+      // chosen time in seconds
+      const chosenSec = BigInt(Math.floor(dayjs(tgeISO).valueOf() / 1000));
+      // enforce earliest allowed (contract requires TGE > strategic end, we use max across rounds)
+      const minAllowed = earliestAllowedSec > 0n ? earliestAllowedSec : 0n;
+      const adjustedSec = chosenSec <= minAllowed ? minAllowed + 1n : chosenSec;
+
+      if (adjustedSec !== chosenSec) {
+        const adjStr = dayjs(Number(adjustedSec) * 1000).format("YYYY-MM-DD HH:mm");
+        toast.info(`TGE moved to ${adjStr} to satisfy sale end constraints.`);
+      }
+
+      await startVestingFromDateTx(account, new Date(Number(adjustedSec) * 1000));
       toast.success("Vesting started.");
       setStarted(true);
     } catch (e) {
@@ -175,6 +193,11 @@ export default function GlobalVestingVestingParams({
       setActionLoading(false);
     }
   };
+
+  const earliestAllowedStr =
+    earliestAllowedSec > 0n
+      ? dayjs(Number(earliestAllowedSec) * 1000).format("YYYY-MM-DD HH:mm")
+      : null;
 
   return (
     <Stack gap={2} width="100%">
@@ -207,11 +230,16 @@ export default function GlobalVestingVestingParams({
                   sx={{
                     ...inputSx,
                     '& input[type="datetime-local"]::-webkit-calendar-picker-indicator': {
-                      filter: 'invert(1) brightness(2)', // makes it white on dark backgrounds
+                      filter: "invert(1) brightness(2)",
                       opacity: 1,
                     },
                   }}
                 />
+                {earliestAllowedStr && (
+                  <FormHelperText sx={{ color: theme.palette.text.secondary, mt: 0.5 }}>
+                    Earliest allowed TGE: {earliestAllowedStr} (must be after all sale end times)
+                  </FormHelperText>
+                )}
               </Grid>
               <Grid size={{ xs: 12, md: 3 }}>
                 <Button
@@ -226,7 +254,9 @@ export default function GlobalVestingVestingParams({
             </Grid>
           )}
 
-          <Divider sx={{ my: 1.5, borderBottom: `1px solid ${theme.palette.secondary.main}` }} />
+          <Divider
+            sx={{ my: 1.5, borderBottom: `1px solid ${theme.palette.secondary.main}` }}
+          />
 
           {/* Read-only derived end times */}
           <Grid container spacing={2} sx={{ mb: 2 }}>

@@ -11,6 +11,41 @@ import { client } from "@/lib/thirdwebClient";
 import { sepolia } from "thirdweb/chains";
 import { presaleAbi } from "@/lib/abi/presale";
 
+type RoundCoreTuple = readonly [
+  isActive: boolean,   // 0
+  tokenPrice: bigint,  // 1
+  minPurchase: bigint, // 2
+  totalRaised: bigint, // 3
+  startTime: bigint,   // 4
+  endTime: bigint,     // 5  <-- sale end (important for TGE check)
+  totalTokensSold: bigint, // 6
+  maxTokensToSell: bigint, // 7
+  isPublic: boolean,       // 8
+  vestingEndTime: bigint,  // 9
+  cliffPeriodMonths: bigint, // 10
+  vestingDurationMonths: bigint, // 11
+  tgeUnlockPercentage: bigint // 12
+];
+
+export async function readEarliestAllowedTgeSec(): Promise<bigint> {
+  const infos = await Promise.all([
+    readRoundInfoByKey("seed"),
+    readRoundInfoByKey("private"),
+    readRoundInfoByKey("institutional"),
+    readRoundInfoByKey("strategic"),
+    readRoundInfoByKey("community"),
+  ]) as RoundCoreTuple[];
+
+  // pick the maximum non-zero endTime
+  let maxEnd = 0n;
+  for (const info of infos) {
+    const end = info[5] ?? 0n;
+    if (end > maxEnd) maxEnd = end;
+  }
+  return maxEnd; // 0n means no constraint from sale windows
+}
+
+
 /**
  * All rounds supported by the new ABI.
  */
@@ -184,7 +219,10 @@ export async function startVestingTx(
   account: Account,
   tgeTimeSec: bigint
 ): Promise<`0x${string}`> {
-  const safeTge = ensureFutureTime(tgeTimeSec);
+  const minAllowed = await readEarliestAllowedTgeSec(); // <= key line
+  const base = tgeTimeSec <= minAllowed ? (minAllowed + 1n) : tgeTimeSec;
+
+  const safeTge = ensureFutureTime(base); // also respects default LEEWAY
   const tx = prepareContractCall({
     contract: presale,
     method: "startVesting",
