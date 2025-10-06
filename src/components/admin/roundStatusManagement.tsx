@@ -27,6 +27,7 @@ import {
 import {
   readRoundMaxTokensHuman,
   setRoundMaxTokensHumanTx,
+  readRoundSoldAndRemainingHuman
 } from "@/utils/admin/roundMaxTokens";
 
 import {
@@ -139,6 +140,10 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
   // Round max tokens (per expanded round)
   const [maxTokensHuman, setMaxTokensHuman] = useState("");
   const [maxTokensLoading, setMaxTokensLoading] = useState(false);
+
+  const [soldHuman, setSoldHuman] = useState("");
+  const [remainingHuman, setRemainingHuman] = useState("");
+  const [salesLoading, setSalesLoading] = useState(false);
 
   // which row is expanded
   const [expandedId, setExpandedId] = useState<UiRoundKey | null>(null);
@@ -291,12 +296,25 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
       if (!expandedId) return;
       try {
         setMaxTokensLoading(true);
-        const human = await readRoundMaxTokensHuman(expandedId as RoundKeyMax);
-        if (!cancelled) setMaxTokensHuman(human);
+        setSalesLoading(true);
+
+        const [humanMax, sales] = await Promise.all([
+          readRoundMaxTokensHuman(expandedId as RoundKeyMax),
+          readRoundSoldAndRemainingHuman(expandedId as RoundKeyMax),
+        ]);
+
+        if (!cancelled) {
+          setMaxTokensHuman(humanMax);
+          setSoldHuman(sales.sold);
+          setRemainingHuman(sales.remaining);
+        }
       } catch (e) {
-        console.error("Failed to read round max tokens:", e);
+        console.error("Failed to read round details:", e);
       } finally {
-        if (!cancelled) setMaxTokensLoading(false);
+        if (!cancelled) {
+          setMaxTokensLoading(false);
+          setSalesLoading(false);
+        }
       }
     };
 
@@ -305,6 +323,7 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
       cancelled = true;
     };
   }, [expandedId]);
+
 
   const handleSaveMaxTokens = async () => {
     if (!expandedId) return;
@@ -699,6 +718,24 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                           </Button>
                         </Grid>
                       </Grid>
+
+                      <Divider sx={{ my: 3, borderBottom: `1px solid ${theme.palette.secondary.main}` }} />
+
+                      <Grid container spacing={2} sx={{ mb: 2 }}>
+                        <Grid size={{ xs: 12, md: 6 }}>
+                          <Typography variant="subtitle1">Sold Tokens</Typography>
+                          <Typography variant="body1" color={theme.palette.text.secondary}>
+                            {salesLoading ? "Loading…" : soldHuman + " $URANO" || "—"}
+                          </Typography>
+                        </Grid>
+                        <Grid size={{ xs: 12, md: 6 }}>
+                          <Typography variant="subtitle1">Remaining Tokens For Sale</Typography>
+                          <Typography variant="body1" color={theme.palette.text.secondary}>
+                            {salesLoading ? "Loading…" : remainingHuman + " $URANO"  || "—"}
+                          </Typography>
+                        </Grid>
+                      </Grid>
+
                     </Collapse>
                   </Stack>
 

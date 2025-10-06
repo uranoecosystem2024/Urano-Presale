@@ -240,3 +240,34 @@ export async function setRoundMaxTokensHumanTx(
   const raw = toUnits(maxTokensHuman, decimals);
   return setRoundMaxTokensRawTx(account, key, raw);
 }
+
+// --- ADD: sold & remaining readers ------------------------------
+
+/** Raw sold/max/remaining for a round (bigint, on-chain units). */
+export async function readRoundSoldAndRemainingRaw(key: RoundKey): Promise<{
+  soldRaw: bigint;
+  maxRaw: bigint;
+  remainingRaw: bigint;
+}> {
+  const info = await readRoundInfoByKey(key);
+  const soldRaw = info[6]; // totalTokensSold_
+  const maxRaw = info[7];  // maxTokensToSell_
+  const rem = maxRaw - soldRaw;
+  const remainingRaw = rem > 0n ? rem : 0n;
+  return { soldRaw, maxRaw, remainingRaw };
+}
+
+/** Human strings (respect token decimals) for sold/max/remaining. */
+export async function readRoundSoldAndRemainingHuman(key: RoundKey): Promise<{
+  sold: string;
+  max: string;
+  remaining: string;
+}> {
+  const decimals = await getTokenDecimals();
+  const { soldRaw, maxRaw, remainingRaw } = await readRoundSoldAndRemainingRaw(key);
+  return {
+    sold: fromUnits(soldRaw, decimals),
+    max: fromUnits(maxRaw, decimals),
+    remaining: fromUnits(remainingRaw, decimals),
+  };
+}
