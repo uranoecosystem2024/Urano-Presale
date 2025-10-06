@@ -6,23 +6,34 @@ import { useMemo } from "react";
 import { usePresaleProgress } from "@/hooks/usePresaleProgress";
 import { useTheme } from "@mui/material/styles";
 import { formatCompactDecimalString } from "@/utils/compactDecimal";
-import { formatTokenAmount } from "@/utils/profile/userClaimInfo"; // <- exact decimal from bigint
+import { formatTokenAmount } from "@/utils/profile/userClaimInfo"; // bigint -> exact decimal string
 
-// ---- tile (unsold) setup ----
-const CELL_W = 20;
-const CELL_H = 18;
-const CELL_GAP_X = 4;
+// Tile sizing
+const CELL_W = 20;      // tile width (px)
+const CELL_H = 18;      // tile height (px)
+const CELL_GAP_X = 4;   // horizontal gap between tiles (px)
 
-// This is your provided tile, encoded for a data URL.
-const TILE_SVG_ENC = encodeURIComponent(
-  `<svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M1.35596 1.83391C1.44235 0.797326 2.30888 0 3.34905 0H17.7743C18.9663 0 19.8937 1.03613 19.762 2.22086L18.2065 16.2209C18.0939 17.2337 17.2378 18 16.2187 18H2.18239C1.01231 18 0.0921267 16.9999 0.189297 15.8339L1.35596 1.83391Z" fill="#171717" fill-opacity="0.48"/>
-    <path d="M3.34863 0.5H17.7744C18.6684 0.50009 19.3634 1.27752 19.2646 2.16602L17.71 16.166C17.6254 16.9255 16.9829 17.5 16.2188 17.5H2.18262C1.30506 17.5 0.614623 16.7495 0.6875 15.875L1.85449 1.875C1.91948 1.09792 2.56884 0.500216 3.34863 0.5Z" stroke="white" stroke-opacity="0.31"/>
-  </svg>`
-);
-
-// Build the data URL once
-const TILE_BG_URL = `url("data:image/svg+xml;utf8,${TILE_SVG_ENC}")`;
+/** Build a tile as a data-url; pass fill + fillOpacity for the body. */
+function buildTileDataUrl({
+  fill = "transparent",
+  fillOpacity = "0",
+  stroke = "white",
+  strokeOpacity = "0.31",
+}: {
+  fill?: string;
+  fillOpacity?: string;
+  stroke?: string;
+  strokeOpacity?: string;
+}) {
+  const svg = `
+<svg width="${CELL_W}" height="${CELL_H}" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M1.35596 1.83391C1.44235 0.797326 2.30888 0 3.34905 0H17.7743C18.9663 0 19.8937 1.03613 19.762 2.22086L18.2065 16.2209C18.0939 17.2337 17.2378 18 16.2187 18H2.18239C1.01231 18 0.0921267 16.9999 0.189297 15.8339L1.35596 1.83391Z"
+        fill="${fill}" fill-opacity="${fillOpacity}"/>
+  <path d="M3.34863 0.5H17.7744C18.6684 0.50009 19.3634 1.27752 19.2646 2.16602L17.71 16.166C17.6254 16.9255 16.9829 17.5 16.2188 17.5H2.18262C1.30506 17.5 0.614623 16.7495 0.6875 15.875L1.85449 1.875C1.91948 1.09792 2.56884 0.500216 3.34863 0.5Z"
+        stroke="${stroke}" stroke-opacity="${strokeOpacity}"/>
+</svg>`;
+  return `url("data:image/svg+xml;utf8,${encodeURIComponent(svg)}")`;
+}
 
 export default function StatusBar() {
   const { loading, error, data } = usePresaleProgress();
@@ -31,7 +42,7 @@ export default function StatusBar() {
   // Adjust to your token decimals
   const TOKEN_DECIMALS = 18;
 
-  // 0..100% for the green fill
+  // 0..100% for the sold portion width
   const pct: number = useMemo(() => {
     const raw = !loading && data ? Number(data.purchasedPercent) : 0;
     if (!Number.isFinite(raw)) return 0;
@@ -40,18 +51,43 @@ export default function StatusBar() {
 
   const fmtPct = useMemo(() => `${pct.toFixed(2)}%`, [pct]);
 
-  // Convert bigint->exact decimal string->compact with 2dp
+  // Format Sold / Max (compact, 2dp; clamp carry on Sold so 19.999..M won't show as 20M)
   const fmtSold = useMemo(() => {
     if (!data) return "—";
-    const decStr = formatTokenAmount(data.totalTokensSold, TOKEN_DECIMALS); // bigint -> decimal string
+    const decStr = formatTokenAmount(data.totalTokensSold, TOKEN_DECIMALS);
     return formatCompactDecimalString(decStr, 2, { preventUnitCarry: true });
   }, [data]);
 
   const fmtMax = useMemo(() => {
     if (!data) return "—";
     const decStr = formatTokenAmount(data.maxTokensToSell, TOKEN_DECIMALS);
-    return formatCompactDecimalString(decStr, 2); // no guard for Max
+    return formatCompactDecimalString(decStr, 2);
   }, [data]);
+
+  // Build the two tile backgrounds (memoized)
+  const UNSOLD_TILE_BG = useMemo(
+    () =>
+      buildTileDataUrl({
+        // faint dark fill (like current), white outline
+        fill: "#171717",
+        fillOpacity: "0.48",
+        stroke: "white",
+        strokeOpacity: "0.31",
+      }),
+    []
+  );
+
+  const SOLD_TILE_BG = useMemo(
+    () =>
+      buildTileDataUrl({
+        // solid green fill tile for sold cells; keep same outline for consistency
+        fill: "#5EBBC3", // pick your brand green here (or theme token converted to hex)
+        fillOpacity: "1",
+        stroke: "white",
+        strokeOpacity: "0.31",
+      }),
+    []
+  );
 
   return (
     <Stack width="100%" gap={1}>
@@ -81,43 +117,39 @@ export default function StatusBar() {
           boxSizing: "border-box",
         }}
       >
-        {/* UNSOLD layer: repeating tile with a small horizontal gap */}
+        {/* Bottom layer = UNSOLD: outline tiles repeating across full width */}
         <Box
           sx={{
             position: "absolute",
             inset: 0,
             backgroundOrigin: "content-box",
-            backgroundImage: TILE_BG_URL,
+            backgroundImage: UNSOLD_TILE_BG,
             backgroundRepeat: "repeat-x",
-            backgroundPosition: "right center",
+            backgroundPosition: "left center",
             backgroundSize: `${CELL_W + CELL_GAP_X}px ${CELL_H}px`,
             pointerEvents: "none",
             zIndex: 0,
           }}
         />
 
-        {/* SOLD layer: single SVG chevron */}
+        {/* Top layer = SOLD: same tiles but with green fill; clipped to sold width */}
         <Box
-          component="svg"
           sx={{
             position: "absolute",
             left: 0,
             top: 0,
             bottom: 0,
             width: pct === 0 ? 0 : `${pct}%`,
-            height: CELL_H,
-            zIndex: 1,
+            backgroundOrigin: "content-box",
+            backgroundImage: SOLD_TILE_BG,
+            backgroundRepeat: "repeat-x",
+            backgroundPosition: "left center",
+            backgroundSize: `${CELL_W + CELL_GAP_X}px ${CELL_H}px`,
             pointerEvents: "none",
+            zIndex: 1,
             transition: "width 400ms ease",
           }}
-          viewBox="0 0 85 18"
-          preserveAspectRatio="none"
-        >
-          <path
-            d="M82.5918 0C83.7838 0 84.7116 1.03606 84.5801 2.2207L83.0244 16.2207C82.9119 17.2336 82.0552 18 81.0361 18H2C0.829946 18 -0.090286 17 0.00683594 15.834L1.17383 1.83398C1.26021 0.7974 2.12681 0 3.16699 0H82.5918Z"
-            fill="#5EBBC3"
-          />
-        </Box>
+        />
       </Box>
 
       {/* Bottom row: counters */}
