@@ -19,15 +19,6 @@ type BoughtUranoProps = {
   title?: string;
 };
 
-function formatUsd(v: string) {
-  const num = Number(v || "0");
-  if (!Number.isFinite(num)) return "$0";
-  if (num >= 1000) {
-    return `$${num.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
-  }
-  return `$${num.toLocaleString(undefined, { maximumFractionDigits: 4 })}`;
-}
-
 export default function BoughtUrano({
   addressOverride,
   title = "Total $URANO Bought",
