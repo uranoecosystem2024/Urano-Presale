@@ -22,14 +22,10 @@ const ERC20_ABI = [
   },
 ] as const;
 
-/** All rounds supported by the new ABI */
+/** All rounds supported by the new ABI (⚠️ matches your enum order) */
 export type RoundKey = "strategic" | "seed" | "private" | "institutional" | "community";
 
-/**
- * Map UI round keys to Solidity enum indices.
- * ⚠️ Confirm these indices match your Solidity enum order.
- * Commonly (inferred from the ABI helpers): 0=Seed,1=Private,2=Institutional,3=Strategic,4=Community
- */
+/** Map UI keys -> Solidity enum index (⚠️ your chosen order) */
 export const ROUND_ENUM_INDEX: Record<RoundKey, number> = {
   strategic: 0,
   seed: 1,
@@ -172,17 +168,21 @@ export async function readWhitelistMany(
 
 /** (Optional helper) How much a whitelisted user can claim now */
 export async function getWhitelistClaimable(user: `0x${string}`): Promise<bigint> {
-  const amount = (await readContract({
+  const amount = await readContract({
     contract: presale,
     method: "getWhitelistClaimable",
     params: [user],
-  }));
+  });
   return amount;
 }
 
 /* ----------------------------- *
  * Writes                        *
  * ----------------------------- */
+
+export function isAddressLike(a: string): a is `0x${string}` {
+  return typeof a === "string" && a.startsWith("0x") && a.length === 42;
+}
 
 /** Normalize a RoundKey | number to a uint8 number (0..255) */
 function toRoundIndex(round: RoundKey | number): number {
@@ -242,6 +242,7 @@ export async function addToWhitelistRawTx(
 /**
  * High-level: accepts human token amounts and flexible round keys/numbers.
  * Converts to raw token units using token decimals.
+ * Supports mixing different rounds per address in a single tx.
  */
 export async function addToWhitelistHumanTx(
   account: Account,
@@ -257,8 +258,8 @@ export async function addToWhitelistHumanTx(
 
   for (const e of entries) {
     const addr = e.address;
-    if (!addr || !addr.startsWith("0x") || addr.length !== 42) {
-      throw new Error(`Invalid address: ${addr}`);
+    if (!isAddressLike(addr)) {
+      throw new Error(`Invalid address`);
     }
 
     const amtRaw = toUnits((e.preAssignedTokens ?? "").trim(), decimals);
@@ -288,4 +289,69 @@ export async function removeFromWhitelistTx(
   const sent = await sendTransaction({ account, transaction: tx });
   await waitForReceipt(sent);
   return sent.transactionHash;
+}
+
+/* ---------------------------------------------------------- *
+ * Helpers for UI batch (same round) – great for your component
+ * ---------------------------------------------------------- */
+
+export type WhitelistRowInput = {
+  /** Unchecked user-entered address (will be validated) */
+  address: string;
+  /** Human token amount as typed (e.g. "100000") */
+  amountHuman: string;
+};
+
+/**
+ * Add many rows for the SAME round. Will try to send in ONE tx.
+ * If you pass `chunkSize`, it will split into multiple txs (useful if you hit gas limits).
+ *
+ * Returns an array of tx hashes (length 1 unless chunked).
+ */
+export async function addWhitelistRowsSameRoundTx(
+  account: Account,
+  round: RoundKey | number,
+  rows: WhitelistRowInput[],
+  opts?: { chunkSize?: number; dedupe?: boolean }
+): Promise<`0x${string}`[]> {
+  const chunkSize = opts?.chunkSize && opts.chunkSize > 0 ? Math.floor(opts.chunkSize) : Infinity;
+  const dedupe = opts?.dedupe ?? true;
+
+  // Clean & validate rows
+  const cleaned: { address: `0x${string}`; preAssignedTokens: string; whitelistRound: RoundKey | number }[] = [];
+  const seen = new Set<string>();
+
+  for (const r of rows) {
+    const addr = (r.address ?? "").trim();
+    const amt = (r.amountHuman ?? "").trim();
+
+    if (!addr || !amt) continue; // skip empty lines
+    if (!isAddressLike(addr)) throw new Error(`Invalid address: ${addr}`);
+    if (!/^\d+(\.\d+)?$/.test(amt)) throw new Error(`Invalid amount for ${addr}: "${amt}"`);
+
+    if (dedupe) {
+      const key = `${addr.toLowerCase()}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+    }
+
+    cleaned.push({ address: addr, preAssignedTokens: amt, whitelistRound: round });
+  }
+
+  if (!cleaned.length) throw new Error("No valid rows to add.");
+
+  // If fits in one tx, use the high-level helper once
+  if (cleaned.length <= chunkSize) {
+    const tx = await addToWhitelistHumanTx(account, cleaned);
+    return [tx];
+  }
+
+  // Otherwise chunk
+  const hashes: `0x${string}`[] = [];
+  for (let i = 0; i < cleaned.length; i += chunkSize) {
+    const slice = cleaned.slice(i, i + chunkSize);
+    const tx = await addToWhitelistHumanTx(account, slice);
+    hashes.push(tx);
+  }
+  return hashes;
 }

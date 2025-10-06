@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Stack,
@@ -18,9 +18,10 @@ import { useActiveAccount } from "thirdweb/react";
 import { toast } from "react-toastify";
 
 import {
-  addToWhitelistHumanTx,
+  addWhitelistRowsSameRoundTx,
   removeFromWhitelistTx,
   type RoundKey,
+  isAddressLike, // from utils
 } from "@/utils/admin/whitelist";
 
 export type WhitelistProps = {
@@ -31,23 +32,9 @@ export type WhitelistProps = {
   initialAmount?: string;
   /** Default whitelist round (enum key or uint8). */
   initialRound?: RoundKey | number;
-  onAdded?: (address: `0x${string}`) => void;
-  onRemoved?: (address: `0x${string}`) => void;
+  onAdded?: (address: `0x${string}`) => void;   // called for first row only (compat)
+  onRemoved?: (address: `0x${string}`) => void; // called for first row only (compat)
 };
-
-function getErrorMessage(err: unknown): string {
-  if (err instanceof Error) return err.message;
-  if (typeof err === "string") return err;
-  try {
-    return JSON.stringify(err);
-  } catch {
-    return "Unexpected error";
-  }
-}
-
-function isAddressLike(a: string): a is `0x${string}` {
-  return a?.startsWith("0x") && a.length === 42;
-}
 
 const ROUND_OPTIONS: { label: string; value: RoundKey }[] = [
   { label: "Seed", value: "seed" },
@@ -57,7 +44,7 @@ const ROUND_OPTIONS: { label: string; value: RoundKey }[] = [
   { label: "Community", value: "community" },
 ];
 
-// enum index <-> key maps (keep in sync with contract)
+// enum index <-> key maps (for normalizing numeric prop only)
 const INDEX_TO_ROUND: Record<number, RoundKey> = {
   0: "seed",
   1: "private",
@@ -65,13 +52,8 @@ const INDEX_TO_ROUND: Record<number, RoundKey> = {
   3: "strategic",
   4: "community",
 };
-const ROUND_TO_INDEX: Record<RoundKey, number> = {
-  seed: 0,
-  private: 1,
-  institutional: 2,
-  strategic: 3,
-  community: 4,
-};
+
+type Row = { address: string; amountHuman: string };
 
 export default function Whitelist({
   title = "Whitelist",
@@ -86,8 +68,8 @@ export default function Whitelist({
   const theme = useTheme();
   const account = useActiveAccount();
 
-  const [address, setAddress] = useState<string>(initialAddress);
-  const [amountHuman, setAmountHuman] = useState<string>(initialAmount);
+  // rows state (dynamic)
+  const [rows, setRows] = useState<Row[]>([{ address: initialAddress, amountHuman: initialAmount }]);
 
   // Keep round in state as RoundKey only; normalize numeric initialRound
   const [round, setRound] = useState<RoundKey>(
@@ -101,8 +83,8 @@ export default function Whitelist({
     setRound(typeof initialRound === "number" ? INDEX_TO_ROUND[initialRound] ?? "private" : initialRound);
   }, [initialRound]);
 
+  // --------- styles ----------
   const inputSx = {
-    // Input surface + border behavior
     "& .MuiOutlinedInput-root": {
       background: theme.palette.background.paper,
       borderRadius: 2,
@@ -110,37 +92,22 @@ export default function Whitelist({
       "&:hover fieldset": { borderColor: theme.palette.text.primary },
       "&.Mui-focused fieldset": { borderColor: theme.palette.uranoGreen1.main },
     },
-
-    // Placeholder opacity
     "& .MuiInputBase-input::placeholder": { opacity: 0.7 },
-
-    // Label styles
     "& .MuiInputLabel-root": {
       color: theme.palette.common.white,
       "&.Mui-focused": { color: theme.palette.common.white },
       "&.MuiInputLabel-shrink": {
         color: theme.palette.common.white,
-        // Make the floating label look like it cuts the border
-        px: 0.75,                   // horizontal padding for breathing room
-        borderRadius: 0.5,          // soften corners
-        backgroundColor: theme.palette.background.paper, // match input bg
-        lineHeight: 1.2,            // avoids clipping with padding
+        px: 0.75,
+        borderRadius: 0.5,
+        backgroundColor: theme.palette.background.paper,
+        lineHeight: 1.2,
       },
       "&.Mui-disabled": { color: theme.palette.text.disabled },
     },
-
-    // Let the notch fit the padded label
-    "& .MuiOutlinedInput-notchedOutline legend": {
-      maxWidth: "60px", // override MUI's tiny animation width
-    },
-
-    // (Optional) add a little inner padding to the legend’s span for perfect notch sizing
-    "& .MuiOutlinedInput-notchedOutline legend > span": {
-      paddingLeft: 6,
-      paddingRight: 6,
-    },
+    "& .MuiOutlinedInput-notchedOutline legend": { maxWidth: "60px" },
+    "& .MuiOutlinedInput-notchedOutline legend > span": { paddingLeft: 6, paddingRight: 6 },
   } as const;
-
 
   const actionBtnSx = {
     textTransform: "none",
@@ -150,53 +117,78 @@ export default function Whitelist({
     backgroundColor: theme.palette.secondary.main,
     border: `1px solid ${theme.palette.headerBorder.main}`,
     color: theme.palette.text.primary,
-    "&:hover": {
-      borderColor: theme.palette.text.primary,
-      background: theme.palette.transparentPaper.main,
-    },
+    "&:hover": { borderColor: theme.palette.text.primary, background: theme.palette.transparentPaper.main },
   } as const;
 
-  const canSubmitAdd =
+  // --------- derived flags ----------
+  const firstRow = rows[0]; // for "Remove" (kept for backward compatibility)
+  const canSubmitRemove =
     !!account &&
-    !!address.trim() &&
-    isAddressLike(address.trim()) &&
-    !!amountHuman.trim() &&
+    !!firstRow?.address?.trim() &&
+    isAddressLike(firstRow.address.trim()) &&
     !disabled &&
     !busy;
 
-  const canSubmitRemove =
-    !!account && !!address.trim() && isAddressLike(address.trim()) && !disabled && !busy;
+  const canSubmitAdd = useMemo(() => {
+    if (!account || disabled || busy) return false;
+    // At least one valid (address + positive number) row
+    return rows.some(
+      (r) =>
+        isAddressLike((r.address ?? "").trim()) &&
+        !!(r.amountHuman ?? "").trim() &&
+        /^\d+(\.\d+)?$/.test((r.amountHuman ?? "").trim())
+    );
+  }, [account, disabled, busy, rows]);
 
-  const handleAdd = async () => {
+  // --------- handlers ----------
+  const handleAddRow = () => {
+    setRows((prev) => [...prev, { address: "", amountHuman: "" }]);
+  };
+
+  const handleChangeRow = (i: number, patch: Partial<Row>) => {
+    setRows((prev) => {
+      const next = [...prev];
+      const current = next[i];
+      if (!current) return prev; // index guard
+  
+      next[i] = {
+        address: patch.address ?? current.address,
+        amountHuman: patch.amountHuman ?? current.amountHuman,
+      };
+      return next;
+    });
+  };
+  
+
+  const handleRemoveRow = (i: number) => {
+    setRows((prev) => (prev.length <= 1 ? prev : prev.filter((_, idx) => idx !== i)));
+  };
+
+  const handleAddBatch = async () => {
     if (!account) {
       toast.error("No wallet connected. Please connect an authorized wallet.");
       return;
     }
-    const addr = address.trim() as `0x${string}`;
-    if (!isAddressLike(addr)) {
-      toast.error("Enter a valid address (0x...)");
-      return;
-    }
-    if (!amountHuman.trim()) {
-      toast.error("Enter a pre-assigned tokens amount.");
-      return;
-    }
-
     try {
       setBusy(true);
-      await addToWhitelistHumanTx(account, [
-        {
-          address: addr,
-          preAssignedTokens: amountHuman.trim(),
-          // you can pass the enum index or the key; util accepts both
-          whitelistRound: ROUND_TO_INDEX[round],
-        },
-      ]);
-      toast.success("Address added to whitelist.");
-      onAdded?.(addr);
-    } catch (e: unknown) {
+      // one tx (unless it needs chunking in utils)
+      const txHashes = await addWhitelistRowsSameRoundTx(account, round, rows, {
+        // chunkSize: 200, // uncomment to force chunking if you expect very large batches
+        dedupe: true,
+      });
+
+      toast.success(
+        txHashes.length === 1
+          ? "Whitelist updated (1 transaction)."
+          : `Whitelist updated (${txHashes.length} transactions).`
+      );
+      // optional: notify for the first address (to keep your existing callback contract)
+      const firstAddr = rows.find((r) => isAddressLike((r.address ?? "").trim()))?.address?.trim();
+      if (firstAddr) onAdded?.(firstAddr as `0x${string}`);
+    } catch (e) {
       console.error(e);
-      toast.error(getErrorMessage(e) ?? "Failed to add to whitelist.");
+      const msg = e instanceof Error ? e.message : "Failed to add to whitelist.";
+      toast.error(msg);
     } finally {
       setBusy(false);
     }
@@ -207,9 +199,9 @@ export default function Whitelist({
       toast.error("No wallet connected. Please connect an authorized wallet.");
       return;
     }
-    const addr = address.trim() as `0x${string}`;
+    const addr = (firstRow?.address ?? "").trim();
     if (!isAddressLike(addr)) {
-      toast.error("Enter a valid address (0x...)");
+      toast.error("Enter a valid address (0x...) in the first row to remove.");
       return;
     }
 
@@ -220,7 +212,8 @@ export default function Whitelist({
       onRemoved?.(addr);
     } catch (e: unknown) {
       console.error(e);
-      toast.error(getErrorMessage(e) ?? "Failed to remove from whitelist.");
+      const msg = e instanceof Error ? e.message : "Failed to remove from whitelist.";
+      toast.error(msg);
     } finally {
       setBusy(false);
     }
@@ -249,7 +242,6 @@ export default function Whitelist({
               border: `1px solid ${theme.palette.headerBorder.main}`,
             }}
             onClick={() => {
-              // Hook up CSV import here if/when you add it
               toast.info("CSV import coming soon.");
             }}
           >
@@ -270,30 +262,65 @@ export default function Whitelist({
           </Button>
         </Stack>
 
-        {/* Inputs */}
-        <Stack direction={{ xs: "column", md: "row" }} gap={2}>
-          <TextField
-            fullWidth
-            label="Address"
-            placeholder="0x..."
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            disabled={disabled || busy}
-            InputLabelProps={{ shrink: true }}
-            sx={inputSx}
-          />
+        {/* Dynamic rows */}
+        <Stack gap={2}>
+          {rows.map((row, i) => (
+            <Stack key={i} direction={{ xs: "column", md: "row" }} gap={2}>
+              <TextField
+                fullWidth
+                label="Address"
+                placeholder="0x..."
+                value={row.address}
+                onChange={(e) => handleChangeRow(i, { address: e.target.value })}
+                disabled={disabled || busy}
+                InputLabelProps={{ shrink: true }}
+                sx={inputSx}
+              />
 
-          <TextField
-            fullWidth
-            label="Pre-assigned Tokens (URANO)"
-            placeholder="e.g. 100000"
-            value={amountHuman}
-            onChange={(e) => setAmountHuman(e.target.value)}
-            disabled={disabled || busy}
-            InputLabelProps={{ shrink: true }}
-            sx={inputSx}
-            type="number"
-          />
+              <TextField
+                fullWidth
+                label="Pre-assigned Tokens (URANO)"
+                placeholder="e.g. 100000"
+                value={row.amountHuman}
+                onChange={(e) => handleChangeRow(i, { amountHuman: e.target.value })}
+                disabled={disabled || busy}
+                InputLabelProps={{ shrink: true }}
+                sx={inputSx}
+                type="number"
+              />
+
+              {/* Add button on the first row; Remove button on additional rows */}
+              {i === 0 ? (
+                <Button
+                  fullWidth
+                  onClick={handleAddRow}
+                  disabled={disabled || busy}
+                  sx={{
+                    ...actionBtnSx,
+                    "&:hover": { background: theme.palette.uranoGreen1.main },
+                    width: "10%",
+                    paddingY: 0,
+                  }}
+                >
+                  <Typography variant="h5">+</Typography>
+                </Button>
+              ) : (
+                <Button
+                  fullWidth
+                  onClick={() => handleRemoveRow(i)}
+                  disabled={disabled || busy}
+                  sx={{
+                    ...actionBtnSx,
+                    "&:hover": { background: theme.palette.error.main },
+                    width: "10%",
+                    paddingY: 0,
+                  }}
+                >
+                  <Typography variant="h6">-</Typography>
+                </Button>
+              )}
+            </Stack>
+          ))}
         </Stack>
 
         {/* Round selector (RoundKey only) */}
@@ -308,12 +335,8 @@ export default function Whitelist({
             displayEmpty
             sx={{
               ...inputSx,
-              '& .MuiSelect-icon': {
-                color: (theme) => theme.palette.common.white, // chevron color
-              },
-              '&.Mui-disabled .MuiSelect-icon': {
-                color: (theme) => theme.palette.text.disabled, // optional: nicer when disabled
-              },
+              "& .MuiSelect-icon": { color: (theme) => theme.palette.common.white },
+              "&.Mui-disabled .MuiSelect-icon": { color: (theme) => theme.palette.text.disabled },
             }}
             label="Whitelist Round"
           >
@@ -324,7 +347,7 @@ export default function Whitelist({
             ))}
           </Select>
           <Typography variant="caption" sx={{ mt: 0.5, color: theme.palette.text.secondary }}>
-            Select which round this user belongs to. (Impacts pricing/vesting rules.)
+            Select which round these users belong to. (Impacts pricing/vesting rules.)
           </Typography>
         </FormControl>
 
@@ -332,14 +355,11 @@ export default function Whitelist({
         <Stack direction={{ xs: "column", md: "row" }} gap={2}>
           <Button
             fullWidth
-            sx={{
-              ...actionBtnSx,
-              "&:hover": { background: theme.palette.error.main },
-            }}
+            sx={{ ...actionBtnSx, "&:hover": { background: theme.palette.error.main } }}
             disabled={!canSubmitRemove}
             onClick={handleRemove}
           >
-            Remove
+            Remove (first row)
           </Button>
 
           <Button
@@ -349,9 +369,9 @@ export default function Whitelist({
               "&:hover": { background: theme.palette.uranoGradient, color: theme.palette.info.main },
             }}
             disabled={!canSubmitAdd}
-            onClick={handleAdd}
+            onClick={handleAddBatch}
           >
-            Add
+            Add ({rows.length})
           </Button>
         </Stack>
 
