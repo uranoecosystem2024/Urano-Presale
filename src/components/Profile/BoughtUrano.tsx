@@ -92,6 +92,11 @@ export default function BoughtUrano({
     [totalTokens]
   );
 
+  const compactTotalUSD = useMemo(
+    () => formatCompactDecimalString(totalUsd, 2),
+    [totalUsd]
+  );
+
   return (
     <Stack
       width={{ xs: "100%", lg: "50%" }}
@@ -134,7 +139,7 @@ export default function BoughtUrano({
             variant="h6"
             sx={{ fontSize: "0.875rem", fontWeight: 400, color: theme.palette.text.secondary }}
           >
-            {address ? <>≈ {formatUsd(totalUsd || "0")} USD</> : "—"}
+            {address ? <>≈ {compactTotalUSD} USD</> : "—"}
           </Typography>
 
           <Typography

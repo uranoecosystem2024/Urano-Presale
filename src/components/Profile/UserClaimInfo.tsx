@@ -406,15 +406,7 @@ export default function UserClaimInfo({ addressOverride }: UserClaimInfoProps) {
             }}
           >
             {address
-              ? `${formatCompactDecimalString(
-                // combine purchased + whitelist claimed for the total claimed display
-                (() => {
-                  const a = Number(purchasedClaimed.replace(/,/g, "")) || 0;
-                  const b = Number(wlClaimed.replace(/,/g, "")) || 0;
-                  return String(a + b);
-                })(),
-                2
-              )} $URANO`
+              ? `${compactPurchasedClaimed} $URANO`
               : "—"}
           </Typography>
         </Stack>
