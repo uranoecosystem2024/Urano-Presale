@@ -16,36 +16,43 @@ import { client } from "@/lib/thirdwebClient";
 import { parseUnits } from "viem";
 import { usePresaleCardData } from "@/hooks/usePresaleCard";
 
-//const RATE = 33.3; // 1 USDC = 33.3 URANO (example)
 const MIN_USDC = 100;
 const AMOUNT_STORAGE_KEY = "urano:purchaseAmount:v1";
-const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_ADDRESS_SEPOLIA as `0x${string}` | undefined;
+const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_ADDRESS_SEPOLIA as
+  | `0x${string}`
+  | undefined;
 const ZERO: `0x${string}` = "0x0000000000000000000000000000000000000000";
+
+function roundTo(n: number, dp: number) {
+  const f = 10 ** dp;
+  return Math.round(n * f) / f;
+}
 
 const TokensSelection = () => {
   const theme = useTheme();
-  const [value, setValue] = useState<number>(0);
-  const [convertedValue, setConvertedValue] = useState<number>(0);
-  const { loading, rawTokenPrice, usdcDecimals } = usePresaleCardData({ priceFractionDigits: 5 });
 
+  // ===== price / decimals =====
+  const { loading, rawTokenPrice, usdcDecimals } = usePresaleCardData({
+    priceFractionDigits: 5,
+  });
+  const dec = usdcDecimals ?? 6;
+  const price = rawTokenPrice ? Number(rawTokenPrice) : 0; // raw price in smallest units
+
+  // ===== wallet / balance =====
   const account = useActiveAccount();
   const address = account?.address as `0x${string}` | undefined;
 
-  // USDC contract (Sepolia)
   const usdcContract = useMemo(() => {
     if (!USDC_ADDRESS) return undefined;
     return getContract({ client, address: USDC_ADDRESS, chain: sepolia });
   }, []);
 
-  // Fallback contract (keeps types happy; call is gated via 'enabled')
   const fallbackContract = useMemo(
     () => getContract({ client, address: ZERO, chain: sepolia }),
     []
   );
 
   const readEnabled = Boolean(address && usdcContract);
-
-  // Always pass a valid params object; gate with queryOptions.enabled
   const { data: usdcBal } = useReadContract(getBalance, {
     contract: readEnabled ? usdcContract! : fallbackContract,
     address: readEnabled ? address! : ZERO,
@@ -56,44 +63,81 @@ const TokensSelection = () => {
     },
   });
 
-  // Compute URANO received from USDC
+  // ===== two-way controlled state =====
+  const [usdcValue, setUsdcValue] = useState<number>(0);
+  const [uranoValue, setUranoValue] = useState<number>(0);
+  const [lastEdited, setLastEdited] = useState<"usdc" | "urano" | null>("usdc");
+
+  // conversions
+  const usdcToUrano = (u: number) => {
+    if (!price || loading) return 0;
+    // tokens = usdc * 10^dec / rawTokenPrice
+    const tokens = (u * Math.pow(10, dec)) / price;
+    return roundTo(tokens, 2); // show URANO to 2 dp
+  };
+  const uranoToUsdc = (t: number) => {
+    if (!price || loading) return 0;
+    // usdc = tokens * rawTokenPrice / 10^dec
+    const u = (t * price) / Math.pow(10, dec);
+    return roundTo(u, 2); // show USDC to 2 dp
+    // if you prefer 6 dp for USDC, change to roundTo(u, 6)
+  };
+
+  // on user edit — USDC
+  const handleUsdcChange = (v: number) => {
+    const safe = Number.isFinite(v) && v >= 0 ? v : 0;
+    setUsdcValue(safe);
+    setUranoValue(usdcToUrano(safe));
+    setLastEdited("usdc");
+  };
+
+  // on user edit — URANO
+  const handleUranoChange = (v: number) => {
+    const safe = Number.isFinite(v) && v >= 0 ? v : 0;
+    setUranoValue(safe);
+    setUsdcValue(uranoToUsdc(safe));
+    setLastEdited("urano");
+  };
+
+  // Recompute pair when price/decimals change (e.g., round switch)
   useEffect(() => {
-    if (loading || !rawTokenPrice || rawTokenPrice <= 0) {
-      setConvertedValue(0);
+    if (!price || loading) {
+      setUranoValue(0);
       return;
     }
-    const dec = usdcDecimals ?? 6; // fallback to 6 just in case
-    // tokens = usdc * 10^usdcDecimals / tokenPriceRaw
-    const tokens = (Number(value || 0) * Math.pow(10, dec)) / Number(rawTokenPrice);
-    setConvertedValue(Number(tokens.toFixed(2)));
-  }, [value, loading, rawTokenPrice, usdcDecimals]);
+    if (lastEdited === "usdc") {
+      setUranoValue(usdcToUrano(usdcValue));
+    } else if (lastEdited === "urano") {
+      setUsdcValue(uranoToUsdc(uranoValue));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [price, dec, loading]);
 
-
-  // Publish amount so the CTA approves exactly what the user typed
+  // Publish the *USDC* amount for the CTA approve/transfer flow
   useEffect(() => {
     try {
-      localStorage.setItem(AMOUNT_STORAGE_KEY, String(value || 0));
+      localStorage.setItem(AMOUNT_STORAGE_KEY, String(usdcValue || 0));
       window.dispatchEvent(new Event("urano:amount"));
     } catch {
       /* noop */
     }
-  }, [value]);
+  }, [usdcValue]);
 
-  // Checks
+  // ===== checks =====
   const insufficient = useMemo(() => {
-    if (!usdcBal || !Number.isFinite(value)) return false;
-    const dec = usdcBal.decimals ?? 6;
+    if (!usdcBal || !Number.isFinite(usdcValue)) return false;
+    const d = usdcBal.decimals ?? 6;
     try {
-      const want = parseUnits((value || 0).toString(), dec);
+      const want = parseUnits((usdcValue || 0).toString(), d);
       return want > usdcBal.value;
     } catch {
       return true;
     }
-  }, [value, usdcBal]);
+  }, [usdcValue, usdcBal]);
 
-  const belowMin = useMemo(() => value > 0 && value < MIN_USDC, [value]);
+  const belowMin = useMemo(() => usdcValue > 0 && usdcValue < MIN_USDC, [usdcValue]);
 
-  // Helper text below the USDC input
+  // helper under USDC field
   const usdcHelper: string = useMemo(() => {
     if (insufficient) return "Insufficient balance";
     if (belowMin) return `Min amount is ${MIN_USDC} USDC`;
@@ -115,13 +159,14 @@ const TokensSelection = () => {
       alignItems={"center"}
       gap={{ xs: 2, lg: 1 }}
     >
+      {/* USDC input */}
       <Stack width={{ xs: "100%", lg: "45%" }}>
         <TokenSelectionTextField
-          value={value}
+          value={usdcValue}
           label="Pay with stablecoin"
           tokenIconSrc={usdc.src}
           tokenSymbol="USDC"
-          onChange={(v) => setValue(Number.isFinite(v) && v >= 0 ? v : 0)}
+          onChange={handleUsdcChange}
           error={insufficient || belowMin}
           helperText={usdcHelper}
         />
@@ -133,24 +178,37 @@ const TokensSelection = () => {
           border: `1px solid ${theme.palette.headerBorder.main}`,
           borderRadius: "50%",
           padding: "0.6rem",
+          marginTop: "-1rem",
           backdropFilter: "blur(8.2px)",
           transform: { xs: "rotate(90deg)", lg: "rotate(0deg)" },
           "&:hover": { border: `1px solid ${theme.palette.text.secondary}` },
         }}
         onClick={() => {
-          // reserved for swap UX; keeping button for layout parity
+          // Optional quick-swap UX: swap the numeric values by converting through the rate
+          // If you want the button to actually swap sides, you can implement that here.
+          if (!price || loading) return;
+          if (lastEdited === "usdc") {
+            // keep URANO as source; recompute USDC
+            setLastEdited("urano");
+            setUsdcValue(uranoToUsdc(uranoValue));
+          } else {
+            setLastEdited("usdc");
+            setUranoValue(usdcToUrano(usdcValue));
+          }
         }}
       >
         <AiOutlineSwap size={20} color="#14EFC0" />
       </IconButton>
 
+      {/* URANO output (now also editable) */}
       <Stack width={{ xs: "100%", lg: "45%" }}>
         <TokenSelectionTextField
-          value={convertedValue}
+          value={uranoValue}
           label="Receive URANO"
           tokenIconSrc={urano.src}
           tokenSymbol="URANO"
           helperText={"Balance: -- URANO"}
+          onChange={handleUranoChange}
         />
       </Stack>
     </Stack>
