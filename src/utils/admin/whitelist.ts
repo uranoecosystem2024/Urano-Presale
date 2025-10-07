@@ -1,4 +1,3 @@
-// utils/admin/whitelist.ts
 import {
   getContract,
   readContract,
@@ -11,7 +10,6 @@ import { client } from "@/lib/thirdwebClient";
 import { sepolia } from "thirdweb/chains";
 import { presaleAbi } from "@/lib/abi/presale";
 
-/** Minimal ERC20 ABI for decimals() */
 const ERC20_ABI = [
   {
     inputs: [],
@@ -22,10 +20,8 @@ const ERC20_ABI = [
   },
 ] as const;
 
-/** All rounds supported by the new ABI (⚠️ matches your enum order) */
 export type RoundKey = "strategic" | "seed" | "private" | "institutional" | "community";
 
-/** Map UI keys -> Solidity enum index (⚠️ your chosen order) */
 export const ROUND_ENUM_INDEX: Record<RoundKey, number> = {
   strategic: 0,
   seed: 1,
@@ -44,11 +40,6 @@ const presale = getContract({
   abi: presaleAbi,
 });
 
-/* ----------------------------- *
- * Conversions & time utilities  *
- * ----------------------------- */
-
-/** Convert a human string (e.g. "123.456") to raw on-chain units using token decimals. */
 export function toUnits(amount: string, decimals: number): bigint {
   const cleaned = (amount ?? "").trim();
   if (!cleaned) return 0n;
@@ -67,7 +58,6 @@ export function toUnits(amount: string, decimals: number): bigint {
   return intVal + fracVal;
 }
 
-/** Convert raw on-chain units to a human string (no trailing zeros). */
 export function fromUnits(amount: bigint, decimals: number): string {
   const base = 10n ** BigInt(decimals);
   const intPart = amount / base;
@@ -79,7 +69,6 @@ export function fromUnits(amount: bigint, decimals: number): string {
   return `${intPart.toString()}.${fracStr}`;
 }
 
-/** Convert Date/dayjs/number-like to unix seconds (bigint). */
 export function toUnixSecondsBigint(
   input: Date | number | string | { valueOf: () => number }
 ): bigint {
@@ -88,10 +77,6 @@ export function toUnixSecondsBigint(
   const seconds = ms < 1e12 ? ms : Math.floor(ms / 1000);
   return BigInt(seconds);
 }
-
-/* ----------------------------- *
- * Token decimals                *
- * ----------------------------- */
 
 export async function getTokenDecimals(): Promise<number> {
   try {
@@ -110,18 +95,10 @@ export async function getTokenDecimals(): Promise<number> {
     const dec = (await readContract({ contract: erc20, method: "decimals" })) as number | bigint;
     return typeof dec === "bigint" ? Number(dec) : dec;
   } catch {
-    return 18; // sensible fallback
+    return 18;
   }
 }
 
-/* ----------------------------- *
- * Reads                         *
- * ----------------------------- */
-
-/**
- * ABI now: whitelist(address) returns
- * (isWhitelisted: bool, preAssignedTokens: uint256, claimedTokens: uint256, whitelistRound: uint8)
- */
 type WhitelistTuple = readonly [boolean, bigint, bigint, number | bigint];
 
 export type WhitelistEntry = {
@@ -129,7 +106,7 @@ export type WhitelistEntry = {
   preAssignedTokensRaw: bigint;
   preAssignedTokensHuman: string;
   claimedTokensRaw: bigint;
-  whitelistRound: number; // uint8
+  whitelistRound: number;
 };
 
 export async function readWhitelist(user: `0x${string}`): Promise<WhitelistEntry> {
@@ -144,7 +121,7 @@ export async function readWhitelist(user: `0x${string}`): Promise<WhitelistEntry
   const isWhitelisted = Boolean(res[0]);
   const preAssignedRaw = res[1];
   const claimedRaw = res[2];
-  const whitelistRound = Number(res[3]); // normalize bigint/number to number
+  const whitelistRound = Number(res[3]);
 
   return {
     isWhitelisted,
@@ -155,7 +132,6 @@ export async function readWhitelist(user: `0x${string}`): Promise<WhitelistEntry
   };
 }
 
-/** Convenience batch reader; executes sequentially to keep it simple. */
 export async function readWhitelistMany(
   users: `0x${string}`[]
 ): Promise<Record<string, WhitelistEntry>> {
@@ -166,7 +142,6 @@ export async function readWhitelistMany(
   return out;
 }
 
-/** (Optional helper) How much a whitelisted user can claim now */
 export async function getWhitelistClaimable(user: `0x${string}`): Promise<bigint> {
   const amount = await readContract({
     contract: presale,
@@ -176,15 +151,10 @@ export async function getWhitelistClaimable(user: `0x${string}`): Promise<bigint
   return amount;
 }
 
-/* ----------------------------- *
- * Writes                        *
- * ----------------------------- */
-
 export function isAddressLike(a: string): a is `0x${string}` {
   return typeof a === "string" && a.startsWith("0x") && a.length === 42;
 }
 
-/** Normalize a RoundKey | number to a uint8 number (0..255) */
 function toRoundIndex(round: RoundKey | number): number {
   if (typeof round === "number") {
     if (round < 0 || round > 255) throw new Error("whitelistRound must be a uint8 (0..255).");
@@ -197,18 +167,10 @@ function toRoundIndex(round: RoundKey | number): number {
 
 export type AddWhitelistEntryHuman = {
   address: `0x${string}`;
-  /** Human amount, e.g., "150000" (token units, not wei) */
   preAssignedTokens: string;
-  /** Target round for this whitelist entry (enum value or key) */
   whitelistRound: RoundKey | number;
 };
 
-/**
- * Low-level: addToWhitelist with raw bigints and uint8 rounds.
- * Arrays must be the same length; each index corresponds to one user.
- *
- * ABI: addToWhitelist(address[] users, uint256[] preAssignedTokens, uint8[] whitelistRounds)
- */
 export async function addToWhitelistRawTx(
   account: Account,
   users: `0x${string}`[],
@@ -223,7 +185,6 @@ export async function addToWhitelistRawTx(
     throw new Error("Input arrays must be non-empty and of equal length.");
   }
 
-  // Ensure uint8 bounds
   for (const r of whitelistRounds) {
     if (r < 0 || r > 255) throw new Error("whitelistRound must be in uint8 range (0..255).");
   }
@@ -239,11 +200,6 @@ export async function addToWhitelistRawTx(
   return sent.transactionHash;
 }
 
-/**
- * High-level: accepts human token amounts and flexible round keys/numbers.
- * Converts to raw token units using token decimals.
- * Supports mixing different rounds per address in a single tx.
- */
 export async function addToWhitelistHumanTx(
   account: Account,
   entries: AddWhitelistEntryHuman[]
@@ -275,7 +231,6 @@ export async function addToWhitelistHumanTx(
   return addToWhitelistRawTx(account, users, amounts, rounds);
 }
 
-/** removeFromWhitelist(address[] users) */
 export async function removeFromWhitelistTx(
   account: Account,
   users: `0x${string}`[]
@@ -291,23 +246,11 @@ export async function removeFromWhitelistTx(
   return sent.transactionHash;
 }
 
-/* ---------------------------------------------------------- *
- * Helpers for UI batch (same round) – great for your component
- * ---------------------------------------------------------- */
-
 export type WhitelistRowInput = {
-  /** Unchecked user-entered address (will be validated) */
   address: string;
-  /** Human token amount as typed (e.g. "100000") */
   amountHuman: string;
 };
 
-/**
- * Add many rows for the SAME round. Will try to send in ONE tx.
- * If you pass `chunkSize`, it will split into multiple txs (useful if you hit gas limits).
- *
- * Returns an array of tx hashes (length 1 unless chunked).
- */
 export async function addWhitelistRowsSameRoundTx(
   account: Account,
   round: RoundKey | number,
@@ -317,7 +260,6 @@ export async function addWhitelistRowsSameRoundTx(
   const chunkSize = opts?.chunkSize && opts.chunkSize > 0 ? Math.floor(opts.chunkSize) : Infinity;
   const dedupe = opts?.dedupe ?? true;
 
-  // Clean & validate rows
   const cleaned: { address: `0x${string}`; preAssignedTokens: string; whitelistRound: RoundKey | number }[] = [];
   const seen = new Set<string>();
 
@@ -325,7 +267,7 @@ export async function addWhitelistRowsSameRoundTx(
     const addr = (r.address ?? "").trim();
     const amt = (r.amountHuman ?? "").trim();
 
-    if (!addr || !amt) continue; // skip empty lines
+    if (!addr || !amt) continue;
     if (!isAddressLike(addr)) throw new Error(`Invalid address: ${addr}`);
     if (!/^\d+(\.\d+)?$/.test(amt)) throw new Error(`Invalid amount for ${addr}: "${amt}"`);
 
@@ -340,13 +282,11 @@ export async function addWhitelistRowsSameRoundTx(
 
   if (!cleaned.length) throw new Error("No valid rows to add.");
 
-  // If fits in one tx, use the high-level helper once
   if (cleaned.length <= chunkSize) {
     const tx = await addToWhitelistHumanTx(account, cleaned);
     return [tx];
   }
 
-  // Otherwise chunk
   const hashes: `0x${string}`[] = [];
   for (let i = 0; i < cleaned.length; i += chunkSize) {
     const slice = cleaned.slice(i, i + chunkSize);

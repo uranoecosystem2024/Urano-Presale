@@ -37,9 +37,8 @@ export default function StablecoinField({
 }: StablecoinFieldProps) {
   const theme = useTheme();
 
-  // --- auto-fit font size to ensure the full number is always visible ---
   const inputRef = React.useRef<HTMLInputElement | null>(null);
-  const [fontSize, setFontSize] = React.useState(18); // px
+  const [fontSize, setFontSize] = React.useState(18);
   const MAX = 18;
   const MIN = 10;
 
@@ -84,9 +83,8 @@ export default function StablecoinField({
     if (el.parentElement) ro.observe(el.parentElement);
     return () => ro.disconnect();
   }, [fit]);
-  // ----------------------------------------------------------------------
 
-  const inputBg = "#151515"; // matches your card background in this field
+  const inputBg = "#151515";
 
   return (
     <TextField
@@ -142,7 +140,6 @@ export default function StablecoinField({
         ),
       }}
       sx={{
-        // Input surface + border behavior
         "& .MuiOutlinedInput-root": {
           bgcolor: inputBg,
           width: "100%",
@@ -153,22 +150,18 @@ export default function StablecoinField({
           "&:hover fieldset": { borderColor: "#3A3A3A" },
           "&.Mui-focused fieldset": { borderColor: "#6BE2C2" },
 
-          // remove side paddings when adorned
           "&.MuiInputBase-adornedStart": { pl: 0 },
           "&.MuiInputBase-adornedEnd": { pr: 0 },
         },
 
-        // Input text (so we can control alignment without relying on inputProps.sx)
         "& .MuiOutlinedInput-input": {
           textAlign: "right",
         },
 
-        // Helper text spacing
         "& .MuiFormHelperText-root": {
           margin: "0 !important",
         },
 
-        // Label base colors
         "& .MuiInputLabel-root": {
           color: "rgba(255,255,255,0.6)",
         },
@@ -176,16 +169,14 @@ export default function StablecoinField({
           color: "rgba(255,255,255,0.7)",
         },
 
-        // Make the floating label look like it cuts the border
         "& .MuiInputLabel-root.MuiInputLabel-shrink": {
-          px: 0.75, // horizontal padding for breathing room
+          px: 0.75,
           borderRadius: 0.5,
-          backgroundColor: inputBg, // match input bg so it "cuts" the outline
+          backgroundColor: inputBg,
           lineHeight: 1.2,
           color: theme.palette.common.white,
         },
 
-        // Let the notch fit the padded label
         "& .MuiOutlinedInput-notchedOutline legend": {
           maxWidth: "40px",
         },

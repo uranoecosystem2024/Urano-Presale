@@ -1,4 +1,3 @@
-// utils/compactDecimal.ts
 export function formatCompactDecimalString(
   dec: string | null | undefined,
   maximumFractionDigits = 2,
@@ -13,7 +12,6 @@ export function formatCompactDecimalString(
   const negative = s.startsWith("-");
   const unsigned = negative ? s.slice(1) : s;
 
-  // If we DON'T care about boundary carry, we can safely use Number/Intl for small values.
   if (!preventUnitCarry) {
     const n = Number(unsigned);
     if (Number.isFinite(n) && Math.abs(n) < 1e15) {
@@ -24,7 +22,6 @@ export function formatCompactDecimalString(
     }
   }
 
-  // String-based path (no unit carry)
   const [intRaw = "0", fracRaw = ""] = unsigned.split(".");
   const int = intRaw.replace(/^0+(?=\d)/, "") || "0";
 
@@ -51,14 +48,13 @@ export function formatCompactDecimalString(
 
   const ndp = Math.max(0, maximumFractionDigits);
 
-  // Build rounded fraction with carry detection
   let needed = tailDigits.slice(0, ndp + 1).padEnd(ndp + 1, "0");
   let carry = 0;
 
   if (ndp > 0 && needed.length > 0) {
-    const last = needed.charCodeAt(needed.length - 1) - 48; // next digit
+    const last = needed.charCodeAt(needed.length - 1) - 48;
     const doRoundUp = last >= 5;
-    needed = needed.slice(0, -1); // digits we keep (to round)
+    needed = needed.slice(0, -1);
 
     if (doRoundUp) {
       const fArr = needed.split("");
@@ -67,7 +63,7 @@ export function formatCompactDecimalString(
         const d = (ch ? ch.charCodeAt(0) - 48 : 0) + 1;
         if (d >= 10) {
           fArr[i] = "0";
-          if (i === 0) carry = 1; // would spill into head (unit boundary)
+          if (i === 0) carry = 1;
         } else {
           fArr[i] = String.fromCharCode(48 + d);
           carry = 0;
@@ -80,7 +76,6 @@ export function formatCompactDecimalString(
     needed = needed.slice(0, ndp);
   }
 
-  // If rounding would cross the next unit (e.g., 19.999..M -> 20.00M), clamp instead
   if (carry === 1 && preventUnitCarry) {
     const clamped = ndp > 0 ? `${head}.${"9".repeat(ndp)}${suffix}` : `${head}${suffix}`;
     return negative ? `-${clamped}` : clamped;

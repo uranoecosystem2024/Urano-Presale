@@ -1,4 +1,3 @@
-// utils/profile/round.ts
 import type { RoundKey } from "@/utils/profile/bought";
 import {
   readRoundInfoByKey,
@@ -13,10 +12,6 @@ export const ROUND_LABEL: Record<RoundKey, string> = {
   community: "Community",
 };
 
-/**
- * Reads the first active round and returns its key, label, raw price and USDC decimals.
- * Returns null round when no round is active.
- */
 export async function readActiveRoundSummary(): Promise<{
   key: RoundKey | null;
   label: string | null;
@@ -25,9 +20,8 @@ export async function readActiveRoundSummary(): Promise<{
 }> {
   const rounds = ["strategic", "seed", "private", "institutional", "community"] as const;
 
-  // fetch all rounds in parallel
   const infos = await Promise.all(rounds.map((r) => readRoundInfoByKey(r)));
-  const idx = infos.findIndex((info) => info[0] === true); // isActive_
+  const idx = infos.findIndex((info) => info[0] === true);
 
   const usdcDecimals = await getUsdcDecimals();
 
@@ -36,6 +30,6 @@ export async function readActiveRoundSummary(): Promise<{
   }
 
   const key = rounds[idx]! as RoundKey;
-  const tokenPriceRaw = infos[idx]![1]; // tokenPrice_
+  const tokenPriceRaw = infos[idx]![1];
   return { key, label: ROUND_LABEL[key], tokenPriceRaw, usdcDecimals };
 }

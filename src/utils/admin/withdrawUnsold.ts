@@ -1,4 +1,3 @@
-// utils/admin/withdrawUnsold.ts
 import {
   getContract,
   readContract,
@@ -11,7 +10,6 @@ import { client } from "@/lib/thirdwebClient";
 import { sepolia } from "thirdweb/chains";
 import { presaleAbi } from "@/lib/abi/presale";
 
-/** Address of the deployed presale contract */
 const PRESALE_ADDR = process.env
   .NEXT_PUBLIC_PRESALE_SMART_CONTRACT_ADDRESS as `0x${string}`;
 
@@ -21,7 +19,6 @@ if (!PRESALE_ADDR) {
   );
 }
 
-/** Presale contract instance */
 const presale = getContract({
   client,
   chain: sepolia,
@@ -29,7 +26,6 @@ const presale = getContract({
   abi: presaleAbi,
 });
 
-/** Minimal ERC20 ABI for decimals() and balanceOf() */
 const ERC20_ABI = [
   {
     inputs: [],
@@ -47,19 +43,14 @@ const ERC20_ABI = [
   },
 ] as const;
 
-/* --------------------------------- Reads --------------------------------- */
-
-/** Returns the URANO token address used by the presale */
 export async function getTokenAddress(): Promise<`0x${string}`> {
   return (await readContract({ contract: presale, method: "token" })) as `0x${string}`;
 }
 
-/** Returns the presale treasury address (handy for showing in the UI) */
 export async function getTreasuryAddress(): Promise<`0x${string}`> {
   return (await readContract({ contract: presale, method: "treasury" })) as `0x${string}`;
 }
 
-/** Returns token decimals (falls back to 18 if anything fails) */
 export async function getTokenDecimals(): Promise<number> {
   try {
     const tokenAddr = await getTokenAddress();
@@ -79,7 +70,6 @@ export async function getTokenDecimals(): Promise<number> {
   }
 }
 
-/** Raw ERC20 balance (in token units) held by the presale contract */
 export async function readContractTokenBalanceRaw(): Promise<bigint> {
   const tokenAddr = await getTokenAddress();
   const erc20 = getContract({
@@ -95,15 +85,11 @@ export async function readContractTokenBalanceRaw(): Promise<bigint> {
   }));
 }
 
-/** Human-readable balance held by the presale (as a string) */
 export async function readContractTokenBalanceHuman(): Promise<string> {
   const [decimals, raw] = await Promise.all([getTokenDecimals(), readContractTokenBalanceRaw()]);
   return fromUnits(raw, decimals);
 }
 
-/* ----------------------------- Conversions ------------------------------ */
-
-/** Convert human amount (e.g. "123.45") to raw units using `decimals`. */
 export function toUnits(amount: string, decimals: number): bigint {
   const cleaned = (amount ?? "").trim();
   if (!cleaned) return 0n;
@@ -121,7 +107,6 @@ export function toUnits(amount: string, decimals: number): bigint {
   return intVal + fracVal;
 }
 
-/** Convert raw on-chain units to a human string (no trailing zeros). */
 export function fromUnits(amount: bigint, decimals: number): string {
   const base = 10n ** BigInt(decimals);
   const intPart = amount / base;
@@ -131,12 +116,6 @@ export function fromUnits(amount: bigint, decimals: number): string {
   return `${intPart}.${fracStr}`;
 }
 
-/* -------------------------------- Writes -------------------------------- */
-
-/**
- * Low-level: call `withdrawUnsoldTokens(amountRaw)` with raw token units.
- * Returns the transaction hash.
- */
 export async function withdrawUnsoldTokensRawTx(
   account: Account,
   amountRaw: bigint
@@ -156,11 +135,6 @@ export async function withdrawUnsoldTokensRawTx(
   return sent.transactionHash;
 }
 
-/**
- * Convenience: accepts a human-readable amount and handles decimals conversion.
- * - Validates `amount > 0`
- * - (Optionally) you can also pre-check against the current contract balance in the UI
- */
 export async function withdrawUnsoldTokensHumanTx(
   account: Account,
   amountHuman: string

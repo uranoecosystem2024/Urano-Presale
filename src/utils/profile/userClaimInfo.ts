@@ -1,4 +1,3 @@
-// utils/profile/userClaimInfo.ts
 "use client";
 
 import { getContract, readContract, prepareContractCall } from "thirdweb";
@@ -47,8 +46,6 @@ async function getTokenDecimals(): Promise<number> {
   }
 }
 
-/* ----------------------- WHITELIST ----------------------- */
-
 export async function readWhitelistClaimSummary(user: `0x${string}`): Promise<{
   claimableRaw: bigint;
   claimedRaw: bigint;
@@ -83,8 +80,6 @@ export function prepareWhitelistClaimTx(): PresalePreparedTx {
     params: [],
   });
 }
-
-/* ----------------------- PURCHASED / VESTING ----------------------- */
 
 export async function readPurchasedClaimSummary(user: `0x${string}`): Promise<{
   claimableRaw: bigint;
@@ -145,13 +140,10 @@ export async function preparePurchasedClaimTxs(user: `0x${string}`): Promise<Pre
   return txs;
 }
 
-/* ----------------------- NEW: COMBINED HELPERS ----------------------- */
-
-/** Sum everything for a single snapshot read. */
 export async function readAllClaimSummary(user: `0x${string}`): Promise<{
   tokenDecimals: number;
-  unclaimedTotalRaw: bigint; // whitelist + purchased (claimable)
-  claimedTotalRaw: bigint;   // whitelist + purchased (claimed so far)
+  unclaimedTotalRaw: bigint;
+  claimedTotalRaw: bigint;
   parts: {
     wl: { claimableRaw: bigint; claimedRaw: bigint };
     purchased: { claimableRaw: bigint; claimedRaw: bigint; items: { round: number; purchaseIndex: number; claimable: bigint }[] };
@@ -162,7 +154,6 @@ export async function readAllClaimSummary(user: `0x${string}`): Promise<{
     readPurchasedClaimSummary(user),
   ]);
 
-  // Both helpers return the same decimals, but we’ll trust purchased.tokenDecimals for output
   const tokenDecimals = purchased.tokenDecimals;
 
   const unclaimedTotalRaw = (wl.claimableRaw ?? 0n) + (purchased.claimableRaw ?? 0n);
@@ -179,10 +170,6 @@ export async function readAllClaimSummary(user: `0x${string}`): Promise<{
   };
 }
 
-/**
- * Return all prepared txs necessary to claim *everything* the user can claim now.
- * Note: With the current ABI this is multiple transactions: 0..1 whitelist + N purchased.
- */
 export async function prepareClaimAllTxs(user: `0x${string}`): Promise<PresalePreparedTx[]> {
   const [wl, purchasedTxs] = await Promise.all([
     readWhitelistClaimSummary(user),

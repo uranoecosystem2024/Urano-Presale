@@ -77,10 +77,8 @@ const MainSection = () => {
   const [amount, setAmount] = useState<number>(0);
   const [loadingPhase, setLoadingPhase] = useState<"idle" | "approve" | "buy">("idle");
 
-  // NEW: we require approval before every buy attempt (session-level, per amount)
   const [approvedThisSession, setApprovedThisSession] = useState(false);
 
-  // unified toast styling based on theme
   const toastBase = useMemo(
     () => ({
       style: {
@@ -93,13 +91,11 @@ const MainSection = () => {
           ●
         </Box>
       ),
-      // force the progress bar to Urano green everywhere
       progressStyle: { background: theme.palette.uranoGreen1.main },
     }),
     [theme]
   );
 
-  // --- wallet + USDC balance ---
   const account = useActiveAccount();
   const address = account?.address as `0x${string}` | undefined;
 
@@ -138,7 +134,6 @@ const MainSection = () => {
 
   const belowMin = useMemo(() => amount > 0 && amount < MIN_USDC, [amount]);
 
-  // read + sync local storage state
   const readProgress = () => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -209,7 +204,6 @@ const MainSection = () => {
     return true;
   }, [allStepsDone, amount, belowMin, insufficient]);
 
-  // reset session approval whenever amount or account changes
   useEffect(() => {
     setApprovedThisSession(false);
   }, [amount, address]);
@@ -224,11 +218,9 @@ const MainSection = () => {
     if (insufficient) return "Insufficient balance";
     if (loadingPhase === "approve") return <>Approving<AnimatedDots /></>;
     if (loadingPhase === "buy") return <>Buying<AnimatedDots /></>;
-    // NEW: we ignore on-chain allowance and force per-attempt approval
     return approvedThisSession ? "Buy" : "Approve";
   }, [progress, amount, belowMin, insufficient, loadingPhase, approvedThisSession]);
 
-  // --- CTA click: Always approve first for this session/amount, then buy ---
   const onClickCta = async () => {
     try {
       if (!canClick) return;
@@ -265,7 +257,6 @@ const MainSection = () => {
       const idx = await getActiveRoundIndexStrict()
       const { txHash: buyTx } = await buyPresaleTokens(account, idx, amount, code);
 
-      // SUCCESS TOAST (no 6-digit code shown)
       toast.success(
         <div>
           <div><b>Transaction sent</b></div>
@@ -284,7 +275,6 @@ const MainSection = () => {
       );
       setPurchaseSuccessModalOpen(true);
 
-      // require approval again after every buy
       setApprovedThisSession(false);
     } catch (err: unknown) {
       const message =
@@ -314,7 +304,6 @@ const MainSection = () => {
         paddingTop={2}
         paddingBottom={4}
       >
-        {/* Toasts */}
         <ToastContainer position="top-right" autoClose={6000} newestOnTop closeOnClick />
 
         <Stack width={{ xs: "100%", lg: "60%" }} flexGrow={1} gap={4}>
@@ -584,7 +573,6 @@ const MainSection = () => {
           <PresaleCard />
           <TokensSelection />
 
-          {/* CTA */}
           <MuiLink
             href="/"
             underline="none"

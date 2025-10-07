@@ -37,10 +37,8 @@ import {
 import { useActiveAccount } from "thirdweb/react";
 import { toast } from "react-toastify";
 
-// ---------- UI-only round key union (all 5 rounds) ----------
 type UiRoundKey = "seed" | "private" | "institutional" | "strategic" | "community";
 
-// type-only imports to align parameter types across modules
 import type { RoundKey as RoundKeyMax } from "@/utils/admin/roundMaxTokens";
 import type { RoundKey as RoundKeyVesting } from "@/utils/admin/vesting";
 
@@ -70,7 +68,6 @@ function getErrorMessage(err: unknown): string {
   }
 }
 
-// ---------- helpers for toggle result details (typed, no any) ----------
 const isUiRoundKey = (v: unknown): v is UiRoundKey =>
   typeof v === "string" &&
   (["seed", "private", "institutional", "strategic", "community"] as const).includes(
@@ -107,7 +104,6 @@ function parseActivated(input: unknown): ActivatedInfo | null {
   return null;
 }
 
-// show all 5 in the UI
 const UI_KEYS: readonly UiRoundKey[] = [
   "seed",
   "private",
@@ -132,12 +128,10 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
   const [loading, setLoading] = useState<boolean>(!rounds);
   const [txLoadingById, setTxLoadingById] = useState<Record<string, boolean>>({});
 
-  // Vesting parameters (per expanded round)
-  const [tgePct, setTgePct] = useState(""); // integer 0..100
-  const [cliffMonths, setCliffMonths] = useState(""); // months (int)
-  const [durationMonths, setDurationMonths] = useState(""); // months (int)
+  const [tgePct, setTgePct] = useState("");
+  const [cliffMonths, setCliffMonths] = useState("");
+  const [durationMonths, setDurationMonths] = useState("");
 
-  // Round max tokens (per expanded round)
   const [maxTokensHuman, setMaxTokensHuman] = useState("");
   const [maxTokensLoading, setMaxTokensLoading] = useState(false);
 
@@ -145,7 +139,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
   const [remainingHuman, setRemainingHuman] = useState("");
   const [salesLoading, setSalesLoading] = useState(false);
 
-  // which row is expanded
   const [expandedId, setExpandedId] = useState<UiRoundKey | null>(null);
 
   const [updateParamsLoading, setUpdateParamsLoading] = useState<Record<UiRoundKey, boolean>>(
@@ -153,7 +146,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
       Object.fromEntries(UI_KEYS.map((k) => [k, false])) as Record<UiRoundKey, boolean>
   );
 
-  // load rounds (from prop or chain)
   useEffect(() => {
     if (rounds) {
       setItems(rounds);
@@ -179,13 +171,11 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
     };
   }, [rounds]);
 
-  // first active computation
   const firstActive = useMemo(() => {
     const idx = items.findIndex((r) => r.active);
     return idx >= 0 ? { id: items[idx]?.id ?? null, index: idx } : null;
   }, [items]);
 
-  // collapse non-first-active rows
   useEffect(() => {
     if (!firstActive || expandedId !== firstActive.id) setExpandedId(null);
   }, [firstActive, expandedId]);
@@ -288,7 +278,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
     }
   };
 
-  // When a row expands, load round-specific extras (max tokens)
   useEffect(() => {
     let cancelled = false;
 
@@ -410,7 +399,7 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
 
   const handleShowMore = (id: UiRoundKey) => {
     if (disabled) return;
-    if (firstActive?.id !== id) return; // only first active can open
+    if (firstActive?.id !== id) return;
     setExpandedId((prev) => (prev === id ? null : id));
     onShowMore?.(id);
   };
@@ -439,7 +428,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
   } as const;
 
   const inputSx = {
-    // Input surface + border behavior
     "& .MuiOutlinedInput-root": {
       background: theme.palette.background.paper,
       borderRadius: 2,
@@ -448,30 +436,25 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
       "&.Mui-focused fieldset": { borderColor: theme.palette.uranoGreen1.main },
     },
 
-    // Placeholder opacity
     "& .MuiInputBase-input::placeholder": { opacity: 0.7 },
 
-    // Label styles
     "& .MuiInputLabel-root": {
       color: theme.palette.common.white,
       "&.Mui-focused": { color: theme.palette.common.white },
       "&.MuiInputLabel-shrink": {
         color: theme.palette.common.white,
-        // Make the floating label look like it cuts the border
-        px: 0.75,                   // horizontal padding for breathing room
-        borderRadius: 0.5,          // soften corners
-        backgroundColor: theme.palette.background.paper, // match input bg
-        lineHeight: 1.2,            // avoids clipping with padding
+        px: 0.75,
+        borderRadius: 0.5,
+        backgroundColor: theme.palette.background.paper,
+        lineHeight: 1.2,
       },
       "&.Mui-disabled": { color: theme.palette.text.disabled },
     },
 
-    // Let the notch fit the padded label
     "& .MuiOutlinedInput-notchedOutline legend": {
-      maxWidth: "60px", // override MUI's tiny animation width
+      maxWidth: "60px",
     },
 
-    // (Optional) add a little inner padding to the legend’s span for perfect notch sizing
     "& .MuiOutlinedInput-notchedOutline legend > span": {
       paddingLeft: 6,
       paddingRight: 6,
@@ -529,7 +512,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                     }}
                     gap={2}
                   >
-                    {/* Header */}
                     <Stack
                       direction="row"
                       alignItems="center"
@@ -609,9 +591,7 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                       </Stack>
                     </Stack>
 
-                    {/* Details (per-round settings only) */}
                     <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                      {/* Vesting Parameters (per-round) */}
                       <Stack gap={0.5} mb={4}>
                         <Typography variant="subtitle1">Round Vesting Parameters</Typography>
                         <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
@@ -674,7 +654,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
 
                       <Divider sx={{ my: 3, borderBottom: `1px solid ${theme.palette.secondary.main}` }} />
 
-                      {/* Round Max Tokens */}
                       <Stack gap={0.5} mb={4}>
                         <Typography variant="subtitle1">Round Max Tokens</Typography>
                         <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>

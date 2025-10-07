@@ -50,7 +50,6 @@ export default function GlobalVestingVestingParams({
   const [started, setStarted] = useState<boolean | null>(null);
   const [tgeISO, setTgeISO] = useState<string>("");
 
-  // earliest allowed TGE (max(endTime) across rounds), seconds since epoch
   const [earliestAllowedSec, setEarliestAllowedSec] = useState<bigint>(0n);
 
   const [derivedEnds, setDerivedEnds] = useState<{
@@ -112,7 +111,6 @@ export default function GlobalVestingVestingParams({
   const fmtSec = (sec?: bigint) =>
     sec && sec > 0n ? dayjs(Number(sec) * 1000).format("YYYY-MM-DD HH:mm") : "—";
 
-  // Load global vesting status, derived ends, and earliest allowed TGE
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
@@ -135,7 +133,6 @@ export default function GlobalVestingVestingParams({
           communityEnd: fmtSec(status.ends.community),
         });
 
-        // suggest a near-future TGE (>= earliest allowed, rounded to minute)
         if (!status.started) {
           const minMillis = Number(earliest > 0n ? earliest * 1000n : 0n);
           const oneHourAhead = dayjs().add(1, "hour");
@@ -158,7 +155,6 @@ export default function GlobalVestingVestingParams({
     };
   }, []);
 
-  // Save: start vesting with provided (or adjusted) TGE
   const saveTgeAndStart = async () => {
     if (disabled || started) return;
     if (!account) {
@@ -172,9 +168,7 @@ export default function GlobalVestingVestingParams({
     try {
       setActionLoading(true);
 
-      // chosen time in seconds
       const chosenSec = BigInt(Math.floor(dayjs(tgeISO).valueOf() / 1000));
-      // enforce earliest allowed (contract requires TGE > strategic end, we use max across rounds)
       const minAllowed = earliestAllowedSec > 0n ? earliestAllowedSec : 0n;
       const adjustedSec = chosenSec <= minAllowed ? minAllowed + 1n : chosenSec;
 
@@ -258,7 +252,6 @@ export default function GlobalVestingVestingParams({
             sx={{ my: 1.5, borderBottom: `1px solid ${theme.palette.secondary.main}` }}
           />
 
-          {/* Read-only derived end times */}
           <Grid container spacing={2} sx={{ mb: 2 }}>
             <Grid size={{ xs: 12, md: 4 }}>
               <TextField

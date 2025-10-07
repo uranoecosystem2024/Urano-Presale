@@ -1,4 +1,3 @@
-// hooks/usePresaleProgress.ts
 "use client";
 
 import { useEffect, useState } from "react";
@@ -35,7 +34,7 @@ export function usePresaleProgress(): State {
       }
     };
   
-    void run(); // explicitly ignore the promise
+    void run();
   
     return () => {
       cancelled = true;

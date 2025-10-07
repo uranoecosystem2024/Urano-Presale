@@ -1,4 +1,3 @@
-// app/api/kyc-status/route.ts (or pages/api/kyc-status.ts if using pages router)
 import { NextResponse } from "next/server";
 import { unstable_noStore as noStore } from "next/cache";
 import { createPublicClient, http, isAddress } from "viem";
@@ -17,20 +16,10 @@ if (!PRESALE_ADDR || !isAddress(PRESALE_ADDR)) {
 
 const publicClient = createPublicClient({ transport: http(RPC_URL) });
 
-/**
- * OPTIONAL: replace this with your DB lookup.
- * Goal: return the *Persona-captured* wallet address (`crypto_wallet_address`)
- * associated with this user/account, if you store it.
- *
- * Return `null` if you don't have it or haven't integrated Persona webhooks.
- */
 async function getPersonaWalletForAddress(
   connectedAddr: `0x${string}`
 ): Promise<`0x${string}` | null> {
-  // Example (pseudo):
-  // const rec = await db.kyc_inquiries
-  //   .findFirst({ where: { connectedAddress: connectedAddr.toLowerCase() }, orderBy: { createdAt: "desc" }});
-  // return rec?.cryptoWalletAddress ?? null;
+
   return null;
 }
 
@@ -46,7 +35,6 @@ export async function GET(req: Request) {
 
   const user = addr;
 
-  // On-chain source of truth for “this exact wallet is verified”
   const verified = await publicClient.readContract({
     address: PRESALE_ADDR as `0x${string}`,
     abi: presaleAbi,
@@ -54,11 +42,10 @@ export async function GET(req: Request) {
     args: [user],
   });
 
-  // Optional: persona-captured wallet (if you store it)
   const personaWallet = await getPersonaWalletForAddress(user);
 
   return NextResponse.json({
     verified,
-    crypto_wallet_address: personaWallet, // may be null if not stored
+    crypto_wallet_address: personaWallet,
   });
 }

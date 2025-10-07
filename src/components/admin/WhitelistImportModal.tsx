@@ -1,4 +1,3 @@
-// components/admin/UploadWhitelistCsvModal.tsx
 "use client";
 
 import React, { useMemo, useState } from "react";
@@ -19,14 +18,14 @@ import type { RoundKey } from "@/utils/admin/whitelist";
 
 export type WhitelistCsvEntry = {
   address: `0x${string}`;
-  preAssignedTokens: string; // human-readable string
-  whitelistRound: RoundKey | number; // enum key or uint8 index
+  preAssignedTokens: string;
+  whitelistRound: RoundKey | number;
 };
 
 type RawCsvRow = {
   address?: string | null;
   amount?: string | number | null;
-  round?: string | number | null; // new: round column
+  round?: string | number | null;
 };
 
 export type UploadWhitelistCsvModalProps = {
@@ -43,7 +42,6 @@ function isAddressLike(a?: string | null): a is `0x${string}` {
   return s.startsWith("0x") && s.length === 42;
 }
 
-/** round names we accept (case-insensitive) */
 const ROUND_OPTIONS: ReadonlyArray<{ key: RoundKey; labels: string[] }> = [
   { key: "seed",           labels: ["seed"] },
   { key: "private",        labels: ["private"] },
@@ -59,7 +57,6 @@ const LABEL_TO_ROUND_KEY: Record<string, RoundKey> = ROUND_OPTIONS
     return acc;
   }, {} as Record<string, RoundKey>);
 
-/** Parse a round value from CSV (name or number). Returns RoundKey or uint8 number, otherwise null. */
 function parseRoundValue(input: string | number | null | undefined): RoundKey | number | null {
   if (input == null) return null;
 
@@ -70,23 +67,19 @@ function parseRoundValue(input: string | number | null | undefined): RoundKey | 
   const raw = String(input).trim();
   if (!raw) return null;
 
-  // numeric string?
   if (/^\d+$/.test(raw)) {
     const n = Number(raw);
     return Number.isFinite(n) && n >= 0 && n <= 255 ? n : null;
   }
 
-  // label string
   const key = LABEL_TO_ROUND_KEY[raw.toLowerCase()];
   return key ?? null;
 }
 
-/** Safe object check (not null, not array) */
 function isRecord(x: unknown): x is Record<string, unknown> {
   return typeof x === "object" && x !== null && !Array.isArray(x);
 }
 
-/** Safely get a field as string (or undefined). Coerces numbers, ignores others. */
 function getString(obj: unknown, key: string): string | undefined {
   if (!isRecord(obj)) return undefined;
   const v = obj[key];
@@ -153,7 +146,6 @@ export default function UploadWhitelistCsvModal({
     try {
       const csvText: string = await file.text();
 
-      // Treat parse() output as unknown, then narrow safely.
       const parsedUnknown: unknown = parse(csvText, {
         columns: true,
         skip_empty_lines: true,
@@ -168,7 +160,6 @@ export default function UploadWhitelistCsvModal({
       const inv: Array<{ row: RawCsvRow; errors: string[] }> = [];
 
       for (const raw of rows) {
-        // Accept common header variants
         const address = getString(raw, "address") ?? getString(raw, "Address") ?? null;
         const amountStr = (getString(raw, "amount") ?? getString(raw, "Amount") ?? "").trim();
         const roundStr =
@@ -213,7 +204,6 @@ export default function UploadWhitelistCsvModal({
     resetAndClose();
   };
 
-  // Pretty-print the round for preview
   function roundToLabel(r: RoundKey | number): string {
     if (typeof r === "number") return String(r);
     switch (r) {
@@ -262,7 +252,6 @@ export default function UploadWhitelistCsvModal({
             gap: 2,
           }}
         >
-          {/* Title */}
           <Stack alignItems="center" gap={0.5} mb={1}>
             <Typography
               variant="h5"
@@ -282,7 +271,6 @@ export default function UploadWhitelistCsvModal({
             </Typography>
           </Stack>
 
-          {/* Uploader */}
           <Paper
             variant="outlined"
             sx={{
@@ -339,7 +327,6 @@ export default function UploadWhitelistCsvModal({
             )}
           </Paper>
 
-          {/* Preview */}
           <Stack gap={1} mt={1}>
             <Typography variant="subtitle1">Preview</Typography>
             <Paper
@@ -429,7 +416,6 @@ export default function UploadWhitelistCsvModal({
             </Paper>
           </Stack>
 
-          {/* Actions */}
           <Stack direction={{ xs: "column", sm: "row" }} gap={2} mt={2}>
             <Button
               onClick={resetAndClose}

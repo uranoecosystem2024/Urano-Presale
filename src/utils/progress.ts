@@ -1,10 +1,8 @@
-// utils/progress.ts
 import { getContract, readContract } from "thirdweb";
 import { presaleAbi } from "@/lib/abi/presale";
 import { client } from "@/lib/thirdwebClient";
 import { PRESALE_ADDRESS, PRESALE_CHAIN } from "@/lib/presaleConfig";
 
-/** Contract enum layout: 0=Seed, 1=Private, 2=Institutional, 3=Strategic, 4=Community */
 export type RoundKey = "strategic" | "seed" | "private" | "institutional" | "community";
 
 export const ROUND_LABEL: Record<RoundKey, string> = {
@@ -22,26 +20,20 @@ const presale = getContract({
   abi: presaleAbi,
 });
 
-/**
- * Tuple layout (matches get*RoundInfo outputs):
- * isActive_, tokenPrice_, minPurchase_, totalRaised_, startTime_, endTime_,
- * totalTokensSold_, maxTokensToSell_, isPublic_, vestingEndTime_,
- * cliffPeriodMonths_, vestingDurationMonths_, tgeUnlockPercentage_
- */
 type RoundInfoTuple = readonly [
-  boolean,  // 0 isActive_
-  bigint,   // 1 tokenPrice_
-  bigint,   // 2 minPurchase_
-  bigint,   // 3 totalRaised_
-  bigint,   // 4 startTime_
-  bigint,   // 5 endTime_
-  bigint,   // 6 totalTokensSold_
-  bigint,   // 7 maxTokensToSell_
-  boolean,  // 8 isPublic_
-  bigint,   // 9 vestingEndTime_
-  bigint,   // 10 cliffPeriodMonths_
-  bigint,   // 11 vestingDurationMonths_
-  bigint    // 12 tgeUnlockPercentage_
+  boolean,
+  bigint,
+  bigint,
+  bigint,
+  bigint,
+  bigint,
+  bigint,
+  bigint,
+  boolean,
+  bigint,
+  bigint,
+  bigint,
+  bigint
 ];
 
 async function readRoundInfoByKey(key: RoundKey): Promise<RoundInfoTuple> {
@@ -72,35 +64,25 @@ async function readRoundInfoByKey(key: RoundKey): Promise<RoundInfoTuple> {
         method: "getCommunityRoundInfo",
       })) as RoundInfoTuple;
     default: {
-      // exhaustive guard
       const _exhaustiveCheck: never = key;
       throw new Error(`Unsupported round key: ${String(_exhaustiveCheck)}`);
     }
   }
 }
 
-/** What the progress bar needs */
 export type PresaleProgress = {
   key: RoundKey | null;
   label: string | null;
-  /** tokens sold in the active round (raw, token decimals) */
   totalTokensSold: bigint;
-  /** max tokens for the active round (raw, token decimals) */
   maxTokensToSell: bigint;
-  /** % sold, 0..100 (number, safe for UI) */
   purchasedPercent: number;
 };
 
-/**
- * Read all rounds, pick the currently active one (preferring within its time window),
- * and compute purchased % = totalTokensSold / maxTokensToSell.
- */
 export async function readPresaleProgress(): Promise<PresaleProgress> {
   const order = ["strategic", "seed", "private", "institutional", "community"] as const;
 
   const all = await Promise.all(order.map((k) => readRoundInfoByKey(k)));
 
-  // Normalize to include key for selection + logging
   const normalized = all.map((t, i) => ({
     key: order[i]! as RoundKey,
     isActive: t[0],
@@ -110,7 +92,6 @@ export async function readPresaleProgress(): Promise<PresaleProgress> {
     maxTokensToSell: t[7],
   }));
 
-  // Prefer active & time-valid; otherwise any active; else none
   const now = BigInt(Math.floor(Date.now() / 1000));
   const timeValid = (s: bigint, e: bigint): boolean => {
     const startOk = s === 0n || now >= s;
@@ -131,20 +112,17 @@ export async function readPresaleProgress(): Promise<PresaleProgress> {
     };
   }
 
-  const key: RoundKey = chosen.key; // concrete RoundKey
+  const key: RoundKey = chosen.key;
   const { totalTokensSold, maxTokensToSell } = chosen;
 
-  // Compute % as number (cap 0..100)
   let purchasedPercent = 0;
   if (maxTokensToSell > 0n) {
-    // scale by 100 with 2 decimals precision (×10000 / ÷100)
     purchasedPercent = Number((totalTokensSold * 10000n) / maxTokensToSell) / 100;
     if (!Number.isFinite(purchasedPercent)) purchasedPercent = 0;
     if (purchasedPercent < 0) purchasedPercent = 0;
     if (purchasedPercent > 100) purchasedPercent = 100;
   }
 
-  // Optional debug log (enable with NEXT_PUBLIC_DEBUG_PRESALE=true)
   if (typeof window !== "undefined" && process.env.NEXT_PUBLIC_DEBUG_PRESALE === "true") {
     try {
       console.groupCollapsed("[Presale] Progress");

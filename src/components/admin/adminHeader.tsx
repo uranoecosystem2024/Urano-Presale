@@ -1,4 +1,3 @@
-// AdminHeader.tsx
 'use client'
 
 import { Stack, Typography, Link, Box } from "@mui/material"
@@ -9,7 +8,7 @@ import arb from "@/assets/images/arbdao.webp"
 import MobileMenu from "@/components/MobileMenu";
 import { ConnectButton, useActiveAccount, useConnectModal } from "thirdweb/react";
 import { client } from "@/lib/thirdwebClient";
-import { sepolia } from "thirdweb/chains";               // ✅ add this
+import { sepolia } from "thirdweb/chains";
 
 const AdminHeader = () => {
   const theme = useTheme<Theme>();
@@ -54,7 +53,6 @@ const AdminHeader = () => {
               underline="none"
               onClick={async (e) => {
                 e.preventDefault();
-                // ✅ open connect modal pre-targeted to Sepolia
                 await connect({ client, chain: sepolia });
               }}
             >
@@ -84,7 +82,6 @@ const AdminHeader = () => {
               </Box>
             </Link>
           ) : (
-            // ✅ force ConnectButton to Sepolia
             <ConnectButton client={client} chain={sepolia} />
           )}
 

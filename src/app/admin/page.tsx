@@ -23,7 +23,6 @@ export default function Admin() {
     const [checkingRole, setCheckingRole] = useState<boolean>(false);
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
-    // Check admin role whenever the wallet changes
     useEffect(() => {
         let cancelled = false;
 
@@ -51,7 +50,6 @@ export default function Admin() {
         };
     }, [account]);
 
-    // Reusable centered notice box
     const CenterNotice = ({ title, subtitle }: { title: string; subtitle?: string }) => (
         <Stack
             alignItems="center"
@@ -129,7 +127,6 @@ export default function Admin() {
                 </Typography>
             </Stack>
 
-            {/* Access gating */}
             {!account ? (
                 <CenterNotice
                     title="No wallet connected"
@@ -143,7 +140,6 @@ export default function Admin() {
                     subtitle="The connected wallet does not have admin role on the presale contract."
                 />
             ) : (
-                // ✅ Admin content
                 <Stack width={{ xs: "95%", lg: "65%" }} mb={4} gap={2}>
                     <Stack
                         sx={{
@@ -224,11 +220,9 @@ export default function Admin() {
                         <WithdrawUnsoldTokens
                             title="Withdraw Unsold Tokens"
                             subtitle="Send remaining presale tokens from the contract to the Treasury"
-                            // optional: wire a success hook
                             onWithdrawSuccess={({ amount, txHash }) => {
                                 console.log("Withdrawn:", amount, "tx:", txHash);
                             }}
-                            // optional: disable while some other admin tx runs
                             disabled={false}
                         />
                     </Stack>

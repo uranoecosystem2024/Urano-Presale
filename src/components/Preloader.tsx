@@ -3,23 +3,14 @@
 import * as React from "react";
 import { Box } from "@mui/material";
 
-/**
- * UranoPreloader
- * - Fullscreen overlay
- * - 3D-ish sphere with requested gradient
- * - Rotating belt (ellipse) with "URANO ECOSYSTEM" text
- * - Respects prefers-reduced-motion
- * - Locks scroll while visible, then fades out smoothly
- */
 export default function UranoPreloader() {
   const [visible, setVisible] = React.useState(true);
 
   React.useEffect(() => {
-    const MIN_SHOWN_MS = 800; // tweak to taste
+    const MIN_SHOWN_MS = 800;
     let timeout: number | undefined;
 
     const hide = () => {
-      // keep a small minimum so it doesn't flash
       timeout = window.setTimeout(() => setVisible(false), MIN_SHOWN_MS);
     };
 
@@ -37,7 +28,6 @@ export default function UranoPreloader() {
     return () => clearTimeout(timeout);
   }, []);
 
-  // Lock page scroll while the preloader is up
   React.useEffect(() => {
     if (visible) {
       const prev = document.documentElement.style.overflow;
@@ -50,7 +40,7 @@ export default function UranoPreloader() {
 
   if (!visible) return null;
 
-  const size = 360; // overall SVG box (px)
+  const size = 360;
 
   return (
     <Box
@@ -65,8 +55,6 @@ export default function UranoPreloader() {
         placeItems: "center",
         bgcolor: (t) => t.palette.background.default,
         transition: "opacity 400ms ease",
-        // If you later set internal fade state, hook opacity here.
-        // For now, we hard-show then unmount.
       }}
     >
       <Box
@@ -82,11 +70,9 @@ export default function UranoPreloader() {
             "0%, 100%": { transform: "scale(1)" },
             "50%": { transform: "scale(1.02)" },
           },
-          // Respect reduced motion
           "@media (prefers-reduced-motion: reduce)": {
             "& svg .orbit, & svg .breath": { animation: "none !important" },
           },
-          // Ensure CSS transforms work inside inline SVG
           "& svg .orbit": {
             transformBox: "fill-box",
             transformOrigin: "50% 50%",
@@ -101,7 +87,6 @@ export default function UranoPreloader() {
           },
         }}
       >
-        {/* Inline SVG = crisp + cheap */}
         <svg
           viewBox="0 0 400 400"
           width="100%"
@@ -110,13 +95,11 @@ export default function UranoPreloader() {
           focusable="false"
         >
           <defs>
-            {/* Requested sphere gradient */}
             <linearGradient id="sphereFill" x1="0%" y1="50%" x2="100%" y2="50%">
               <stop offset="0%" stopColor="#5EBBC3" />
               <stop offset="100%" stopColor="#6DE7C2" />
             </linearGradient>
 
-            {/* Soft radial shading to fake depth */}
             <radialGradient id="shade" cx="35%" cy="30%" r="60%">
               <stop offset="0%" stopColor="rgba(255,255,255,0.65)" />
               <stop offset="40%" stopColor="rgba(255,255,255,0.15)" />
@@ -124,13 +107,11 @@ export default function UranoPreloader() {
               <stop offset="100%" stopColor="rgba(0,0,0,0.35)" />
             </radialGradient>
 
-            {/* Small specular highlight */}
             <radialGradient id="spec" cx="30%" cy="28%" r="18%">
               <stop offset="0%" stopColor="rgba(255,255,255,0.9)" />
               <stop offset="60%" stopColor="rgba(255,255,255,0.0)" />
             </radialGradient>
 
-            {/* Elliptical orbit path (belt) — centered at 200,200 */}
             <path
               id="orbitPath"
               d="
@@ -141,15 +122,12 @@ export default function UranoPreloader() {
               "
             />
 
-            {/* A mask to show only the 'front' half of the belt text */}
             <mask id="frontMask">
               <rect x="0" y="0" width="400" height="400" fill="black" />
-              {/* upper half of ellipse region */}
               <ellipse cx="200" cy="200" rx="160" ry="70" fill="white" />
             </mask>
           </defs>
 
-          {/* BACK belt (behind sphere) */}
           <g className="orbit" style={{ transform: "rotateZ(0deg)" }}>
             <ellipse
               cx="200"
@@ -172,15 +150,12 @@ export default function UranoPreloader() {
             </text>
           </g>
 
-          {/* SPHERE (on top of back belt) */}
           <g className="breath">
             <circle cx="200" cy="200" r="120" fill="url(#sphereFill)" />
-            {/* subtle lighting layers */}
             <circle cx="200" cy="200" r="120" fill="url(#shade)" />
             <ellipse cx="170" cy="165" rx="36" ry="22" fill="url(#spec)" />
           </g>
 
-          {/* FRONT belt (above sphere) — masked to show only the near side */}
           <g className="orbit" style={{ transform: "rotateZ(0deg)" }} mask="url(#frontMask)">
             <ellipse
               cx="200"

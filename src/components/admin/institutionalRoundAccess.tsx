@@ -8,7 +8,7 @@ import {
   setInstitutionalPublic,
   canEditInstitutionalPublic,
 } from "@/utils/admin/institutionalAccess";
-import { toast } from "react-toastify"; // ⬅️ add
+import { toast } from "react-toastify";
 
 export type InstitutionalRoundAccessProps = {
   value?: boolean;
@@ -58,7 +58,7 @@ export default function InstitutionalRoundAccess({
         setLoading(true);
         const [isPublic, editable] = await Promise.all([
           readInstitutionalPublic(),
-          canEditInstitutionalPublic(account ?? undefined), // admin-only now
+          canEditInstitutionalPublic(account ?? undefined),
         ]);
         if (!cancelled) {
           setOn(isPublic);
@@ -90,7 +90,7 @@ export default function InstitutionalRoundAccess({
       }
 
       setLoading(true);
-      setOn(next); // optimistic
+      setOn(next);
 
       const editable = await canEditInstitutionalPublic(account);
       if (!editable) {

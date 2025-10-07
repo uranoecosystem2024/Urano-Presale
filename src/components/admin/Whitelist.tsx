@@ -21,7 +21,7 @@ import {
   addWhitelistRowsSameRoundTx,
   removeFromWhitelistTx,
   type RoundKey,
-  isAddressLike, // from utils
+  isAddressLike,
 } from "@/utils/admin/whitelist";
 
 export type WhitelistProps = {
@@ -30,10 +30,9 @@ export type WhitelistProps = {
   disabled?: boolean;
   initialAddress?: string;
   initialAmount?: string;
-  /** Default whitelist round (enum key or uint8). */
   initialRound?: RoundKey | number;
-  onAdded?: (address: `0x${string}`) => void;   // called for first row only (compat)
-  onRemoved?: (address: `0x${string}`) => void; // called for first row only (compat)
+  onAdded?: (address: `0x${string}`) => void;
+  onRemoved?: (address: `0x${string}`) => void;
 };
 
 const ROUND_OPTIONS: { label: string; value: RoundKey }[] = [
@@ -44,7 +43,6 @@ const ROUND_OPTIONS: { label: string; value: RoundKey }[] = [
   { label: "Community", value: "community" },
 ];
 
-// enum index <-> key maps (for normalizing numeric prop only)
 const INDEX_TO_ROUND: Record<number, RoundKey> = {
   0: "seed",
   1: "private",
@@ -68,10 +66,8 @@ export default function Whitelist({
   const theme = useTheme();
   const account = useActiveAccount();
 
-  // rows state (dynamic)
   const [rows, setRows] = useState<Row[]>([{ address: initialAddress, amountHuman: initialAmount }]);
 
-  // Keep round in state as RoundKey only; normalize numeric initialRound
   const [round, setRound] = useState<RoundKey>(
     typeof initialRound === "number" ? INDEX_TO_ROUND[initialRound] ?? "private" : initialRound
   );
@@ -79,11 +75,9 @@ export default function Whitelist({
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
-    // If initialRound prop changes later, normalize again
     setRound(typeof initialRound === "number" ? INDEX_TO_ROUND[initialRound] ?? "private" : initialRound);
   }, [initialRound]);
 
-  // --------- styles ----------
   const inputSx = {
     "& .MuiOutlinedInput-root": {
       background: theme.palette.background.paper,
@@ -120,8 +114,7 @@ export default function Whitelist({
     "&:hover": { borderColor: theme.palette.text.primary, background: theme.palette.transparentPaper.main },
   } as const;
 
-  // --------- derived flags ----------
-  const firstRow = rows[0]; // for "Remove" (kept for backward compatibility)
+  const firstRow = rows[0];
   const canSubmitRemove =
     !!account &&
     !!firstRow?.address?.trim() &&
@@ -131,7 +124,6 @@ export default function Whitelist({
 
   const canSubmitAdd = useMemo(() => {
     if (!account || disabled || busy) return false;
-    // At least one valid (address + positive number) row
     return rows.some(
       (r) =>
         isAddressLike((r.address ?? "").trim()) &&
@@ -140,7 +132,6 @@ export default function Whitelist({
     );
   }, [account, disabled, busy, rows]);
 
-  // --------- handlers ----------
   const handleAddRow = () => {
     setRows((prev) => [...prev, { address: "", amountHuman: "" }]);
   };
@@ -149,7 +140,7 @@ export default function Whitelist({
     setRows((prev) => {
       const next = [...prev];
       const current = next[i];
-      if (!current) return prev; // index guard
+      if (!current) return prev;
   
       next[i] = {
         address: patch.address ?? current.address,
@@ -171,9 +162,7 @@ export default function Whitelist({
     }
     try {
       setBusy(true);
-      // one tx (unless it needs chunking in utils)
       const txHashes = await addWhitelistRowsSameRoundTx(account, round, rows, {
-        // chunkSize: 200, // uncomment to force chunking if you expect very large batches
         dedupe: true,
       });
 
@@ -182,7 +171,6 @@ export default function Whitelist({
           ? "Whitelist updated (1 transaction)."
           : `Whitelist updated (${txHashes.length} transactions).`
       );
-      // optional: notify for the first address (to keep your existing callback contract)
       const firstAddr = rows.find((r) => isAddressLike((r.address ?? "").trim()))?.address?.trim();
       if (firstAddr) onAdded?.(firstAddr as `0x${string}`);
     } catch (e) {
@@ -262,7 +250,6 @@ export default function Whitelist({
           </Button>
         </Stack>
 
-        {/* Dynamic rows */}
         <Stack gap={2}>
           {rows.map((row, i) => (
             <Stack key={i} direction={{ xs: "column", md: "row" }} gap={2}>
@@ -289,7 +276,6 @@ export default function Whitelist({
                 type="number"
               />
 
-              {/* Add button on the first row; Remove button on additional rows */}
               {i === 0 ? (
                 <Button
                   fullWidth
@@ -323,7 +309,6 @@ export default function Whitelist({
           ))}
         </Stack>
 
-        {/* Round selector (RoundKey only) */}
         <FormControl fullWidth disabled={disabled || busy}>
           <InputLabel id="whitelist-round-label" shrink sx={{ color: theme.palette.common.white }}>
             Whitelist Round
@@ -351,7 +336,6 @@ export default function Whitelist({
           </Typography>
         </FormControl>
 
-        {/* Actions */}
         <Stack direction={{ xs: "column", md: "row" }} gap={2}>
           <Button
             fullWidth

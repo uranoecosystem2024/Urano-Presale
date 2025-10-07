@@ -1,4 +1,3 @@
-// hooks/usePresaleCard.ts
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -16,13 +15,9 @@ type PresaleCardState = {
 };
 
 type UsePresaleCardDataOpts = {
-  priceFractionDigits?: number; // default 5 to match "$0.03000"
+  priceFractionDigits?: number;
 };
 
-/**
- * Hook that does ALL data fetching/formatting for the PresaleCard.
- * Component stays presentational.
- */
 export function usePresaleCardData({ priceFractionDigits = 5 }: UsePresaleCardDataOpts = {}): PresaleCardState {
   const [state, setState] = useState<PresaleCardState>({
     loading: true,
@@ -34,7 +29,6 @@ export function usePresaleCardData({ priceFractionDigits = 5 }: UsePresaleCardDa
     info: null,
   });
 
-  // keep deps explicit & stable
   const deps = useMemo(() => ({ priceFractionDigits }), [priceFractionDigits]);
 
   useEffect(() => {
@@ -80,7 +74,7 @@ export function usePresaleCardData({ priceFractionDigits = 5 }: UsePresaleCardDa
       }
     };
 
-    void run(); // satisfy no-floating-promises
+    void run();
 
     return () => {
       cancelled = true;

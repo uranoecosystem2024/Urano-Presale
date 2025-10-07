@@ -1,4 +1,3 @@
-// /utils/admin/institutionalAccess.ts
 import {
   getContract,
   readContract,
@@ -21,12 +20,6 @@ const presale = getContract({
   abi: presaleAbi,
 });
 
-/**
- * ABI tuple returned by getInstitutionalRoundInfo:
- * isActive_, tokenPrice_, minPurchase_, totalRaised_, startTime_, endTime_,
- * totalTokensSold_, maxTokensToSell_, isPublic_, vestingEndTime_,
- * cliffPeriodMonths_, vestingDurationMonths_, tgeUnlockPercentage_
- */
 type InstitutionalInfoTuple = readonly [
   boolean,
   bigint,
@@ -36,24 +29,22 @@ type InstitutionalInfoTuple = readonly [
   bigint,
   bigint,
   bigint,
-  boolean, // isPublic_ (index 8)
+  boolean,
   bigint,
   bigint,
   bigint,
   bigint
 ];
 
-/** Returns the current "public" flag for the Institutional round. */
 export async function readInstitutionalPublic(): Promise<boolean> {
   const info = (await readContract({
     contract: presale,
     method: "getInstitutionalRoundInfo",
   })) as InstitutionalInfoTuple;
 
-  return info[8]; // isPublic_
+  return info[8];
 }
 
-/** Cached role ids to avoid repeated reads. */
 let cachedDefaultAdminRole: `0x${string}` | null = null;
 let cachedInstitutionalManagerRole: `0x${string}` | null = null;
 
@@ -77,10 +68,6 @@ async function getInstitutionalManagerRole(): Promise<`0x${string}`> {
   return role;
 }
 
-/**
- * Admin-only: can the connected account toggle Institutional round "public"?
- * We allow either DEFAULT_ADMIN_ROLE or INSTITUTIONAL_MANAGER_ROLE.
- */
 export async function canEditInstitutionalPublic(
   account?: Account
 ): Promise<boolean> {
@@ -108,7 +95,6 @@ export async function canEditInstitutionalPublic(
   return isAdmin || isManager;
 }
 
-/** Sets the Institutional round public flag (requires proper role). */
 export async function setInstitutionalPublic(
   account: Account,
   next: boolean

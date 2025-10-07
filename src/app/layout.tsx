@@ -22,7 +22,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en">
       <body className={hostGrotesk.className}>
         <Providers>
-          {/* Wrapper establishes the containing block for the absolute gradient */}
           <Box component="main" sx={{ position: "relative", minHeight: "100dvh" }}>
             <Container
               maxWidth="xl"
@@ -36,10 +35,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             <BottomGradient />
             <AnimatedSVGPreloader
               scale={0.6}
-              textSrc="/urano-text.svg"     // ensure this is in /public
-              textScale={0.4}               // optional; defaults to same as logo
-              textGapPx={20}                // optional spacing
-              textFadeMs={800}              // optional fade speed for the text
+              textSrc="/urano-text.svg"
+              textScale={0.4}
+              textGapPx={20}
+              textFadeMs={800}
             />
           </Box>
         </Providers>

@@ -1,4 +1,3 @@
-// utils/kyc.ts
 export type KycInfo = {
   verified: boolean;
   crypto_wallet_address: `0x${string}` | null;
@@ -16,13 +15,11 @@ export async function fetchKycInfo(address: `0x${string}`): Promise<KycInfo> {
   };
 }
 
-// Backwards-compat wrapper (if other code still calls this)
 export async function fetchKycStatus(address: `0x${string}`): Promise<boolean> {
   const { verified } = await fetchKycInfo(address);
   return verified;
 }
 
-// Convenience: check for mismatch
 export async function fetchKycAndCheckMismatch(
   connected: `0x${string}`
 ): Promise<{ verified: boolean; personaWallet: `0x${string}` | null; mismatch: boolean }> {

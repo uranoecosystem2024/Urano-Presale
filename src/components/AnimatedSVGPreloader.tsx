@@ -4,17 +4,17 @@ import { useEffect, useRef, useState } from "react";
 import { Box } from "@mui/material";
 
 type Props = {
-    src?: string;            // logo svg under /public
-    textSrc?: string;        // text svg under /public
-    showMs?: number;         // minimum visible time (ms)
-    strokeWidth?: number;    // drawing stroke width
-    pathDuration?: number;   // ms per path
-    stagger?: number;        // ms between paths
-    fillFadeMs?: number;     // ms for logo fill fade-in
-    scale?: number;          // scale for logo (1 = 100%)
-    textScale?: number;      // scale for text (defaults to scale)
-    textGapPx?: number;      // gap between logo and text
-    textFadeMs?: number;     // fade-in duration for text
+    src?: string;
+    textSrc?: string;
+    showMs?: number;
+    strokeWidth?: number;
+    pathDuration?: number;
+    stagger?: number;
+    fillFadeMs?: number;
+    scale?: number;
+    textScale?: number;
+    textGapPx?: number;
+    textFadeMs?: number;
 };
 
 export default function AnimatedSVGPreloader({
@@ -40,12 +40,11 @@ export default function AnimatedSVGPreloader({
         const run = async () => {
             const startedAt = performance.now();
             try {
-                // fetch logo + text concurrently
                 const [logoMarkup, textMarkup] = await Promise.all([
                     fetch(src, { cache: "force-cache", signal: abort.signal }).then((r) => r.text()),
                     fetch(textSrc, { cache: "force-cache", signal: abort.signal })
                         .then((r) => r.text())
-                        .catch(() => null), // text is optional; don't fail the preloader
+                        .catch(() => null),
                 ]);
                 if (!active) return;
 
@@ -56,7 +55,6 @@ export default function AnimatedSVGPreloader({
                 host.style.flexDirection = "column";
                 host.style.alignItems = "center";
 
-                // inject & prep logo (draw layer + final layer)
                 const prep = injectAndPrepareLogo(host, logoMarkup, strokeWidth, scale);
                 if (!prep) {
                     await waitRemaining(startedAt, showMs);
@@ -65,7 +63,6 @@ export default function AnimatedSVGPreloader({
                 }
                 const { finalPaths, drawPaths, lengths } = prep;
 
-                // inject text under the logo and fade it in
                 let textEl: SVGSVGElement | null = null;
                 if (textMarkup) {
                     const el = createSvgFromMarkup(textMarkup);
@@ -79,7 +76,6 @@ export default function AnimatedSVGPreloader({
                         el.style.height = "auto";
                         el.style.marginTop = `${Math.max(0, textGapPx)}px`;
                         el.style.opacity = "0";
-                        // hard-center even if host styles change later
                         el.style.marginLeft = "auto";
                         el.style.marginRight = "auto";
                         host.appendChild(el);
@@ -95,15 +91,12 @@ export default function AnimatedSVGPreloader({
 
                 await fadeFillsIn(finalPaths, fillFadeMs, abort.signal);
 
-                // remove the stroke clones
                 for (const p of drawPaths) p.remove();
 
-                // --- now just fade the already-laid-out text in (no layout shift) ---
                 if (textEl) {
                     await fadeElementOpacity(textEl, textFadeMs ?? fillFadeMs, abort.signal);
                 }
 
-                // honor the minimum display time
                 await waitRemaining(startedAt, showMs);
                 if (active) setVisible(false);
             } catch {
@@ -112,7 +105,7 @@ export default function AnimatedSVGPreloader({
             }
         };
 
-        void run(); // no-floating-promises: explicitly ignored
+        void run();
 
         return () => {
             active = false;
@@ -152,13 +145,11 @@ export default function AnimatedSVGPreloader({
     );
 }
 
-/* ---------------- internals ---------------- */
-
 type LogoPrep = {
     finalPaths: SVGPathElement[];
     drawPaths: SVGPathElement[];
     lengths: number[];
-    svgWidthCss: string; // the CSS width we used (for consistency if needed)
+    svgWidthCss: string;
 };
 
 function injectAndPrepareLogo(
@@ -170,7 +161,6 @@ function injectAndPrepareLogo(
     const svg = createSvgFromMarkup(svgMarkup);
     if (!svg) return null;
 
-    // quality & sizing (scaled)
     svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
     svg.setAttribute("shape-rendering", "geometricPrecision");
     svg.style.display = "block";
@@ -180,11 +170,9 @@ function injectAndPrepareLogo(
     svg.style.width = widthCss;
     svg.style.height = "auto";
 
-    // originals (final filled logo), start invisible
     const finalPaths = Array.from(svg.querySelectorAll<SVGPathElement>("path"));
     for (const p of finalPaths) (p as SVGElement).style.fillOpacity = "0";
 
-    // clones for drawing (stroke-only), placed AFTER originals so they render on top
     const drawPaths: SVGPathElement[] = [];
     const lengths: number[] = [];
     for (const original of finalPaths) {
@@ -215,7 +203,6 @@ function injectAndPrepareLogo(
 }
 
 function computeScaledWidth(scale: number): { px: number; vw: number } {
-    // These match your previous baseline: min(360px, 60vw) * scale
     const basePx = 360;
     const baseVw = 60;
     return { px: Math.round(basePx * scale), vw: baseVw * scale };

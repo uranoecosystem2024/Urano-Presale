@@ -1,4 +1,3 @@
-// utils/admin/vesting.ts
 import {
   getContract,
   readContract,
@@ -12,19 +11,19 @@ import { sepolia } from "thirdweb/chains";
 import { presaleAbi } from "@/lib/abi/presale";
 
 type RoundCoreTuple = readonly [
-  isActive: boolean,   // 0
-  tokenPrice: bigint,  // 1
-  minPurchase: bigint, // 2
-  totalRaised: bigint, // 3
-  startTime: bigint,   // 4
-  endTime: bigint,     // 5  <-- sale end (important for TGE check)
-  totalTokensSold: bigint, // 6
-  maxTokensToSell: bigint, // 7
-  isPublic: boolean,       // 8
-  vestingEndTime: bigint,  // 9
-  cliffPeriodMonths: bigint, // 10
-  vestingDurationMonths: bigint, // 11
-  tgeUnlockPercentage: bigint // 12
+  isActive: boolean,
+  tokenPrice: bigint,
+  minPurchase: bigint,
+  totalRaised: bigint,
+  startTime: bigint,
+  endTime: bigint,
+  totalTokensSold: bigint,
+  maxTokensToSell: bigint,
+  isPublic: boolean,
+  vestingEndTime: bigint,
+  cliffPeriodMonths: bigint,
+  vestingDurationMonths: bigint,
+  tgeUnlockPercentage: bigint
 ];
 
 export async function readEarliestAllowedTgeSec(): Promise<bigint> {
@@ -36,27 +35,16 @@ export async function readEarliestAllowedTgeSec(): Promise<bigint> {
     readRoundInfoByKey("community"),
   ]) as RoundCoreTuple[];
 
-  // pick the maximum non-zero endTime
   let maxEnd = 0n;
   for (const info of infos) {
     const end = info[5] ?? 0n;
     if (end > maxEnd) maxEnd = end;
   }
-  return maxEnd; // 0n means no constraint from sale windows
+  return maxEnd;
 }
 
-
-/**
- * All rounds supported by the new ABI.
- */
 export type RoundKey = "strategic" | "seed" | "private" | "institutional" | "community";
 
-/**
- * Map your UI keys to the Solidity enum indices.
- * ⚠️ Confirm these with your Solidity enum order.
- * Common order inferred from ABI helpers:
- *   0=Seed, 1=Private, 2=Institutional, 3=Strategic, 4=Community
- */
 export const ROUND_ENUM_INDEX: Record<RoundKey, number> = {
   strategic: 0,
   seed: 1,
@@ -67,11 +55,9 @@ export const ROUND_ENUM_INDEX: Record<RoundKey, number> = {
 
 const ALL_ROUND_KEYS: RoundKey[] = ["strategic", "seed", "private", "institutional", "community"];
 
-/** Address of the Presale contract (must be defined in your .env) */
 const PRESALE_ADDR = process.env
   .NEXT_PUBLIC_PRESALE_SMART_CONTRACT_ADDRESS as `0x${string}`;
 
-/** Small buffer added to “now” when validating future times */
 export const DEFAULT_LEEWAY_SEC = 120n;
 
 const presale = getContract({
@@ -81,40 +67,27 @@ const presale = getContract({
   abi: presaleAbi,
 });
 
-/**
- * Tuple returned by get*RoundInfo() in the new ABI:
- *
- * isActive_, tokenPrice_, minPurchase_, totalRaised_, startTime_, endTime_,
- * totalTokensSold_, maxTokensToSell_, isPublic_, vestingEndTime_,
- * cliffPeriodMonths_, vestingDurationMonths_, tgeUnlockPercentage_
- */
 type RoundInfoTuple = readonly [
-  boolean, // 0 isActive_
-  bigint,  // 1 tokenPrice_
-  bigint,  // 2 minPurchase_
-  bigint,  // 3 totalRaised_
-  bigint,  // 4 startTime_
-  bigint,  // 5 endTime_
-  bigint,  // 6 totalTokensSold_
-  bigint,  // 7 maxTokensToSell_
-  boolean, // 8 isPublic_
-  bigint,  // 9 vestingEndTime_
-  bigint,  // 10 cliffPeriodMonths_
-  bigint,  // 11 vestingDurationMonths_
-  bigint   // 12 tgeUnlockPercentage_
+  boolean,
+  bigint,
+  bigint,
+  bigint,
+  bigint,
+  bigint,
+  bigint,
+  bigint,
+  boolean,
+  bigint,
+  bigint,
+  bigint,
+  bigint
 ];
 
-/* ----------------------------- */
-/* Reads                         */
-/* ----------------------------- */
-
-/** True if vesting has been started already */
 export async function readVestingStarted(): Promise<boolean> {
   const started = await readContract({ contract: presale, method: "vestingStarted" });
   return Boolean(started);
 }
 
-/** Read the global TGE time (seconds since epoch) */
 export async function readTgeTime(): Promise<bigint> {
   const tge = await readContract({ contract: presale, method: "tgeTime" });
   return BigInt(tge);
@@ -139,7 +112,6 @@ async function readRoundInfoByKey(key: RoundKey): Promise<RoundInfoTuple> {
   }
 }
 
-/** Read per-round vesting end times (seconds). Defaults to all rounds. */
 export async function readVestingEndTimes(
   keys: RoundKey[] = ALL_ROUND_KEYS
 ): Promise<Record<RoundKey, bigint>> {
@@ -157,14 +129,12 @@ export async function readVestingEndTimes(
       throw new Error(`Failed to load round info for key "${key}"`);
     }
 
-    // vestingEndTime_ is index 9 in the new ABI
     result[key] = info[9];
   }
 
   return result;
 }
 
-/** Convenience: read overall vesting status */
 export async function readVestingStatus(): Promise<{
   started: boolean;
   tgeTime: bigint;
@@ -178,16 +148,6 @@ export async function readVestingStatus(): Promise<{
   return { started, tgeTime, ends };
 }
 
-/* ----------------------------- */
-/* Helpers                       */
-/* ----------------------------- */
-
-/**
- * Convert a JS Date / dayjs / number-like input to unix seconds (bigint).
- * Accepts: Date, number (ms or s), string (ms or s), or Dayjs-like { valueOf(): number }.
- *
- * Heuristic: values < 1e12 are treated as seconds, otherwise milliseconds.
- */
 export function toUnixSecondsBigint(
   input: Date | number | string | { valueOf: () => number }
 ): bigint {
@@ -197,7 +157,6 @@ export function toUnixSecondsBigint(
   return BigInt(seconds);
 }
 
-/** Ensure a timestamp is strictly in the future by at least LEEWAY seconds. */
 export function ensureFutureTime(
   tsSec: bigint,
   opts?: { LEEWAY_SEC?: bigint }
@@ -207,22 +166,14 @@ export function ensureFutureTime(
   return tsSec <= now + LEEWAY ? now + LEEWAY : tsSec;
 }
 
-/* ----------------------------- */
-/* Writes                        */
-/* ----------------------------- */
-
-/**
- * Start vesting (sets the global TGE time).
- * Contract begins vesting at TGE on tx confirmation.
- */
 export async function startVestingTx(
   account: Account,
   tgeTimeSec: bigint
 ): Promise<`0x${string}`> {
-  const minAllowed = await readEarliestAllowedTgeSec(); // <= key line
+  const minAllowed = await readEarliestAllowedTgeSec();
   const base = tgeTimeSec <= minAllowed ? (minAllowed + 1n) : tgeTimeSec;
 
-  const safeTge = ensureFutureTime(base); // also respects default LEEWAY
+  const safeTge = ensureFutureTime(base);
   const tx = prepareContractCall({
     contract: presale,
     method: "startVesting",
@@ -233,7 +184,6 @@ export async function startVestingTx(
   return sent.transactionHash;
 }
 
-/** Convenience: start vesting with Date/dayjs-like input */
 export async function startVestingFromDateTx(
   account: Account,
   tge: Date | { valueOf: () => number },
@@ -243,17 +193,13 @@ export async function startVestingFromDateTx(
   return startVestingTx(account, tgeSec);
 }
 
-/**
- * Update per-round vesting parameters (months and TGE unlock %).
- * This is how you configure vesting schedules in the new ABI.
- */
 export async function updateRoundVestingParametersTx(
   account: Account,
   key: RoundKey,
   params: {
-    cliffPeriodMonths: bigint;          // e.g., 6n
-    vestingDurationMonths: bigint;      // e.g., 18n
-    tgeUnlockPercentage: bigint;        // e.g., 100n == 100%? (check contract units)
+    cliffPeriodMonths: bigint;
+    vestingDurationMonths: bigint;
+    tgeUnlockPercentage: bigint;
   }
 ): Promise<`0x${string}`> {
   const idx = ROUND_ENUM_INDEX[key];

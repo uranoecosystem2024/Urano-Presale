@@ -1,4 +1,3 @@
-// utils/admin/roundMaxTokens.ts
 import {
   getContract,
   readContract,
@@ -11,10 +10,8 @@ import { client } from "@/lib/thirdwebClient";
 import { sepolia } from "thirdweb/chains";
 import { presaleAbi } from "@/lib/abi/presale";
 
-/** Contract rounds supported by the ABI (enum RoundType { Seed, Private, Institutional, Strategic, Community }) */
 export type RoundKey = "strategic" | "seed" | "private" | "institutional" | "community";
 
-/** ⚠️ Ensure these match your Solidity enum order */
 export const ROUND_ENUM_INDEX: Record<RoundKey, number> = {
   strategic: 0,
   seed: 1,
@@ -33,7 +30,6 @@ const presale = getContract({
   abi: presaleAbi,
 });
 
-// --- Minimal ERC20 ABI for decimals() ---
 const ERC20_ABI = [
   {
     inputs: [],
@@ -44,7 +40,6 @@ const ERC20_ABI = [
   },
 ] as const;
 
-/** Ensure RoundKey -> enum index exists */
 function ensureEnumMapping(key: RoundKey): number {
   const idx = ROUND_ENUM_INDEX[key];
   if (idx === undefined) {
@@ -53,11 +48,6 @@ function ensureEnumMapping(key: RoundKey): number {
   return idx;
 }
 
-// -----------------------------
-// Conversions (human <-> raw)
-// -----------------------------
-
-/** Convert a human string (e.g. "123.456") to raw on-chain units using token decimals. */
 export function toUnits(amount: string, decimals: number): bigint {
   const cleaned = (amount ?? "").trim();
   if (!cleaned) return 0n;
@@ -76,7 +66,6 @@ export function toUnits(amount: string, decimals: number): bigint {
   return intVal + fracVal;
 }
 
-/** Convert raw on-chain units to a human string (no trailing zeros). */
 export function fromUnits(amount: bigint, decimals: number): string {
   const base = 10n ** BigInt(decimals);
   const intPart = amount / base;
@@ -88,11 +77,6 @@ export function fromUnits(amount: bigint, decimals: number): string {
   return `${intPart.toString()}.${fracStr}`;
 }
 
-// -----------------------------
-// Token decimals
-// -----------------------------
-
-/** Reads the presale token address and then its decimals(); falls back to 18 if anything fails. */
 export async function getTokenDecimals(): Promise<number> {
   try {
     const tokenAddr = (await readContract({
@@ -118,26 +102,6 @@ export async function getTokenDecimals(): Promise<number> {
   }
 }
 
-// -----------------------------
-// Reads
-// -----------------------------
-
-/**
- * Tuple shape returned by get*RoundInfo() in your ABI (13 outputs):
- * 0  isActive_ (bool)
- * 1  tokenPrice_ (uint256)
- * 2  minPurchase_ (uint256)
- * 3  totalRaised_ (uint256)
- * 4  startTime_ (uint256)
- * 5  endTime_ (uint256)
- * 6  totalTokensSold_ (uint256)
- * 7  maxTokensToSell_ (uint256)
- * 8  isPublic_ (bool)
- * 9  vestingEndTime_ (uint256)
- * 10 cliffPeriodMonths_ (uint256)
- * 11 vestingDurationMonths_ (uint256)
- * 12 tgeUnlockPercentage_ (uint256)
- */
 type RoundInfoTuple = readonly [
   boolean,
   bigint,
@@ -154,7 +118,6 @@ type RoundInfoTuple = readonly [
   bigint
 ];
 
-/** Fetch the per-round info using the dedicated getters in the ABI */
 async function readRoundInfoByKey(key: RoundKey): Promise<RoundInfoTuple> {
   switch (key) {
     case "seed":
@@ -185,13 +148,11 @@ async function readRoundInfoByKey(key: RoundKey): Promise<RoundInfoTuple> {
   }
 }
 
-/** Read the current maxTokensToSell for a given round (raw on-chain units). */
 export async function readRoundMaxTokensRaw(key: RoundKey): Promise<bigint> {
   const info = await readRoundInfoByKey(key);
-  return info[7]; // maxTokensToSell_
+  return info[7];
 }
 
-/** Read the current maxTokensToSell for a given round, returned in human units (string). */
 export async function readRoundMaxTokensHuman(key: RoundKey): Promise<string> {
   const [decimals, raw] = await Promise.all([
     getTokenDecimals(),
@@ -200,14 +161,6 @@ export async function readRoundMaxTokensHuman(key: RoundKey): Promise<string> {
   return fromUnits(raw, decimals);
 }
 
-// -----------------------------
-// Write: setRoundMaxTokens
-// -----------------------------
-
-/**
- * Send `setRoundMaxTokens(round, maxTokensRaw)` using raw on-chain units.
- * Returns the transaction hash.
- */
 export async function setRoundMaxTokensRawTx(
   account: Account,
   key: RoundKey,
@@ -224,10 +177,6 @@ export async function setRoundMaxTokensRawTx(
   return sent.transactionHash;
 }
 
-/**
- * Convenience: accepts a human-readable amount (e.g. "1000000") and handles decimals conversion.
- * Returns the transaction hash.
- */
 export async function setRoundMaxTokensHumanTx(
   account: Account,
   key: RoundKey,
@@ -241,23 +190,19 @@ export async function setRoundMaxTokensHumanTx(
   return setRoundMaxTokensRawTx(account, key, raw);
 }
 
-// --- ADD: sold & remaining readers ------------------------------
-
-/** Raw sold/max/remaining for a round (bigint, on-chain units). */
 export async function readRoundSoldAndRemainingRaw(key: RoundKey): Promise<{
   soldRaw: bigint;
   maxRaw: bigint;
   remainingRaw: bigint;
 }> {
   const info = await readRoundInfoByKey(key);
-  const soldRaw = info[6]; // totalTokensSold_
-  const maxRaw = info[7];  // maxTokensToSell_
+  const soldRaw = info[6];
+  const maxRaw = info[7];
   const rem = maxRaw - soldRaw;
   const remainingRaw = rem > 0n ? rem : 0n;
   return { soldRaw, maxRaw, remainingRaw };
 }
 
-/** Human strings (respect token decimals) for sold/max/remaining. */
 export async function readRoundSoldAndRemainingHuman(key: RoundKey): Promise<{
   sold: string;
   max: string;

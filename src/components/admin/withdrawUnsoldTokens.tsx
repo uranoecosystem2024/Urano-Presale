@@ -54,7 +54,6 @@ export default function WithdrawUnsoldTokens({
   const [busy, setBusy] = useState(false);
 
   const inputSx = {
-    // Input surface + border behavior
     "& .MuiOutlinedInput-root": {
       background: theme.palette.background.paper,
       borderRadius: 2,
@@ -63,30 +62,25 @@ export default function WithdrawUnsoldTokens({
       "&.Mui-focused fieldset": { borderColor: theme.palette.uranoGreen1.main },
     },
 
-    // Placeholder opacity
     "& .MuiInputBase-input::placeholder": { opacity: 0.7 },
 
-    // Label styles
     "& .MuiInputLabel-root": {
       color: theme.palette.common.white,
       "&.Mui-focused": { color: theme.palette.common.white },
       "&.MuiInputLabel-shrink": {
         color: theme.palette.common.white,
-        // Make the floating label look like it cuts the border
-        px: 0.75,                   // horizontal padding for breathing room
-        borderRadius: 0.5,          // soften corners
-        backgroundColor: theme.palette.background.paper, // match input bg
-        lineHeight: 1.2,            // avoids clipping with padding
+        px: 0.75,
+        borderRadius: 0.5,
+        backgroundColor: theme.palette.background.paper,
+        lineHeight: 1.2,
       },
       "&.Mui-disabled": { color: theme.palette.text.disabled },
     },
 
-    // Let the notch fit the padded label
     "& .MuiOutlinedInput-notchedOutline legend": {
-      maxWidth: "60px", // override MUI's tiny animation width
+      maxWidth: "60px",
     },
 
-    // (Optional) add a little inner padding to the legend’s span for perfect notch sizing
     "& .MuiOutlinedInput-notchedOutline legend > span": {
       paddingLeft: 6,
       paddingRight: 6,
@@ -108,7 +102,6 @@ export default function WithdrawUnsoldTokens({
     },
   } as const;
 
-  // Load treasury, token decimals, and current presale token balance
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
@@ -176,7 +169,6 @@ export default function WithdrawUnsoldTokens({
     try {
       setBusy(true);
 
-      // Final pre-check using raw values (defensive; UI already disabled if it exceeds)
       try {
         const dec = decimals ?? (await getTokenDecimals());
         const rawBal = balanceRaw ?? (await readContractTokenBalanceRaw());
@@ -187,14 +179,13 @@ export default function WithdrawUnsoldTokens({
           return;
         }
       } catch {
-        // Let the contract enforce if reads fail
       }
 
       const txHash = await withdrawUnsoldTokensHumanTx(account, amountHuman.trim());
       toast.success("Withdrawal confirmed.");
 
       await refreshBalance();
-      setAmountHuman(""); // clear input after success
+      setAmountHuman("");
       onWithdrawSuccess?.({ amount: amountHuman.trim(), txHash });
     } catch (e) {
       console.error(e);
@@ -219,7 +210,6 @@ export default function WithdrawUnsoldTokens({
         </Typography>
       </Stack>
 
-      {/* Read-only info */}
       <Stack gap={2} direction={{ xs: "column", md: "row" }}>
         <TextField
           fullWidth
@@ -239,7 +229,6 @@ export default function WithdrawUnsoldTokens({
         />
       </Stack>
 
-      {/* Action row */}
       <Stack direction={{ xs: "column", md: "row" }} gap={2} alignItems="stretch">
         <TextField
           fullWidth

@@ -20,9 +20,9 @@ import { client } from "@/lib/thirdwebClient";
 import { fetchKycAndCheckMismatch } from "@/utils/kyc";
 
 type Progress = {
-  step1: boolean; // Email
-  step2: boolean; // KYC
-  step3: boolean; // Wallet connected (UI state)
+  step1: boolean;
+  step2: boolean;
+  step3: boolean;
 };
 
 const STORAGE_KEY = "registrationProgress:v1";
@@ -59,7 +59,6 @@ const Registration = () => {
     step3: false,
   });
 
-  // Load progress
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -69,7 +68,6 @@ const Registration = () => {
     }
   }, []);
 
-  // Persist progress
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
@@ -78,14 +76,12 @@ const Registration = () => {
     }
   }, [progress]);
 
-  // Keep step3 (UI state) in sync with live connection
   useEffect(() => {
     if (progress.step3 !== connected) {
       setProgress((p) => ({ ...p, step3: connected }));
     }
   }, [connected, progress.step3]);
 
-  // Reset KYC progress if wallet disconnects or changes
   useEffect(() => {
     setProgress((p) => (p.step2 ? { ...p, step2: false } : p));
   }, [address]);
@@ -98,9 +94,6 @@ const Registration = () => {
     }
   }, [progress]);
 
-  // Locking rules:
-  // - Step 3 (Connect wallet) requires Step 1 (email) only.
-  // - Step 2 (KYC) requires Step 1 + CURRENT WALLET CONNECTED ON SEPOLIA.
   const locked = useMemo(
     () => ({
       step1: false,
@@ -130,7 +123,6 @@ const Registration = () => {
     }
   };
 
-  // Hard guard: if connected but on the wrong chain, try to switch immediately.
   useEffect(() => {
     if (!connected || !activeChain) return;
 
@@ -155,7 +147,6 @@ const Registration = () => {
       return;
     }
 
-    // Already connected → if wrong chain, switch; else open wallet details
     if (connected) {
       if (!onSepolia) {
         const ok = await ensureSepoliaOrPrompt();
@@ -168,9 +159,7 @@ const Registration = () => {
       return;
     }
 
-    // Not connected → open connect modal pinned to Sepolia
     await connect({ client, chain: sepolia });
-    // step3 UI syncs via the effect above
   };
 
   const handleClickStep2 = async () => {
@@ -195,7 +184,6 @@ const Registration = () => {
       }
     }
 
-    // Pre-check: wallet/Persona consistency and on-chain verification
     try {
       const { verified, personaWallet, mismatch } = await fetchKycAndCheckMismatch(address!);
 
@@ -219,7 +207,6 @@ const Registration = () => {
         return;
       }
     } catch {
-      // proceed to Persona flow even if status check fails
     }
 
     setOpenStep2(true);

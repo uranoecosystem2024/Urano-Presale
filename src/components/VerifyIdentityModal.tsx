@@ -21,7 +21,6 @@ interface VerifyIdentityModalProps {
   open: boolean;
   onClose: () => void;
   onComplete: () => void;
-  /** Connected wallet address to bind KYC to (used as Persona referenceId). */
   walletAddress?: `0x${string}`;
 }
 
@@ -51,7 +50,6 @@ const VerifyIdentityModal: React.FC<VerifyIdentityModalProps> = ({ open, onClose
   const [busy, setBusy] = useState(false);
   const [errorText, setErrorText] = useState<string | null>(null);
 
-  // Bind Persona session to the connected wallet address
   const referenceId = useMemo(() => walletAddress ?? undefined, [walletAddress]);
 
   useEffect(() => {

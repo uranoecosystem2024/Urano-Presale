@@ -5,14 +5,12 @@ import { Box } from "@mui/material";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
-/* ---------------- Sphere texture (exact requested gradient) ---------------- */
 function makeSphereGradient(): THREE.CanvasTexture {
     const c = document.createElement("canvas");
     c.width = 1024;
     c.height = 512;
     const ctx = c.getContext("2d");
     if (!ctx) throw new Error("2D context not available");
-    // 90deg = left -> right
     const g = ctx.createLinearGradient(0, 0, c.width, 0);
     g.addColorStop(0, "#5EBBC3");
     g.addColorStop(1, "#6DE7C2");
@@ -24,7 +22,6 @@ function makeSphereGradient(): THREE.CanvasTexture {
     return tex;
 }
 
-/* ---------------- Glyph textures ---------------- */
 const glyphCache = new Map<string, THREE.CanvasTexture>();
 
 function makeGlyph(char: string, px = 1536): THREE.CanvasTexture {
@@ -56,7 +53,6 @@ function makeGlyph(char: string, px = 1536): THREE.CanvasTexture {
     return tex;
 }
 
-/* ---------------- 3D primitives ---------------- */
 const Sphere: React.FC<{ radius: number }> = ({ radius }) => {
     const tex = React.useMemo(() => makeSphereGradient(), []);
     const { gl } = useThree();
@@ -67,7 +63,6 @@ const Sphere: React.FC<{ radius: number }> = ({ radius }) => {
     return (
         <mesh castShadow receiveShadow>
             <sphereGeometry args={[radius, 64, 64]} />
-            {/* Keep lighting for 3D feel; the map carries the exact gradient */}
             <meshPhysicalMaterial
                 map={tex}
                 color="#ffffff"
@@ -80,9 +75,8 @@ const Sphere: React.FC<{ radius: number }> = ({ radius }) => {
     );
 };
 
-/** Characters around the equator; no solid torus, just letters. */
 const RingLetters: React.FC<{
-    radius: number;          // distance of letters from center
+    radius: number;
     speed: number;
     reduceMotion: boolean;
     text?: string;
@@ -90,9 +84,8 @@ const RingLetters: React.FC<{
     const group = React.useRef<THREE.Group>(null);
     const { gl } = useThree();
 
-    // Larger letters so they're clearer next to the bigger sphere
-    const charW = 0.56;   // world units
-    const charH = 1.04;   // world units
+    const charW = 0.56;
+    const charH = 1.04;
 
     const circumference = 2 * Math.PI * radius;
     const count = Math.max(24, Math.floor(circumference / charW));
@@ -101,7 +94,6 @@ const RingLetters: React.FC<{
     const chars = React.useMemo(() => {
         let s = "";
         while (s.length < count) s += base;
-        // Reverse so at the front the text reads left->right
         return s.slice(0, count).split("").reverse();
     }, [base, count]);
 
@@ -119,10 +111,10 @@ const RingLetters: React.FC<{
     return (
         <group ref={group}>
             {chars.map((ch, i) => {
-                const theta = (i / count) * Math.PI * 2; // negative => front reads L->R
+                const theta = (i / count) * Math.PI * 2;
                 const x = radius * Math.cos(theta);
                 const z = radius * Math.sin(theta);
-                const rotY = Math.atan2(x, z); // face outward
+                const rotY = Math.atan2(x, z);
 
                 return (
                     <mesh key={`${ch}-${i}`} position={[x, 0, z]} rotation={[0, rotY, 0]}>
@@ -144,9 +136,8 @@ const RingLetters: React.FC<{
 };
 
 const Scene: React.FC<{ reduceMotion: boolean }> = ({ reduceMotion }) => {
-    // Bigger sphere + belt closer
-    const sphereRadius = 1.6;  // was 1.25
-    const beltRadius = 1.74; // closer to sphere (≈ 0.12 gap)
+    const sphereRadius = 1.6;
+    const beltRadius = 1.74;
 
     const lightRef = React.useRef<THREE.DirectionalLight>(null);
     React.useEffect(() => {
@@ -160,7 +151,6 @@ const Scene: React.FC<{ reduceMotion: boolean }> = ({ reduceMotion }) => {
             <ambientLight intensity={0.45} />
             <directionalLight ref={lightRef} position={[3, 4, 5]} intensity={1} castShadow />
             <Sphere radius={sphereRadius} />
-            {/* strictly horizontal, equatorial text ring */}
             <group rotation={[0, 0, beltTiltZ]}>
                 <RingLetters radius={beltRadius} speed={0.6} reduceMotion={reduceMotion} />
             </group>
@@ -168,7 +158,6 @@ const Scene: React.FC<{ reduceMotion: boolean }> = ({ reduceMotion }) => {
     );
 };
 
-/* ---------------- Preloader overlay (Canvas only) ---------------- */
 const UranoPreloader3D: React.FC = () => {
     const [visible, setVisible] = React.useState(true);
     const [fading, setFading] = React.useState(false);
@@ -182,9 +171,8 @@ const UranoPreloader3D: React.FC = () => {
         return () => m.removeEventListener("change", onChange);
     }, []);
 
-    // >= 10s AND wait for window 'load'
     React.useEffect(() => {
-        const MIN_MS = 10000; // ⬅️ 10 seconds
+        const MIN_MS = 10000;
         const start = performance.now();
 
         let tMin: number | undefined;
@@ -226,7 +214,6 @@ const UranoPreloader3D: React.FC = () => {
         };
     }, []);
 
-    // Lock scroll while visible
     React.useEffect(() => {
         if (!visible) return;
         const prev = document.documentElement.style.overflow;
@@ -255,7 +242,7 @@ const UranoPreloader3D: React.FC = () => {
         >
             <Box
                 sx={{
-                    width: { xs: 320, sm: 420, md: 520 }, // a bit larger container to fit bigger sphere
+                    width: { xs: 320, sm: 420, md: 520 },
                     height: { xs: 320, sm: 420, md: 520 },
                     position: "relative",
                     filter: "drop-shadow(0 28px 60px rgba(0,0,0,0.25))",
@@ -264,7 +251,7 @@ const UranoPreloader3D: React.FC = () => {
                 <Canvas
                     dpr={[1, 2]}
                     gl={{ antialias: true, alpha: true }}
-                    camera={{ position: [0, 0, 6.2], fov: 45, near: 0.1, far: 100 }} // pull camera back to frame larger scene
+                    camera={{ position: [0, 0, 6.2], fov: 45, near: 0.1, far: 100 }}
                     shadows
                     style={{ position: "absolute", inset: 0 }}
                 >

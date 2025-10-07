@@ -5,13 +5,12 @@ import { type SxProps } from "@mui/material";
 type NotchedPanelProps = {
   title: string;
   children?: React.ReactNode;
-  /** Visual params (tweak to match your design) */
   borderColor?: string;
   strokeWidth?: number;
   borderRadius?: number;
-  tabWidth?: number;     // width of the top-left tab (px)
-  tabHeight?: number;    // height the tab rises above the panel (px)
-  tabSlope?: number;     // the diagonal cut on the tab’s right edge (px)
+  tabWidth?: number;
+  tabHeight?: number;
+  tabSlope?: number;
   sx?: SxProps;
 };
 
@@ -29,7 +28,6 @@ export default function NotchedPanel({
   const ref = React.useRef<HTMLDivElement | null>(null);
   const [size, setSize] = React.useState({ w: 0, h: 0 });
 
-  // Keep the SVG path perfectly in sync with the element’s box
   React.useLayoutEffect(() => {
     if (!ref.current) return;
     const ro = new ResizeObserver(([entry]) => {
@@ -41,30 +39,20 @@ export default function NotchedPanel({
   }, []);
 
   const { w, h } = size;
-  const r = Math.min(borderRadius, 20); // clamp a bit for nicer corners
+  const r = Math.min(borderRadius, 20);
 
-  // We draw one closed path that goes around: bottom → right → top →
-  // tab diagonal → tab top → tab left → down left edge → bottom.
-  // (Top-left of the main rectangle is square on purpose for a crisp join.)
   const d =
     w && h
       ? [
-          // start bottom-left (after radius)
           `M ${r},${h}`,
-          // bottom edge → bottom-right corner
           `L ${w - r},${h}`,
           `A ${r} ${r} 0 0 0 ${w},${h - r}`,
-          // right edge → top-right corner
           `L ${w},${tabHeight + r}`,
           `A ${r} ${r} 0 0 0 ${w - r},${tabHeight}`,
-          // top edge until the notch
           `L ${Math.max(tabWidth - tabSlope, r)},${tabHeight}`,
-          // diagonal up into the tab
           `L ${tabWidth},0`,
-          // across the tab top → top-left outer corner (rounded)
           `L ${r},0`,
           `A ${r} ${r} 0 0 0 0,${r}`,
-          // down the left edge to bottom-left corner
           `L 0,${h - r}`,
           `A ${r} ${r} 0 0 0 ${r},${h}`,
           "Z",
@@ -84,7 +72,6 @@ export default function NotchedPanel({
         minHeight: 220,
       }}
     >
-      {/* Title positioned inside the tab region */}
       <Box
         sx={{
           position: "absolute",
@@ -96,12 +83,10 @@ export default function NotchedPanel({
           alignItems: "center",
           pl: 3,
           pr: 2,
-          // Make the tab’s fill match the panel
           bgcolor: "#0f1011",
-          // visually cut the right edge into a diagonal so the fill matches the outline
           clipPath: `polygon(0 0, 100% 0, calc(100% - ${tabSlope}px) 100%, 0 100%)`,
           borderTopLeftRadius: borderRadius,
-          pointerEvents: "none", // tab is decorative; keeps hover/press simple
+          pointerEvents: "none",
         }}
       >
         <Typography
@@ -112,7 +97,6 @@ export default function NotchedPanel({
         </Typography>
       </Box>
 
-      {/* The single-stroke outline that goes around both panel and tab */}
       <Box
         aria-hidden
         sx={{
@@ -128,7 +112,6 @@ export default function NotchedPanel({
           preserveAspectRatio="none"
           style={{ display: "block" }}
         >
-          {/* Expand the drawing area upward to include the tab */}
           <g transform={`translate(0,0)`}>
             <path
               d={d}
@@ -142,7 +125,6 @@ export default function NotchedPanel({
         </svg>
       </Box>
 
-      {/* your content */}
       <Box sx={{ mt: 1 }}>{children}</Box>
     </Box>
   );

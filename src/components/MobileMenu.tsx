@@ -5,7 +5,6 @@ import Drawer from "@mui/material/Drawer"
 import { useState } from "react"
 import Image from "next/image"
 import { useTheme, type Theme } from '@mui/material/styles';
-// assets
 import { IoMdClose } from "react-icons/io"
 import logo from "@/assets/images/logos/logo-turquoise-1.webp"
 import { PiXLogo, PiTelegramLogoDuotone } from "react-icons/pi";

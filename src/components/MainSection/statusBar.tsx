@@ -1,4 +1,3 @@
-// components/MainSection/statusBar.tsx
 "use client";
 
 import { Stack, Typography, Box } from "@mui/material";
@@ -6,14 +5,12 @@ import { useMemo } from "react";
 import { usePresaleProgress } from "@/hooks/usePresaleProgress";
 import { useTheme } from "@mui/material/styles";
 import { formatCompactDecimalString } from "@/utils/compactDecimal";
-import { formatTokenAmount } from "@/utils/profile/userClaimInfo"; // bigint -> exact decimal string
+import { formatTokenAmount } from "@/utils/profile/userClaimInfo";
 
-// Tile sizing
-const CELL_W = 20;      // tile width (px)
-const CELL_H = 18;      // tile height (px)
-const CELL_GAP_X = 4;   // horizontal gap between tiles (px)
+const CELL_W = 20;
+const CELL_H = 18;
+const CELL_GAP_X = 4;
 
-/** Build a tile as a data-url; pass fill + fillOpacity for the body. */
 function buildTileDataUrl({
   fill = "transparent",
   fillOpacity = "0",
@@ -39,10 +36,8 @@ export default function StatusBar() {
   const { loading, error, data } = usePresaleProgress();
   const theme = useTheme();
 
-  // Adjust to your token decimals
   const TOKEN_DECIMALS = 18;
 
-  // 0..100% for the sold portion width
   const pct: number = useMemo(() => {
     const raw = !loading && data ? Number(data.purchasedPercent) : 0;
     if (!Number.isFinite(raw)) return 0;
@@ -51,7 +46,6 @@ export default function StatusBar() {
 
   const fmtPct = useMemo(() => `${pct.toFixed(2)}%`, [pct]);
 
-  // Format Sold / Max (compact, 2dp; clamp carry on Sold so 19.999..M won't show as 20M)
   const fmtSold = useMemo(() => {
     if (!data) return "—";
     const decStr = formatTokenAmount(data.totalTokensSold, TOKEN_DECIMALS);
@@ -64,11 +58,9 @@ export default function StatusBar() {
     return formatCompactDecimalString(decStr, 2);
   }, [data]);
 
-  // Build the two tile backgrounds (memoized)
   const UNSOLD_TILE_BG = useMemo(
     () =>
       buildTileDataUrl({
-        // faint dark fill (like current), white outline
         fill: "#171717",
         fillOpacity: "0.48",
         stroke: "white",
@@ -80,8 +72,7 @@ export default function StatusBar() {
   const SOLD_TILE_BG = useMemo(
     () =>
       buildTileDataUrl({
-        // solid green fill tile for sold cells; keep same outline for consistency
-        fill: "#5EBBC3", // pick your brand green here (or theme token converted to hex)
+        fill: "#5EBBC3",
         fillOpacity: "1",
         stroke: "white",
         strokeOpacity: "0.31",
@@ -91,7 +82,6 @@ export default function StatusBar() {
 
   return (
     <Stack width="100%" gap={1}>
-      {/* Top row: label + percent */}
       <Stack direction="row" justifyContent="space-between" alignItems="center">
         <Typography variant="subtitle1" sx={{ fontStyle: "italic" }}>
           Status
@@ -101,7 +91,6 @@ export default function StatusBar() {
         </Typography>
       </Stack>
 
-      {/* Progress bar */}
       <Box
         role="progressbar"
         aria-valuenow={Math.round(pct)}
@@ -117,7 +106,6 @@ export default function StatusBar() {
           boxSizing: "border-box",
         }}
       >
-        {/* Bottom layer = UNSOLD: outline tiles repeating across full width */}
         <Box
           sx={{
             position: "absolute",
@@ -132,7 +120,6 @@ export default function StatusBar() {
           }}
         />
 
-        {/* Top layer = SOLD: same tiles but with green fill; clipped to sold width */}
         <Box
           sx={{
             position: "absolute",
@@ -152,7 +139,6 @@ export default function StatusBar() {
         />
       </Box>
 
-      {/* Bottom row: counters */}
       {!loading && !error && data ? (
         <Stack direction="row" justifyContent="space-between">
           <Typography variant="caption" color="text.secondary">
