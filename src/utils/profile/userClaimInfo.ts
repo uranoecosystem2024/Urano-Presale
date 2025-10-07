@@ -7,13 +7,9 @@ import { client } from "@/lib/thirdwebClient";
 import { sepolia } from "thirdweb/chains";
 import { presaleAbi } from "@/lib/abi/presale";
 
-/** Reusable type for this contract’s prepared txs */
 type PresalePreparedTx = PreparedTransaction<typeof presaleAbi>;
 
-/* ============================== Contracts ============================== */
-
-const PRESALE_ADDR = process.env
-  .NEXT_PUBLIC_PRESALE_SMART_CONTRACT_ADDRESS as `0x${string}`;
+const PRESALE_ADDR = process.env.NEXT_PUBLIC_PRESALE_SMART_CONTRACT_ADDRESS as `0x${string}`;
 
 const presale = getContract({
   client,
@@ -22,37 +18,14 @@ const presale = getContract({
   abi: presaleAbi,
 });
 
-/** Minimal ERC20 ABI to read decimals() */
 const ERC20_DECIMALS_ABI = [
-  {
-    inputs: [],
-    name: "decimals",
-    outputs: [{ internalType: "uint8", name: "", type: "uint8" }],
-    stateMutability: "view",
-    type: "function",
-  },
+  { inputs: [], name: "decimals", outputs: [{ internalType: "uint8", name: "", type: "uint8" }], stateMutability: "view", type: "function" },
 ] as const;
 
-/* ============================== Types ============================== */
+type PurchasesTuple = readonly [bigint[], bigint[], bigint[], bigint[]];
+type VestsTuple     = readonly [bigint[], bigint[], bigint[], bigint[]];
 
-type PurchasesTuple = readonly [
-  amounts: bigint[],
-  usdcAmounts: bigint[],
-  timestamps: bigint[],
-  claimed: bigint[]
-];
-
-type VestsTuple = readonly [
-  amounts: bigint[],
-  unlockTimes: bigint[],
-  claimed: bigint[],
-  claimableAmounts: bigint[]
-];
-
-/** Round ids as stored on-chain (enum order) */
 const ROUND_IDS = [0, 1, 2, 3, 4] as const;
-
-/* ============================== Helpers ============================== */
 
 export function formatTokenAmount(amountRaw: bigint, decimals: number): string {
   const base = 10n ** BigInt(decimals);
@@ -65,30 +38,16 @@ export function formatTokenAmount(amountRaw: bigint, decimals: number): string {
 
 async function getTokenDecimals(): Promise<number> {
   try {
-    const tokenAddr = (await readContract({
-      contract: presale,
-      method: "token",
-    })) as `0x${string}`;
-
-    const erc20 = getContract({
-      client,
-      chain: sepolia,
-      address: tokenAddr,
-      abi: ERC20_DECIMALS_ABI,
-    });
-
-    const dec = (await readContract({
-      contract: erc20,
-      method: "decimals",
-    })) as number | bigint;
-
+    const tokenAddr = (await readContract({ contract: presale, method: "token" })) as `0x${string}`;
+    const erc20 = getContract({ client, chain: sepolia, address: tokenAddr, abi: ERC20_DECIMALS_ABI });
+    const dec = (await readContract({ contract: erc20, method: "decimals" })) as number | bigint;
     return typeof dec === "bigint" ? Number(dec) : dec;
   } catch {
-    return 18; // sensible fallback for ERC20s
+    return 18;
   }
 }
 
-/* ============================== WHITELIST FLOW ============================== */
+/* ----------------------- WHITELIST ----------------------- */
 
 export async function readWhitelistClaimSummary(user: `0x${string}`): Promise<{
   claimableRaw: bigint;
@@ -104,7 +63,6 @@ export async function readWhitelistClaimSummary(user: `0x${string}`): Promise<{
     params: [user],
   }));
 
-  // If not whitelisted, everything is 0
   if (!isWhitelisted) {
     return { claimableRaw: 0n, claimedRaw: 0n, preAssignedRaw: 0n, tokenDecimals };
   }
@@ -126,17 +84,13 @@ export function prepareWhitelistClaimTx(): PresalePreparedTx {
   });
 }
 
-/* ============================== PURCHASED FLOW ============================== */
+/* ----------------------- PURCHASED / VESTING ----------------------- */
 
 export async function readPurchasedClaimSummary(user: `0x${string}`): Promise<{
-  claimableRaw: bigint; // sum of current claimable across all rounds
-  claimedRaw: bigint;   // sum of already claimed across all rounds
+  claimableRaw: bigint;
+  claimedRaw: bigint;
   tokenDecimals: number;
-  items: Array<{
-    round: number;
-    purchaseIndex: number;
-    claimable: bigint;  // per purchase claimable now
-  }>;
+  items: Array<{ round: number; purchaseIndex: number; claimable: bigint }>;
 }> {
   const tokenDecimals = await getTokenDecimals();
 
@@ -174,12 +128,8 @@ export async function readPurchasedClaimSummary(user: `0x${string}`): Promise<{
   return { claimableRaw: totalClaimable, claimedRaw: totalClaimed, tokenDecimals, items };
 }
 
-/** One prepared tx per purchase with claimable > 0 */
-export async function preparePurchasedClaimTxs(
-  user: `0x${string}`
-): Promise<PresalePreparedTx[]> {
+export async function preparePurchasedClaimTxs(user: `0x${string}`): Promise<PresalePreparedTx[]> {
   const { items } = await readPurchasedClaimSummary(user);
-
   const txs: PresalePreparedTx[] = [];
   for (const it of items) {
     if (it.claimable > 0n) {
@@ -191,6 +141,60 @@ export async function preparePurchasedClaimTxs(
         })
       );
     }
+  }
+  return txs;
+}
+
+/* ----------------------- NEW: COMBINED HELPERS ----------------------- */
+
+/** Sum everything for a single snapshot read. */
+export async function readAllClaimSummary(user: `0x${string}`): Promise<{
+  tokenDecimals: number;
+  unclaimedTotalRaw: bigint; // whitelist + purchased (claimable)
+  claimedTotalRaw: bigint;   // whitelist + purchased (claimed so far)
+  parts: {
+    wl: { claimableRaw: bigint; claimedRaw: bigint };
+    purchased: { claimableRaw: bigint; claimedRaw: bigint; items: { round: number; purchaseIndex: number; claimable: bigint }[] };
+  };
+}> {
+  const [wl, purchased] = await Promise.all([
+    readWhitelistClaimSummary(user),
+    readPurchasedClaimSummary(user),
+  ]);
+
+  // Both helpers return the same decimals, but we’ll trust purchased.tokenDecimals for output
+  const tokenDecimals = purchased.tokenDecimals;
+
+  const unclaimedTotalRaw = (wl.claimableRaw ?? 0n) + (purchased.claimableRaw ?? 0n);
+  const claimedTotalRaw   = (wl.claimedRaw ?? 0n) + (purchased.claimedRaw ?? 0n);
+
+  return {
+    tokenDecimals,
+    unclaimedTotalRaw,
+    claimedTotalRaw,
+    parts: {
+      wl: { claimableRaw: wl.claimableRaw, claimedRaw: wl.claimedRaw },
+      purchased: { claimableRaw: purchased.claimableRaw, claimedRaw: purchased.claimedRaw, items: purchased.items },
+    },
+  };
+}
+
+/**
+ * Return all prepared txs necessary to claim *everything* the user can claim now.
+ * Note: With the current ABI this is multiple transactions: 0..1 whitelist + N purchased.
+ */
+export async function prepareClaimAllTxs(user: `0x${string}`): Promise<PresalePreparedTx[]> {
+  const [wl, purchasedTxs] = await Promise.all([
+    readWhitelistClaimSummary(user),
+    preparePurchasedClaimTxs(user),
+  ]);
+
+  const txs: PresalePreparedTx[] = [];
+  if (wl.claimableRaw > 0n) {
+    txs.push(prepareWhitelistClaimTx());
+  }
+  if (purchasedTxs.length) {
+    txs.push(...purchasedTxs);
   }
   return txs;
 }

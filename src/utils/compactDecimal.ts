@@ -20,7 +20,7 @@ export function formatCompactDecimalString(
       return (negative ? "-" : "") + new Intl.NumberFormat(undefined, {
         notation: "compact",
         maximumFractionDigits,
-      }).format(n);
+      }).format(n).replace(/\u00A0/g, "").toLocaleUpperCase();
     }
   }
 

@@ -8,7 +8,7 @@ import {
   readUserBoughtSummary,
   readActiveRoundPrice,
   fromUnits,
-} from "@/utils/profile/bought";
+} from "@/utils/profile/bought"; 
 
 import { formatCompactDecimalString } from "@/utils/compactDecimal";
 

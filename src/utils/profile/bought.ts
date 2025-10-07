@@ -155,12 +155,14 @@ export async function readActiveRoundPrice(): Promise<{
 
 /* ------------------------ User totals ------------------------ */
 
+// utils/profile/bought.ts
+
 export async function readUserBoughtSummary(user: `0x${string}`): Promise<{
-  totalTokensRaw: bigint;
-  totalUsdRaw: bigint;
+  totalTokensRaw: bigint;   // purchases + whitelist preAssignedTokens
+  totalUsdRaw: bigint;      // purchases only (unchanged)
   tokenDecimals: number;
   usdcDecimals: number;
-  singleRoundPriceRaw: bigint | null; // kept for compatibility, not used by UI anymore
+  singleRoundPriceRaw: bigint | null;
 }> {
   const rounds: RoundKey[] = ["seed", "private", "institutional", "strategic", "community"];
   const [tokenDecimals, usdcDecimals] = await Promise.all([getTokenDecimals(), getUsdcDecimals()]);
@@ -169,6 +171,7 @@ export async function readUserBoughtSummary(user: `0x${string}`): Promise<{
   let totalUsdRaw = 0n;
   const nonZeroRounds: RoundKey[] = [];
 
+  // ---- purchases (existing logic) ----
   for (const rk of rounds) {
     const [amounts] = (await readContract({
       contract: presale,
@@ -189,6 +192,18 @@ export async function readUserBoughtSummary(user: `0x${string}`): Promise<{
     if (roundTokens > 0n || spent > 0n) nonZeroRounds.push(rk);
   }
 
+  // ---- ADD: whitelist tokens (claimed + unclaimed == preAssignedTokens) ----
+  // whitelist(address) returns (isWhitelisted, preAssignedTokens, claimedTokens, whitelistRound)
+  const [isWhitelisted, preAssignedTokens] = (await readContract({
+    contract: presale,
+    method: "whitelist",
+    params: [user],
+  }));
+
+  if (isWhitelisted && preAssignedTokens > 0n) {
+    totalTokensRaw += preAssignedTokens;
+  }
+
   // (legacy) If exactly one round had purchases, read its price
   let singleRoundPriceRaw: bigint | null = null;
   if (nonZeroRounds.length === 1) {
@@ -197,10 +212,11 @@ export async function readUserBoughtSummary(user: `0x${string}`): Promise<{
   }
 
   return {
-    totalTokensRaw,
-    totalUsdRaw,
+    totalTokensRaw,   // now includes whitelist preAssignedTokens
+    totalUsdRaw,      // purchases only
     tokenDecimals,
     usdcDecimals,
     singleRoundPriceRaw,
   };
 }
+
