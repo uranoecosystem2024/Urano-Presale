@@ -17,7 +17,7 @@ import {
 } from "thirdweb/react";
 import { sepolia } from "thirdweb/chains";
 import { client } from "@/lib/thirdwebClient";
-import { fetchKycStatus } from "@/utils/kyc";
+import { fetchKycAndCheckMismatch } from "@/utils/kyc";
 
 type Progress = {
   step1: boolean; // Email
@@ -85,6 +85,11 @@ const Registration = () => {
     }
   }, [connected, progress.step3]);
 
+  // Reset KYC progress if wallet disconnects or changes
+  useEffect(() => {
+    setProgress((p) => (p.step2 ? { ...p, step2: false } : p));
+  }, [address]);
+
   useEffect(() => {
     try {
       window.dispatchEvent(new Event("urano:progress"));
@@ -128,7 +133,7 @@ const Registration = () => {
   // Hard guard: if connected but on the wrong chain, try to switch immediately.
   useEffect(() => {
     if (!connected || !activeChain) return;
-  
+
     if (activeChain.id !== sepolia.id) {
       void switchChain(sepolia).catch(() => {
         void networkSwitcher.open({
@@ -138,7 +143,6 @@ const Registration = () => {
       });
     }
   }, [connected, activeChain?.id, switchChain, networkSwitcher, activeChain]);
-  
 
   const handleClickStep1 = () => setOpenStep1(true);
 
@@ -191,10 +195,22 @@ const Registration = () => {
       }
     }
 
-    // Pre-check: already KYC-verified on-chain?
+    // Pre-check: wallet/Persona consistency and on-chain verification
     try {
-      const already = await fetchKycStatus(address!);
-      if (already) {
+      const { verified, personaWallet, mismatch } = await fetchKycAndCheckMismatch(address!);
+
+      if (mismatch) {
+        showLockError(
+          "Wallet mismatch",
+          personaWallet
+            ? "Your identity is linked to a different wallet address. Please reconnect the verified wallet or re-verify with this wallet."
+            : "We couldn't confirm the wallet that was linked during identity verification. Please re-verify with this wallet."
+        );
+        setProgress((p) => ({ ...p, step2: false }));
+        return;
+      }
+
+      if (verified) {
         showLockError(
           "Identity Already Verified",
           "Your connected wallet is already KYC-verified and whitelisted."
@@ -371,7 +387,7 @@ const Registration = () => {
 
       <SubscriptionModal
         open={openStep1}
-        onClose={() => setOpenStep1(false)}
+        onClose={() => setOpenStep1(false)} 
         onComplete={completeStep1}
       />
 
