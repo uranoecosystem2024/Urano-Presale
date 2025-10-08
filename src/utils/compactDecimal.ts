@@ -1,10 +1,7 @@
 export function formatCompactDecimalString(
   dec: string | null | undefined,
-  maximumFractionDigits = 2,
-  opts?: { preventUnitCarry?: boolean }
+  maximumFractionDigits = 2
 ): string {
-  const preventUnitCarry = opts?.preventUnitCarry ?? false;
-
   if (!dec) return "0";
   const s = dec.replace(/,/g, "").trim();
   if (!s || s === "." || s === "-." || s === "-") return "0";
@@ -12,75 +9,77 @@ export function formatCompactDecimalString(
   const negative = s.startsWith("-");
   const unsigned = negative ? s.slice(1) : s;
 
-  if (!preventUnitCarry) {
-    const n = Number(unsigned);
-    if (Number.isFinite(n) && Math.abs(n) < 1e15) {
-      return (negative ? "-" : "") + new Intl.NumberFormat(undefined, {
-        notation: "compact",
-        maximumFractionDigits,
-      }).format(n).replace(/\u00A0/g, "").toLocaleUpperCase();
+  const parts = unsigned.split(".");
+  let intRaw = (parts[0] ?? "0").replace(/^0+(?=\d)/, "") || "0";
+  const fracRaw = parts[1] ?? "";
+
+  const max = Math.max(0, maximumFractionDigits);
+  let frac = fracRaw;
+
+  if (max === 0) {
+    if (frac.length > 0) {
+      const first = frac.charCodeAt(0) - 48;
+      if (first >= 5) {
+        const carryInt = intRaw.split("");
+        for (let i = carryInt.length - 1; i >= 0; i--) {
+          const ch = carryInt[i]!;
+          const d = ch.charCodeAt(0) - 48 + 1;
+          if (d === 10) {
+            carryInt[i] = "0";
+            if (i === 0) carryInt.unshift("1");
+          } else {
+            carryInt[i] = String.fromCharCode(48 + d);
+            break;
+          }
+        }
+        intRaw = carryInt.join("");
+      }
     }
-  }
-
-  const [intRaw = "0", fracRaw = ""] = unsigned.split(".");
-  const int = intRaw.replace(/^0+(?=\d)/, "") || "0";
-
-  if (int === "0") {
-    const frac = fracRaw.slice(0, maximumFractionDigits).padEnd(maximumFractionDigits, "0");
-    const out = maximumFractionDigits > 0 ? `0.${frac}` : "0";
-    return negative ? `-${out}` : out;
-  }
-
-  const len = int.length;
-  const suffixes = ["", "K", "M", "B", "T", "P", "E"] as const;
-  const idx = Math.min(Math.floor((len - 1) / 3), suffixes.length - 1);
-
-  if (idx === 0) {
-    const frac = fracRaw.slice(0, maximumFractionDigits);
-    const base = maximumFractionDigits > 0 && frac ? `${int}.${frac}` : int;
-    return negative ? `-${base}` : base;
-  }
-
-  const suffix = suffixes[idx];
-  const headLen = len - idx * 3;
-  const head = int.slice(0, headLen);
-  const tailDigits = int.slice(headLen) + fracRaw;
-
-  const ndp = Math.max(0, maximumFractionDigits);
-
-  let needed = tailDigits.slice(0, ndp + 1).padEnd(ndp + 1, "0");
-  let carry = 0;
-
-  if (ndp > 0 && needed.length > 0) {
-    const last = needed.charCodeAt(needed.length - 1) - 48;
-    const doRoundUp = last >= 5;
-    needed = needed.slice(0, -1);
-
-    if (doRoundUp) {
-      const fArr = needed.split("");
-      for (let i = fArr.length - 1; i >= 0; i--) {
-        const ch = fArr[i];
-        const d = (ch ? ch.charCodeAt(0) - 48 : 0) + 1;
+    frac = "";
+  } else if (frac.length > max) {
+    const keep = frac.slice(0, max).split("");
+    const next = frac.charCodeAt(max) - 48;
+    if (next >= 5) {
+      let carry = 1;
+      for (let i = keep.length - 1; i >= 0; i--) {
+        const ch = keep[i]!;
+        const d = ch.charCodeAt(0) - 48 + carry;
         if (d >= 10) {
-          fArr[i] = "0";
-          if (i === 0) carry = 1;
+          keep[i] = "0";
+          carry = 1;
         } else {
-          fArr[i] = String.fromCharCode(48 + d);
+          keep[i] = String.fromCharCode(48 + d);
           carry = 0;
           break;
         }
       }
-      needed = fArr.join("");
+      if (carry === 1) {
+        const carryInt = intRaw.split("");
+        for (let i = carryInt.length - 1; i >= 0; i--) {
+          const ch = carryInt[i]!;
+          const d = ch.charCodeAt(0) - 48 + 1;
+          if (d === 10) {
+            carryInt[i] = "0";
+            if (i === 0) carryInt.unshift("1");
+          } else {
+            carryInt[i] = String.fromCharCode(48 + d);
+            break;
+          }
+        }
+        intRaw = carryInt.join("");
+        frac = "0".repeat(max);
+      } else {
+        frac = keep.join("");
+      }
+    } else {
+      frac = keep.join("");
     }
-  } else {
-    needed = needed.slice(0, ndp);
   }
 
-  if (carry === 1 && preventUnitCarry) {
-    const clamped = ndp > 0 ? `${head}.${"9".repeat(ndp)}${suffix}` : `${head}${suffix}`;
-    return negative ? `-${clamped}` : clamped;
-  }
+  if (frac) frac = frac.replace(/0+$/, "");
 
-  const compact = ndp > 0 && needed ? `${head}.${needed}${suffix}` : `${head}${suffix}`;
-  return negative ? `-${compact}` : compact;
+  const intWithCommas = intRaw.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+
+  const out = frac ? `${intWithCommas}.${frac}` : intWithCommas;
+  return negative ? `-${out}` : out;
 }

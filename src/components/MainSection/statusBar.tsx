@@ -49,7 +49,7 @@ export default function StatusBar() {
   const fmtSold = useMemo(() => {
     if (!data) return "—";
     const decStr = formatTokenAmount(data.totalTokensSold, TOKEN_DECIMALS);
-    return formatCompactDecimalString(decStr, 2, { preventUnitCarry: true });
+    return formatCompactDecimalString(decStr, 2);
   }, [data]);
 
   const fmtMax = useMemo(() => {
