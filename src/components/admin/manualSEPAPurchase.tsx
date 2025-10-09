@@ -187,8 +187,8 @@ export default function ManualSepaPurchase({
 
             toast.success(
                 hashes.length === 1
-                    ? "Purchase added (1 transaction)."
-                    : `Purchases added (${hashes.length} transactions).`
+                    ? "FIAT Purchase added (1 transaction)."
+                    : `FIAT Purchases added (${hashes.length} transactions).`
             );
 
             const firstAddr = cleaned.find((r) => isAddressLike(r.address))?.address as `0x${string}` | undefined;

@@ -219,10 +219,10 @@ export default function Admin() {
                         }}
                     >
                         <ManualSepaPurchase
-                            title="Manual SEPA Purchases"
-                            subtitle="Add one or more USDC purchases (one transaction per row) to a single round."
+                            title="Add FIAT Purchases"
+                            subtitle="Add one or more USDC purchases (one transaction per row) to the selected round."
                             disabled={checkingRole || !isAdmin}
-                            onAddedFirst={(addr) => console.log("SEPA purchase added for:", addr)}
+                            onAddedFirst={(addr) => console.log("FIAT purchase added for:", addr)}
                         />
                     </Stack>
 
