@@ -74,13 +74,6 @@ export default function VestingAndCliffSummary() {
         >
           Vesting + Cliff Summary
         </Typography>
-
-        <Typography
-          variant="h6"
-          sx={{ fontSize: "0.875rem", fontWeight: 400, color: theme.palette.text.secondary }}
-        >
-          {roundLabel}
-        </Typography>
       </Stack>
 
       <Stack
