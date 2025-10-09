@@ -10,6 +10,7 @@ import RoundStatusManagement from "@/components/admin/roundStatusManagement";
 import GlobalVestingParams from "@/components/admin/globalVestingParams";
 import InstitutionalRoundAccess from "@/components/admin/institutionalRoundAccess";
 import Whitelist from "@/components/admin/Whitelist";
+import ManualSepaPurchase from "@/components/admin/manualSEPAPurchase";
 import WithdrawUnsoldTokens from "@/components/admin/withdrawUnsoldTokens";
 
 import { useActiveAccount } from "thirdweb/react";
@@ -207,6 +208,24 @@ export default function Admin() {
                             onRemoved={(addr) => console.log("Removed:", addr)}
                         />
                     </Stack>
+
+                    <Stack
+                        sx={{
+                            backgroundColor: theme.palette.presaleCardBg.main,
+                            border: `1px solid ${theme.palette.headerBorder.main}`,
+                            borderRadius: 2,
+                            p: 3,
+                            gap: 2,
+                        }}
+                    >
+                        <ManualSepaPurchase
+                            title="Manual SEPA Purchases"
+                            subtitle="Add one or more USDC purchases (one transaction per row) to a single round."
+                            disabled={checkingRole || !isAdmin}
+                            onAddedFirst={(addr) => console.log("SEPA purchase added for:", addr)}
+                        />
+                    </Stack>
+
 
                     <Stack
                         sx={{
