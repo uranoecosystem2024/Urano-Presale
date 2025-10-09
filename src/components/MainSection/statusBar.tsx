@@ -104,6 +104,9 @@ export default function StatusBar() {
           overflow: "hidden",
           backgroundColor: "transparent",
           boxSizing: "border-box",
+          borderRight: "solid 1px rgba(255, 255, 255, 0.31)",
+          borderTopRightRadius: "3px",
+          borderBottomRightRadius: "3px"
         }}
       >
         <Box
