@@ -1,8 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Stack, Typography, useTheme } from "@mui/material";
-import { readActiveRoundSummary } from "@/utils/profile/round";
+import { useActiveAccount } from "thirdweb/react";
+
+import {
+  readUserParticipationRounds,
+  ROUND_LABEL,
+  type UserRoundParticipation,
+  type UserParticipationSummary,
+} from "@/utils/profile/participation";
 import { fromUnits } from "@/utils/profile/bought";
 
 type ParticipationRoundProps = {
@@ -10,42 +17,55 @@ type ParticipationRoundProps = {
 };
 
 export default function ParticipationRound({
-  title = "Participation Round",
+  title = "Participation Rounds",
 }: ParticipationRoundProps) {
   const theme = useTheme();
+  const account = useActiveAccount();
+
   const [loading, setLoading] = useState(false);
-  const [label, setLabel] = useState<string | null>(null);
-  const [priceHuman, setPriceHuman] = useState<string | null>(null);
+  const [summary, setSummary] = useState<UserParticipationSummary | null>(null);
+
+  const address = account?.address as `0x${string}` | undefined;
 
   useEffect(() => {
     let cancelled = false;
+
     const run = async () => {
+      if (!address) {
+        setSummary(null);
+        return;
+      }
       setLoading(true);
       try {
-        const { label, tokenPriceRaw, usdcDecimals } =
-          await readActiveRoundSummary();
-        const human =
-          tokenPriceRaw !== null ? fromUnits(tokenPriceRaw, usdcDecimals) : null;
-
-        if (!cancelled) {
-          setLabel(label);
-          setPriceHuman(human);
-        }
+        const data = await readUserParticipationRounds(address);
+        if (!cancelled) setSummary(data);
       } catch (e) {
-        console.error("Failed to read active round:", e);
-        if (!cancelled) {
-          setLabel(null);
-          setPriceHuman(null);
-        }
+        console.error("Failed to read user participation rounds:", e);
+        if (!cancelled) setSummary(null);
       } finally {
         if (!cancelled) setLoading(false);
       }
     };
+
     void run();
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [address]);
+
+  const rows = useMemo(
+    () =>
+      summary
+        ? summary.rounds.map((r: UserRoundParticipation) => ({
+            key: r.key,
+            label: ROUND_LABEL[r.key],
+            priceHuman: fromUnits(r.tokenPriceRaw, summary.usdcDecimals),
+          }))
+        : [],
+    [summary]
+  );
+
+  const hasData = rows.length > 0;
 
   return (
     <Stack
@@ -55,7 +75,7 @@ export default function ParticipationRound({
         backgroundColor: theme.palette.presaleCardBg.main,
         border: `1px solid ${theme.palette.headerBorder.main}`,
         borderRadius: 2,
-        padding: 3,
+        p: 3,
         gap: 2,
         opacity: loading ? 0.8 : 1,
       }}
@@ -73,43 +93,52 @@ export default function ParticipationRound({
         </Typography>
       </Stack>
 
-      <Stack
-        width="100%"
-        direction="row"
-        alignItems="center"
-        justifyContent="center"
-        gap={0.5}
-        sx={{
-          background: theme.palette.transparentPaper.main,
-          border: `1px solid ${theme.palette.headerBorder.main}`,
-          borderRadius: 2,
-          paddingX: 1.5,
-          paddingY: 1,
-          overflow: "hidden",
-        }}
-      >
-        <Typography
-          variant="h6"
-          sx={{
-            fontSize: "0.875rem",
-            fontWeight: 300,
-            color: theme.palette.text.primary,
-          }}
-        >
-          {label ? `${label} round` : "No active round"}
+      {!address ? (
+        <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+          Connect a wallet to see your participation rounds.
         </Typography>
+      ) : !hasData && !loading ? (
+        <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+          No purchases found yet.
+        </Typography>
+      ) : (
+        <Stack gap={1.25}>
+          {rows.map((row) => (
+            <Stack
+              key={row.key}
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              sx={{
+                background: theme.palette.transparentPaper.main,
+                border: `1px solid ${theme.palette.headerBorder.main}`,
+                borderRadius: 2,
+                px: 1.5,
+                py: 1,
+                overflow: "hidden",
+              }}
+            >
+              <Typography
+                variant="body1"
+                sx={{ color: theme.palette.text.primary, fontWeight: 400 }}
+              >
+                {row.label} round
+              </Typography>
 
-        <Typography
-          variant="h6"
-          sx={{
-            fontSize: "0.875rem",
-            fontWeight: 300,
-            color: theme.palette.uranoGreen1.main,
-          }}
-        >
-          {priceHuman ? `$${Number(priceHuman).toLocaleString(undefined, { maximumFractionDigits: 6 })} per token` : "—"}
-        </Typography>
-      </Stack>
+              <Typography
+                variant="body1"
+                sx={{ color: theme.palette.uranoGreen1.main, fontWeight: 400 }}
+              >
+                $
+                {Number(row.priceHuman).toLocaleString(undefined, {
+                  maximumFractionDigits: 6,
+                })}{" "}
+                per token
+              </Typography>
+            </Stack>
+          ))}
+        </Stack>
+      )}
     </Stack>
   );
 }
