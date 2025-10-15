@@ -168,21 +168,24 @@ export function ensureFutureTime(
 
 export async function startVestingTx(
   account: Account,
-  tgeTimeSec: bigint
+  tgeTimeSec: bigint,
+  opts?: { enforceAfterSaleEnds?: boolean }   // <- add a flag
 ): Promise<`0x${string}`> {
-  const minAllowed = await readEarliestAllowedTgeSec();
-  const base = tgeTimeSec <= minAllowed ? (minAllowed + 1n) : tgeTimeSec;
+  const enforce = opts?.enforceAfterSaleEnds ?? true;
+
+  let base = tgeTimeSec;
+  if (enforce) {
+    const minAllowed = await readEarliestAllowedTgeSec();
+    base = tgeTimeSec <= minAllowed ? (minAllowed + 1n) : tgeTimeSec;
+  }
 
   const safeTge = ensureFutureTime(base);
-  const tx = prepareContractCall({
-    contract: presale,
-    method: "startVesting",
-    params: [safeTge],
-  });
+  const tx = prepareContractCall({ contract: presale, method: "startVesting", params: [safeTge] });
   const sent = await sendTransaction({ account, transaction: tx });
   await waitForReceipt(sent);
   return sent.transactionHash;
 }
+
 
 export async function startVestingFromDateTx(
   account: Account,
