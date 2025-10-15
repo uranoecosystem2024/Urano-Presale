@@ -559,9 +559,7 @@ const MainSection = () => {
             background: {
               xs: "transparent",
               lg: `
-                linear-gradient(${theme.palette.presaleCardBg.main}, ${theme.palette.presaleCardBg.main}) padding-box,
-                linear-gradient(260.63deg, rgba(107, 226, 194, 0.82) 2.15%, rgba(0, 0, 0, 0) 52.96%, #6BE2C2 100%) border-box,
-                linear-gradient(0deg, #242424, #242424) border-box
+                transparent
             `,
             },
             borderRadius: { xs: 0, lg: "0.75rem" },

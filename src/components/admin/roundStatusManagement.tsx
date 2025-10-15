@@ -16,23 +16,24 @@ import Grid from "@mui/material/Grid";
 
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import dayjs from "dayjs";
 
 import { fetchRoundItems } from "@/utils/admin/rounds";
 import {
   toggleRoundActive,
   toggleRoundActiveExclusive,
+  readRoundInfoByKey,
+  updateRoundWindowFromDateTx, // ✅ use this
   type RoundKey as RoundsWriteRoundKey,
 } from "@/utils/admin/roundsWrite";
 
 import {
   readRoundMaxTokensHuman,
   setRoundMaxTokensHumanTx,
-  readRoundSoldAndRemainingHuman
+  readRoundSoldAndRemainingHuman,
 } from "@/utils/admin/roundMaxTokens";
 
-import {
-  updateRoundVestingParametersTx,
-} from "@/utils/admin/vesting";
+import { updateRoundVestingParametersTx } from "@/utils/admin/vesting";
 
 import { useActiveAccount } from "thirdweb/react";
 import { toast } from "react-toastify";
@@ -146,6 +147,11 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
       Object.fromEntries(UI_KEYS.map((k) => [k, false])) as Record<UiRoundKey, boolean>
   );
 
+  // Round date fields
+  const [roundDatesLoading, setRoundDatesLoading] = useState(false);
+  const [startISO, setStartISO] = useState(""); // "YYYY-MM-DDTHH:mm"
+  const [endISO, setEndISO] = useState("");
+
   useEffect(() => {
     if (rounds) {
       setItems(rounds);
@@ -227,24 +233,20 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
         const act = parseActivated((res as { activated?: unknown }).activated);
         const start = act?.startTimeUsed;
         const end = act?.endTimeUsed;
-
         toast.success(
-          `Activated ${id} round${start != null && end != null ? ` (${Number(start)} → ${Number(end)})` : ""}`
+          `Activated ${id} round${
+            start != null && end != null ? ` (${Number(start)} → ${Number(end)})` : ""
+          }`
         );
 
         const deactivated = parseDeactivated((res as { deactivated?: unknown }).deactivated);
         if (deactivated.length > 0) {
           toast.info(`Deactivated ${deactivated.map((d) => d.round).join(", ")}.`);
         }
-
         return;
       }
 
-      const result = await toggleRoundActive(
-        account,
-        id as RoundsWriteRoundKey,
-        nextVal
-      );
+      const result = await toggleRoundActive(account, id as RoundsWriteRoundKey, nextVal);
 
       try {
         const latest = await fetchRoundItems();
@@ -264,10 +266,11 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
       const act2 = parseActivated(result as unknown);
       const start2 = act2?.startTimeUsed;
       const end2 = act2?.endTimeUsed;
-
       toast.success(
         nextVal
-          ? `Activated ${id} round${start2 != null && end2 != null ? ` (${Number(start2)} → ${Number(end2)})` : ""}`
+          ? `Activated ${id} round${
+              start2 != null && end2 != null ? ` (${Number(start2)} → ${Number(end2)})` : ""
+            }`
           : `${id} round deactivated.`
       );
     } catch (e: unknown) {
@@ -278,6 +281,7 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
     }
   };
 
+  // Load details for expanded round (max tokens / sales / current start & end)
   useEffect(() => {
     let cancelled = false;
 
@@ -286,16 +290,31 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
       try {
         setMaxTokensLoading(true);
         setSalesLoading(true);
+        setRoundDatesLoading(true);
 
-        const [humanMax, sales] = await Promise.all([
+        const [humanMax, sales, info] = await Promise.all([
           readRoundMaxTokensHuman(expandedId as RoundKeyMax),
           readRoundSoldAndRemainingHuman(expandedId as RoundKeyMax),
+          readRoundInfoByKey(expandedId as RoundsWriteRoundKey),
         ]);
 
         if (!cancelled) {
           setMaxTokensHuman(humanMax);
           setSoldHuman(sales.sold);
           setRemainingHuman(sales.remaining);
+
+          const startSec = Number(info[4] ?? 0n);
+          const endSec = Number(info[5] ?? 0n);
+          const toISO = (sec: number) =>
+            sec > 0
+              ? dayjs(sec * 1000)
+                  .second(0)
+                  .millisecond(0)
+                  .format("YYYY-MM-DDTHH:mm")
+              : "";
+
+          setStartISO(toISO(startSec));
+          setEndISO(toISO(endSec));
         }
       } catch (e) {
         console.error("Failed to read round details:", e);
@@ -303,6 +322,7 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
         if (!cancelled) {
           setMaxTokensLoading(false);
           setSalesLoading(false);
+          setRoundDatesLoading(false);
         }
       }
     };
@@ -312,7 +332,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
       cancelled = true;
     };
   }, [expandedId]);
-
 
   const handleSaveMaxTokens = async () => {
     if (!expandedId) return;
@@ -328,11 +347,7 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
 
     try {
       setRowTxLoading(rowId, true);
-      await setRoundMaxTokensHumanTx(
-        account,
-        expandedId as RoundKeyMax,
-        maxTokensHuman.trim()
-      );
+      await setRoundMaxTokensHumanTx(account, expandedId as RoundKeyMax, maxTokensHuman.trim());
       toast.success(`Max tokens updated for ${expandedId} round.`);
 
       try {
@@ -379,21 +394,75 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
 
     try {
       setUpdateParamsLoading((prev) => ({ ...prev, [key]: true }));
-      await updateRoundVestingParametersTx(
-        account,
-        key as RoundKeyVesting,
-        {
-          cliffPeriodMonths: BigInt(Math.round(cliffNum)),
-          vestingDurationMonths: BigInt(Math.round(durationNum)),
-          tgeUnlockPercentage: BigInt(Math.round(tgeNum)),
-        }
-      );
+      await updateRoundVestingParametersTx(account, key as RoundKeyVesting, {
+        cliffPeriodMonths: BigInt(Math.round(cliffNum)),
+        vestingDurationMonths: BigInt(Math.round(durationNum)),
+        tgeUnlockPercentage: BigInt(Math.round(tgeNum)),
+      });
       toast.success(`Updated vesting parameters for ${key} round.`);
     } catch (e) {
       console.error(e);
       toast.error(getErrorMessage(e));
     } finally {
       setUpdateParamsLoading((prev) => ({ ...prev, [key]: false }));
+    }
+  };
+
+  // Save Start/End dates (no “nudge”; respect the exact input)
+  const handleSaveRoundDates = async () => {
+    if (!expandedId) return;
+    if (disabled) return;
+    if (!account) {
+      toast.error("No wallet connected. Please connect an authorized wallet.");
+      return;
+    }
+    const id = expandedId;
+    if (txLoadingById[id] || anyRowBusy) return;
+
+    if (!startISO || !endISO) {
+      toast.error("Please set both Start and End date/time.");
+      return;
+    }
+    const startMs = dayjs(startISO).valueOf();
+    const endMs = dayjs(endISO).valueOf();
+    if (!Number.isFinite(startMs) || !Number.isFinite(endMs)) {
+      toast.error("Invalid date/time values.");
+      return;
+    }
+    if (endMs <= startMs) {
+      toast.error("End time must be after Start time.");
+      return;
+    }
+
+    // preserve the current active flag
+    const isActive = items.find((r) => r.id === id)?.active ?? false;
+
+    try {
+      setRowTxLoading(id, true);
+      await updateRoundWindowFromDateTx(account, expandedId as RoundsWriteRoundKey, {
+        start: new Date(dayjs(startISO).valueOf()),
+        end:   new Date(dayjs(endISO).valueOf()),
+        // isActive omitted → preserves current active flag
+      });
+
+      // refresh the displayed values from chain
+      const info = await readRoundInfoByKey(id as RoundsWriteRoundKey);
+      const toISO = (sec: bigint) =>
+        sec > 0n
+          ? dayjs(Number(sec) * 1000)
+              .second(0)
+              .millisecond(0)
+              .format("YYYY-MM-DDTHH:mm")
+          : "";
+      setStartISO(toISO(info[4]));
+      setEndISO(toISO(info[5]));
+
+      toast.success(`Dates updated for ${id} round.`);
+    } catch (e) {
+      console.error(e);
+      toast.error(getErrorMessage(e));
+    } finally {
+      setRowTxLoading(id, false);
     }
   };
 
@@ -461,7 +530,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
     },
   } as const;
 
-
   const actionBtnSx = {
     textTransform: "none",
     borderRadius: 2,
@@ -505,7 +573,9 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                   <Stack
                     sx={{
                       ...cardBaseSx,
-                      border: isActive ? `1px solid ${theme.palette.uranoGreen1.main}` : cardBaseSx.border,
+                      border: isActive
+                        ? `1px solid ${theme.palette.uranoGreen1.main}`
+                        : cardBaseSx.border,
                       boxShadow: isActive ? `0 0 0 1px rgba(107, 226, 194, .25)` : "none",
                       opacity: rowBusy ? 0.6 : 1,
                       pointerEvents: rowBusy || anyRowBusy ? "none" : "auto",
@@ -592,6 +662,7 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                     </Stack>
 
                     <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                      {/* Vesting params */}
                       <Stack gap={0.5} mb={4}>
                         <Typography variant="subtitle1">Round Vesting Parameters</Typography>
                         <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
@@ -654,6 +725,71 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
 
                       <Divider sx={{ my: 3, borderBottom: `1px solid ${theme.palette.secondary.main}` }} />
 
+                      {/* Round Start / End dates */}
+                      <Stack gap={0.5} mb={4}>
+                        <Typography variant="subtitle1">Round Start & End</Typography>
+                        <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+                          Update sale window for this round
+                        </Typography>
+                      </Stack>
+                      <Grid container spacing={2} sx={{ mb: 2 }}>
+                        <Grid size={{ xs: 12, md: 5.25 }}>
+                          <TextField
+                            fullWidth
+                            label="Start Date & Time"
+                            type="datetime-local"
+                            value={startISO}
+                            onChange={(e) => setStartISO(e.target.value)}
+                            disabled={disabled || roundDatesLoading}
+                            InputLabelProps={{ shrink: true }}
+                            sx={{
+                              ...inputSx,
+                              '& input[type="datetime-local"]::-webkit-calendar-picker-indicator': {
+                                filter: "invert(1) brightness(2)",
+                                opacity: 1,
+                              },
+                            }}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 12, md: 5.25 }}>
+                          <TextField
+                            fullWidth
+                            label="End Date & Time"
+                            type="datetime-local"
+                            value={endISO}
+                            onChange={(e) => setEndISO(e.target.value)}
+                            disabled={disabled || roundDatesLoading}
+                            InputLabelProps={{ shrink: true }}
+                            sx={{
+                              ...inputSx,
+                              '& input[type="datetime-local"]::-webkit-calendar-picker-indicator': {
+                                filter: "invert(1) brightness(2)",
+                                opacity: 1,
+                              },
+                            }}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 12, md: 1.5 }}>
+                          <Button
+                            onClick={handleSaveRoundDates}
+                            disabled={
+                              disabled ||
+                              roundDatesLoading ||
+                              anyRowBusy ||
+                              (expandedId ? !!txLoadingById[expandedId] : false) ||
+                              !startISO ||
+                              !endISO
+                            }
+                            sx={{ ...actionBtnSx, width: { xs: "100%", md: "auto" } }}
+                          >
+                            Save
+                          </Button>
+                        </Grid>
+                      </Grid>
+
+                      <Divider sx={{ my: 3, borderBottom: `1px solid ${theme.palette.secondary.main}` }} />
+
+                      {/* Max tokens */}
                       <Stack gap={0.5} mb={4}>
                         <Typography variant="subtitle1">Round Max Tokens</Typography>
                         <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
@@ -700,6 +836,7 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
 
                       <Divider sx={{ my: 3, borderBottom: `1px solid ${theme.palette.secondary.main}` }} />
 
+                      {/* Sales summary */}
                       <Grid container spacing={2} sx={{ mb: 2 }}>
                         <Grid size={{ xs: 12, md: 6 }}>
                           <Typography variant="subtitle1">Sold Tokens</Typography>
@@ -710,11 +847,10 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                         <Grid size={{ xs: 12, md: 6 }}>
                           <Typography variant="subtitle1">Remaining Tokens For Sale</Typography>
                           <Typography variant="body1" color={theme.palette.text.secondary}>
-                            {salesLoading ? "Loading…" : remainingHuman + " $URANO"  || "—"}
+                            {salesLoading ? "Loading…" : remainingHuman + " $URANO" || "—"}
                           </Typography>
                         </Grid>
                       </Grid>
-
                     </Collapse>
                   </Stack>
 
