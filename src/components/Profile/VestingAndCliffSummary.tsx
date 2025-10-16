@@ -104,7 +104,7 @@ export default function VestingAndCliffSummary() {
             variant="h6"
             sx={{ fontSize: "1.5rem", fontWeight: 500, color: theme.palette.text.primary }}
           >
-            {Number(tgePct/100).toFixed().toString()}
+            {Number(Number(tgePct)/100).toFixed().toString()}
           </Typography>
         </Stack>
 
