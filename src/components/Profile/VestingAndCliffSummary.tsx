@@ -14,7 +14,7 @@ export default function VestingAndCliffSummary() {
   const [loading, setLoading] = useState(false);
 
   const [roundLabel, setRoundLabel] = useState<string>("—");
-  const [tgePct, setTgePct] = useState<string>("—");
+  const [tgeBps, setTgeBps] = useState<number | null>(null); // store BASIS POINTS as number
   const [cliffM, setCliffM] = useState<string>("—");
   const [durationM, setDurationM] = useState<string>("—");
   const [releaseFreq, setReleaseFreq] = useState<string>("Unknown");
@@ -25,21 +25,16 @@ export default function VestingAndCliffSummary() {
     const run = async () => {
       setLoading(true);
       try {
-        // 👇 Precise annotation to satisfy ESLint “unsafe assignment/call”
         const res: ActiveVestingSummary = await readActiveRoundVestingSummary();
         if (cancelled) return;
 
         setRoundLabel(res.label);
 
-        setTgePct(
-          res.tgeUnlockPct !== null ? `${Number(res.tgeUnlockPct)}%` : "—"
-        );
-        setCliffM(
-          res.cliffMonths !== null ? `${Number(res.cliffMonths)} months` : "—"
-        );
-        setDurationM(
-          res.durationMonths !== null ? `${Number(res.durationMonths)} months` : "—"
-        );
+        // res.tgeUnlockPct is in bps (e.g. 1200 for 12%)
+        setTgeBps(res.tgeUnlockPct !== null ? Number(res.tgeUnlockPct) : null);
+
+        setCliffM(res.cliffMonths !== null ? `${Number(res.cliffMonths)} months` : "—");
+        setDurationM(res.durationMonths !== null ? `${Number(res.durationMonths)} months` : "—");
         setReleaseFreq(res.releaseFrequency);
       } catch (e) {
         console.error(e);
@@ -54,6 +49,9 @@ export default function VestingAndCliffSummary() {
       cancelled = true;
     };
   }, []);
+
+  // Pretty display: convert bps → % (e.g., 1200 → "12%")
+  const tgeDisplay = tgeBps !== null ? `${(tgeBps / 100).toFixed(0)}%` : "—";
 
   return (
     <Stack
@@ -104,7 +102,7 @@ export default function VestingAndCliffSummary() {
             variant="h6"
             sx={{ fontSize: "1.5rem", fontWeight: 500, color: theme.palette.text.primary }}
           >
-            {Number(Number(tgePct)/100).toFixed().toString()}
+            {tgeDisplay}
           </Typography>
         </Stack>
 
