@@ -9,7 +9,9 @@ import { presaleAbi } from "@/lib/abi/presale";
 type PresalePreparedTx = PreparedTransaction<typeof presaleAbi>;
 
 const DEBUG = process.env.NEXT_PUBLIC_DEBUG === "true";
-const log = (...args: unknown[]) => { if (DEBUG) console.log("[userClaimInfo]", ...args); };
+const log = (...args: unknown[]) => {
+  if (DEBUG) console.log("[userClaimInfo]", ...args);
+};
 
 const PRESALE_ADDR = process.env
   .NEXT_PUBLIC_PRESALE_SMART_CONTRACT_ADDRESS as `0x${string}`;
@@ -31,6 +33,7 @@ const ERC20_DECIMALS_ABI = [
   },
 ] as const;
 
+/** getUserVestingInfo returns these arrays aligned by index */
 type VestsTuple = readonly [
   amounts: bigint[],
   unlockTimes: bigint[],
@@ -78,6 +81,8 @@ type RoundStructObj = {
 };
 
 const ROUND_IDS = [0, 1, 2, 3, 4] as const;
+
+/* -------------------------- Type Guards & Utils -------------------------- */
 
 function isWhitelistTuple(x: unknown): x is WhitelistTuple {
   return (
@@ -144,36 +149,13 @@ async function getTokenDecimals(): Promise<number> {
       method: "decimals",
     })) as number | bigint;
 
-    const decimals = typeof dec === "bigint" ? Number(dec) : dec;
-    return decimals;
-  } catch (e) {
+    return typeof dec === "bigint" ? Number(dec) : dec;
+  } catch {
     return 18;
   }
 }
 
-async function readActiveRoundId(): Promise<number | null> {
-  for (const roundId of ROUND_IDS) {
-    const raw: unknown = await readContract({
-      contract: presale,
-      method: "rounds",
-      params: [roundId],
-    });
-
-    let active = false;
-    if (isRoundTuple(raw)) {
-      active = raw[0];
-    } else if (isRoundObj(raw)) {
-      active = raw.isActive;
-    } else {
-      log(`Round ${roundId} unexpected shape:`, raw);
-    }
-
-    if (active) {
-      return roundId;
-    }
-  }
-  return null;
-}
+/* -------------------------- Whitelist (Pre-assign) -------------------------- */
 
 export async function readWhitelistClaimSummary(user: `0x${string}`): Promise<{
   claimableRaw: bigint;
@@ -222,67 +204,86 @@ export function prepareWhitelistClaimTx(): PresalePreparedTx {
   });
 }
 
-export async function readPurchasedClaimSummaryActive(user: `0x${string}`): Promise<{
-  roundId: number | null;
+/* ----------------------------- Purchased vesting ----------------------------- */
+/** Claim summary across *all* rounds, not just the active one. */
+export async function readPurchasedClaimSummaryAllRounds(user: `0x${string}`): Promise<{
+  roundIdsWithPurchases: number[];
   claimableRaw: bigint;
   claimedRaw: bigint;
   tokenDecimals: number;
   items: Array<{ round: number; purchaseIndex: number; claimable: bigint }>;
 }> {
   const tokenDecimals = await getTokenDecimals();
-  const roundId = await readActiveRoundId();
-
-  if (roundId === null) {
-    return { roundId: null, claimableRaw: 0n, claimedRaw: 0n, tokenDecimals, items: [] };
-  }
-
-  const v = (await readContract({
-    contract: presale,
-    method: "getUserVestingInfo",
-    params: [user, roundId],
-  })) as VestsTuple;
-
-  const [amounts, claimed, claimables] = v;
 
   let totalClaimable = 0n;
   let totalClaimed = 0n;
   const items: Array<{ round: number; purchaseIndex: number; claimable: bigint }> = [];
+  const roundIdsWithPurchases: number[] = [];
 
-  const n = Math.min(amounts.length, claimables.length, claimed.length);
-  for (let i = 0; i < n; i++) {
-    const cNow = claimables[i] ?? 0n;
-    const cl = claimed[i] ?? 0n;
-    if (cNow > 0n) {
-      items.push({ round: roundId, purchaseIndex: i, claimable: cNow });
-      totalClaimable += cNow;
+  for (const roundId of ROUND_IDS) {
+    let v: VestsTuple;
+    try {
+      v = (await readContract({
+        contract: presale,
+        method: "getUserVestingInfo",
+        params: [user, roundId],
+      })) as VestsTuple;
+    } catch (e) {
+      log(`getUserVestingInfo failed for round ${roundId}:`, e);
+      continue;
     }
-    totalClaimed += cl;
+
+    if (!Array.isArray(v) || v.length < 4) continue;
+
+    const [amounts, _unlockTimes, claimed, claimables] = v;
+
+    const n = Math.min(amounts.length, claimables.length, claimed.length);
+    if (n === 0) continue;
+
+    // Mark that this round has entries for the user
+    roundIdsWithPurchases.push(roundId);
+
+    for (let i = 0; i < n; i++) {
+      const cNow = claimables[i] ?? 0n;
+      const cl = claimed[i] ?? 0n;
+
+      if (cNow > 0n) {
+        items.push({ round: roundId, purchaseIndex: i, claimable: cNow });
+        totalClaimable += cNow;
+      }
+      // Sum all claimed so far for display
+      totalClaimed += cl;
+    }
   }
 
-  return { roundId, claimableRaw: totalClaimable, claimedRaw: totalClaimed, tokenDecimals, items };
+  return {
+    roundIdsWithPurchases,
+    claimableRaw: totalClaimable,
+    claimedRaw: totalClaimed,
+    tokenDecimals,
+    items,
+  };
 }
 
 export async function preparePurchasedClaimTxs(
   user: `0x${string}`
 ): Promise<PresalePreparedTx[]> {
-  const res = await readPurchasedClaimSummaryActive(user);
-  if (res.roundId === null) {
-    return [];
-  }
+  const res = await readPurchasedClaimSummaryAllRounds(user);
   const txs: PresalePreparedTx[] = [];
   for (const it of res.items) {
-    if (it.claimable > 0n) {
-      txs.push(
-        prepareContractCall({
-          contract: presale,
-          method: "claimTokens",
-          params: [it.round, BigInt(it.purchaseIndex)],
-        })
-      );
-    }
+    // one tx per (round, purchaseIndex) that has something to claim
+    txs.push(
+      prepareContractCall({
+        contract: presale,
+        method: "claimTokens",
+        params: [it.round, BigInt(it.purchaseIndex)],
+      })
+    );
   }
   return txs;
 }
+
+/* ------------------------------ Combined summary ------------------------------ */
 
 export async function readAllClaimSummary(user: `0x${string}`): Promise<{
   tokenDecimals: number;
@@ -291,7 +292,7 @@ export async function readAllClaimSummary(user: `0x${string}`): Promise<{
   parts: {
     wl: { claimableRaw: bigint; claimedRaw: bigint };
     purchased: {
-      roundId: number | null;
+      roundIdsWithPurchases: number[];
       claimableRaw: bigint;
       claimedRaw: bigint;
       items: { round: number; purchaseIndex: number; claimable: bigint }[];
@@ -300,7 +301,7 @@ export async function readAllClaimSummary(user: `0x${string}`): Promise<{
 }> {
   const [wl, purchased] = await Promise.all([
     readWhitelistClaimSummary(user),
-    readPurchasedClaimSummaryActive(user),
+    readPurchasedClaimSummaryAllRounds(user),
   ]);
 
   const tokenDecimals = purchased.tokenDecimals;
@@ -315,7 +316,7 @@ export async function readAllClaimSummary(user: `0x${string}`): Promise<{
     parts: {
       wl: { claimableRaw: wl.claimableRaw, claimedRaw: wl.claimedRaw },
       purchased: {
-        roundId: purchased.roundId,
+        roundIdsWithPurchases: purchased.roundIdsWithPurchases,
         claimableRaw: purchased.claimableRaw,
         claimedRaw: purchased.claimedRaw,
         items: purchased.items,
@@ -324,6 +325,7 @@ export async function readAllClaimSummary(user: `0x${string}`): Promise<{
   };
 }
 
+/** Build all claim txs (whitelist + purchased across all rounds). */
 export async function prepareClaimAllTxs(user: `0x${string}`): Promise<PresalePreparedTx[]> {
   const [wl, purchasedTxs] = await Promise.all([
     readWhitelistClaimSummary(user),
