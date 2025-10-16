@@ -23,7 +23,7 @@ import {
   toggleRoundActive,
   toggleRoundActiveExclusive,
   readRoundInfoByKey,
-  updateRoundWindowFromDateTx, // ✅ use this
+  updateRoundWindowFromDateTx,
   type RoundKey as RoundsWriteRoundKey,
 } from "@/utils/admin/roundsWrite";
 
@@ -147,9 +147,8 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
       Object.fromEntries(UI_KEYS.map((k) => [k, false])) as Record<UiRoundKey, boolean>
   );
 
-  // Round date fields
   const [roundDatesLoading, setRoundDatesLoading] = useState(false);
-  const [startISO, setStartISO] = useState(""); // "YYYY-MM-DDTHH:mm"
+  const [startISO, setStartISO] = useState("");
   const [endISO, setEndISO] = useState("");
 
   useEffect(() => {
@@ -281,7 +280,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
     }
   };
 
-  // Load details for expanded round (max tokens / sales / current start & end)
   useEffect(() => {
     let cancelled = false;
 
@@ -312,9 +310,16 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                   .millisecond(0)
                   .format("YYYY-MM-DDTHH:mm")
               : "";
-
           setStartISO(toISO(startSec));
           setEndISO(toISO(endSec));
+
+          const cliff = Number(info[10] ?? 0n);
+          const duration = Number(info[11] ?? 0n);
+          const tgeBps = Number(info[12] ?? 0n);
+          const tgePercent = Math.round(tgeBps / 100);
+          setCliffMonths(String(cliff));
+          setDurationMonths(String(duration));
+          setTgePct(String(tgePercent));
         }
       } catch (e) {
         console.error("Failed to read round details:", e);
@@ -394,11 +399,15 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
 
     try {
       setUpdateParamsLoading((prev) => ({ ...prev, [key]: true }));
+
+      const tgeBps = BigInt(Math.round(tgeNum * 100));
+
       await updateRoundVestingParametersTx(account, key as RoundKeyVesting, {
         cliffPeriodMonths: BigInt(Math.round(cliffNum)),
         vestingDurationMonths: BigInt(Math.round(durationNum)),
-        tgeUnlockPercentage: BigInt(Math.round(tgeNum)),
+        tgeUnlockPercentage: tgeBps,
       });
+
       toast.success(`Updated vesting parameters for ${key} round.`);
     } catch (e) {
       console.error(e);
@@ -408,7 +417,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
     }
   };
 
-  // Save Start/End dates (no “nudge”; respect the exact input)
   const handleSaveRoundDates = async () => {
     if (!expandedId) return;
     if (disabled) return;
@@ -434,18 +442,14 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
       return;
     }
 
-    // preserve the current active flag
-    const isActive = items.find((r) => r.id === id)?.active ?? false;
-
     try {
       setRowTxLoading(id, true);
+
       await updateRoundWindowFromDateTx(account, expandedId as RoundsWriteRoundKey, {
-        start: new Date(dayjs(startISO).valueOf()),
-        end:   new Date(dayjs(endISO).valueOf()),
-        // isActive omitted → preserves current active flag
+        start: new Date(startMs),
+        end: new Date(endMs),
       });
 
-      // refresh the displayed values from chain
       const info = await readRoundInfoByKey(id as RoundsWriteRoundKey);
       const toISO = (sec: bigint) =>
         sec > 0n
@@ -662,7 +666,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                     </Stack>
 
                     <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                      {/* Vesting params */}
                       <Stack gap={0.5} mb={4}>
                         <Typography variant="subtitle1">Round Vesting Parameters</Typography>
                         <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
@@ -695,13 +698,13 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                             InputLabelProps={{ shrink: true }}
                             sx={inputSx}
                             type="number"
-                            inputProps={{ step: 1, min: 0, max: 100 }}
+                            inputProps={{ step: 1, min: 0, max: 120 }}
                           />
                         </Grid>
                         <Grid size={{ xs: 12, md: 3.5 }}>
                           <TextField
                             fullWidth
-                            label="Vesting"
+                            label="Vesting (months)"
                             placeholder="0"
                             value={durationMonths}
                             onChange={(e) => setDurationMonths(e.target.value)}
@@ -709,7 +712,7 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
                             InputLabelProps={{ shrink: true }}
                             sx={inputSx}
                             type="number"
-                            inputProps={{ step: 1, min: 0, max: 100 }}
+                            inputProps={{ step: 1, min: 1, max: 120 }}
                           />
                         </Grid>
                         <Grid size={{ xs: 12, md: 1.5 }}>
@@ -725,7 +728,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
 
                       <Divider sx={{ my: 3, borderBottom: `1px solid ${theme.palette.secondary.main}` }} />
 
-                      {/* Round Start / End dates */}
                       <Stack gap={0.5} mb={4}>
                         <Typography variant="subtitle1">Round Start & End</Typography>
                         <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
@@ -789,7 +791,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
 
                       <Divider sx={{ my: 3, borderBottom: `1px solid ${theme.palette.secondary.main}` }} />
 
-                      {/* Max tokens */}
                       <Stack gap={0.5} mb={4}>
                         <Typography variant="subtitle1">Round Max Tokens</Typography>
                         <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
@@ -836,7 +837,6 @@ const RoundStatusManagement = memo(function RoundStatusManagement({
 
                       <Divider sx={{ my: 3, borderBottom: `1px solid ${theme.palette.secondary.main}` }} />
 
-                      {/* Sales summary */}
                       <Grid container spacing={2} sx={{ mb: 2 }}>
                         <Grid size={{ xs: 12, md: 6 }}>
                           <Typography variant="subtitle1">Sold Tokens</Typography>
