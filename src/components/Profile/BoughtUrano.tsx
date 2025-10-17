@@ -4,11 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import { Stack, Typography, useTheme } from "@mui/material";
 import { useActiveAccount } from "thirdweb/react";
 import { toast } from "react-toastify";
+
 import {
   readUserBoughtSummary,
   readActiveRoundPrice,
   fromUnits,
-} from "@/utils/profile/bought"; 
+} from "@/utils/profile/bought";
 
 import { formatCompactDecimalString } from "@/utils/compactDecimal";
 
@@ -24,7 +25,7 @@ export default function BoughtUrano({
   title = "Total $URANO Bought",
 }: BoughtUranoProps) {
   const theme = useTheme();
-  const account = useActiveAccount(); 
+  const account = useActiveAccount();
 
   const address = useMemo(
     () => addressOverride ?? (account?.address as `0x${string}` | undefined),
@@ -42,28 +43,43 @@ export default function BoughtUrano({
     const run = async () => {
       setLoading(true);
       try {
-        // 1) Active round price (always fetch)
-        const { priceRaw, usdcDecimals } = await readActiveRoundPrice();
-        const priceHuman =
-          priceRaw !== null ? fromUnits(priceRaw, usdcDecimals) : null;
-        if (!cancelled) setRoundPriceUsd(priceHuman);
+        // 1) Fetch user totals first (includes whitelist USD and a per-user price hint)
+        let userTotals:
+          | {
+              totalTokensRaw: bigint;
+              totalUsdRaw: bigint;
+              tokenDecimals: number;
+              usdcDecimals: number;
+              singleRoundPriceRaw: bigint | null;
+            }
+          | null = null;
 
-        // 2) User totals (only if address present)
         if (address) {
-          const res = await readUserBoughtSummary(address);
-          const totalTokensHuman = fromUnits(res.totalTokensRaw, res.tokenDecimals);
-          const totalUsdHuman = fromUnits(res.totalUsdRaw, res.usdcDecimals);
+          userTotals = await readUserBoughtSummary(address);
+          const totalTokensHuman = fromUnits(userTotals.totalTokensRaw, userTotals.tokenDecimals);
+          const totalUsdHuman = fromUnits(userTotals.totalUsdRaw, userTotals.usdcDecimals);
 
           if (!cancelled) {
             setTotalTokens(totalTokensHuman);
             setTotalUsd(totalUsdHuman);
           }
-        } else {
-          if (!cancelled) {
-            setTotalTokens("");
-            setTotalUsd("");
-          }
+        } else if (!cancelled) {
+          setTotalTokens("");
+          setTotalUsd("");
         }
+
+        // 2) Choose the price to display
+        //    - Prefer the user's single-round price (incl. whitelist)
+        //    - Fallback to currently active round price
+        let priceHuman: string | null = null;
+        if (userTotals?.singleRoundPriceRaw) {
+          priceHuman = fromUnits(userTotals.singleRoundPriceRaw, userTotals.usdcDecimals);
+        } else {
+          const { priceRaw, usdcDecimals } = await readActiveRoundPrice();
+          priceHuman = priceRaw !== null ? fromUnits(priceRaw, usdcDecimals) : null;
+        }
+
+        if (!cancelled) setRoundPriceUsd(priceHuman);
       } catch (e) {
         console.error(e);
         if (!cancelled) toast.error("Failed to load data from the contract.");

@@ -3,6 +3,7 @@ import { client } from "@/lib/thirdwebClient";
 import { sepolia } from "thirdweb/chains";
 import { presaleAbi } from "@/lib/abi/presale";
 
+/** Round keys mapped to enum indices used on-chain */
 export type RoundKey = "strategic" | "seed" | "private" | "institutional" | "community";
 export const ROUND_ENUM_INDEX: Record<RoundKey, number> = {
   strategic: 0,
@@ -32,6 +33,7 @@ const ERC20_DECIMALS_ABI = [
   },
 ] as const;
 
+/** BigInt → decimal string respecting token decimals */
 export function fromUnits(amount: bigint, decimals: number): string {
   const base = 10n ** BigInt(decimals);
   const intPart = amount / base;
@@ -83,20 +85,21 @@ export async function getUsdcDecimals(): Promise<number> {
   }
 }
 
+/** Shape returned by get*RoundInfo */
 type RoundInfoTuple = readonly [
-  boolean,
-  bigint,
-  bigint,
-  bigint,
-  bigint,
-  bigint,
-  bigint,
-  bigint,
-  boolean,
-  bigint,
-  bigint,
-  bigint,
-  bigint
+  boolean,  // isActive
+  bigint,   // tokenPrice
+  bigint,   // minPurchase
+  bigint,   // totalRaised
+  bigint,   // startTime
+  bigint,   // endTime
+  bigint,   // totalTokensSold
+  bigint,   // maxTokensToSell
+  boolean,  // isPublic
+  bigint,   // vestingEndTime
+  bigint,   // cliffPeriodMonths
+  bigint,   // vestingDurationMonths
+  bigint    // tgeUnlockPercentage (bps)
 ];
 
 export async function readRoundInfoByKey(key: RoundKey): Promise<RoundInfoTuple> {
@@ -114,36 +117,38 @@ export async function readRoundInfoByKey(key: RoundKey): Promise<RoundInfoTuple>
   }
 }
 
+/** Active round + price helper (falls back to null if none active) */
 export async function readActiveRoundPrice(): Promise<{
-    round: RoundKey | null;
-    priceRaw: bigint | null;
-    usdcDecimals: number;
-  }> {
-    const rounds = ["seed", "private", "institutional", "strategic", "community"] as const;
-  
-    const infos = (await Promise.all(rounds.map((r) => readRoundInfoByKey(r))));
-  
-    const idx = infos.findIndex((info) => info[0] === true);
-  
-    const usdcDecimals = await getUsdcDecimals();
-  
-    if (idx === -1) {
-      return { round: null, priceRaw: null, usdcDecimals };
-    }
-  
-    const info = infos[idx]!;
-    const priceRaw = info[1];
-    const round = rounds[idx]! as RoundKey;
-  
-    return { round, priceRaw, usdcDecimals };
-  }
-  
+  round: RoundKey | null;
+  priceRaw: bigint | null;
+  usdcDecimals: number;
+}> {
+  const rounds = ["seed", "private", "institutional", "strategic", "community"] as const;
+  const infos = await Promise.all(rounds.map((r) => readRoundInfoByKey(r)));
+  const idx = infos.findIndex((info) => info[0] === true);
+  const usdcDecimals = await getUsdcDecimals();
 
+  if (idx === -1) {
+    return { round: null, priceRaw: null, usdcDecimals };
+  }
+
+  const info = infos[idx]!;
+  const priceRaw = info[1];
+  const round = rounds[idx]! as RoundKey;
+  return { round, priceRaw, usdcDecimals };
+}
+
+/**
+ * Returns totals for the profile cards.
+ * IMPORTANT: includes whitelist countervalue for Strategic/Seed by pricing preAssignedTokens
+ * with the corresponding round price.
+ */
 export async function readUserBoughtSummary(user: `0x${string}`): Promise<{
   totalTokensRaw: bigint;
   totalUsdRaw: bigint;
   tokenDecimals: number;
   usdcDecimals: number;
+  /** If user participated in exactly one round (incl. whitelist), expose that round's price. */
   singleRoundPriceRaw: bigint | null;
 }> {
   const rounds: RoundKey[] = ["seed", "private", "institutional", "strategic", "community"];
@@ -153,6 +158,7 @@ export async function readUserBoughtSummary(user: `0x${string}`): Promise<{
   let totalUsdRaw = 0n;
   const nonZeroRounds: RoundKey[] = [];
 
+  // Sum on-chain purchases (non-whitelist)
   for (const rk of rounds) {
     const [amounts] = (await readContract({
       contract: presale,
@@ -173,20 +179,35 @@ export async function readUserBoughtSummary(user: `0x${string}`): Promise<{
     if (roundTokens > 0n || spent > 0n) nonZeroRounds.push(rk);
   }
 
-  const [isWhitelisted, preAssignedTokens] = (await readContract({
+  // Include whitelist countervalue for Strategic/Seed
+  const wl = (await readContract({
     contract: presale,
     method: "whitelist",
     params: [user],
-  }));
+  })) as [boolean, bigint, bigint, number]; // isWhitelisted, preAssigned, claimed, whitelistRound(uint8)
 
-  if (isWhitelisted && preAssignedTokens > 0n) {
+  let whitelistPriceRaw: bigint | null = null;
+  if (wl[0] && wl[1] > 0n) {
+    const preAssignedTokens = wl[1];
     totalTokensRaw += preAssignedTokens;
+
+    const wlRound = (["strategic","seed","private","institutional","community"] as const)[wl[3]]!;
+    const wlInfo = await readRoundInfoByKey(wlRound);
+    whitelistPriceRaw = wlInfo[1];
+
+    // preAssigned(18) * price(USDC 6) / 1e18 = USDC raw
+    totalUsdRaw += (preAssignedTokens * whitelistPriceRaw) / (10n ** 18n);
+
+    if (!nonZeroRounds.includes(wlRound)) nonZeroRounds.push(wlRound);
   }
 
+  // Determine "single round price" if user participated in exactly one round (incl. whitelist)
   let singleRoundPriceRaw: bigint | null = null;
   if (nonZeroRounds.length === 1) {
     const info = await readRoundInfoByKey(nonZeroRounds[0]!);
     singleRoundPriceRaw = info[1];
+  } else if (nonZeroRounds.length === 0 && whitelistPriceRaw) {
+    singleRoundPriceRaw = whitelistPriceRaw;
   }
 
   return {
@@ -197,4 +218,3 @@ export async function readUserBoughtSummary(user: `0x${string}`): Promise<{
     singleRoundPriceRaw,
   };
 }
-
