@@ -5,6 +5,14 @@ import { presaleAbi } from "@/lib/abi/presale";
 
 export type RoundKey = "strategic" | "seed" | "private" | "institutional" | "community";
 
+export const ROUND_ENUM_INDEX: Record<RoundKey, number> = {
+  strategic: 0,
+  seed: 1,
+  private: 2,
+  institutional: 3,
+  community: 4,
+};
+
 const PRESALE_ADDR = process.env
   .NEXT_PUBLIC_PRESALE_SMART_CONTRACT_ADDRESS as `0x${string}`;
 
@@ -15,22 +23,6 @@ const presale = getContract({
   abi: presaleAbi,
 });
 
-type RoundInfoTuple = readonly [
-  boolean,
-  bigint,
-  bigint,
-  bigint,
-  bigint,
-  bigint,
-  bigint,
-  bigint,
-  boolean,
-  bigint,
-  bigint,
-  bigint,
-  bigint
-];
-
 const ROUND_LABEL: Record<RoundKey, string> = {
   seed: "Seed Round",
   private: "Private Round",
@@ -38,6 +30,22 @@ const ROUND_LABEL: Record<RoundKey, string> = {
   strategic: "Strategic Round",
   community: "Community Round",
 };
+
+type RoundInfoTuple = readonly [
+  boolean,  // isActive
+  bigint,   // tokenPrice
+  bigint,   // minPurchase
+  bigint,   // totalRaised
+  bigint,   // startTime
+  bigint,   // endTime
+  bigint,   // totalTokensSold
+  bigint,   // maxTokensToSell
+  boolean,  // isPublic
+  bigint,   // vestingEndTime
+  bigint,   // cliffPeriodMonths
+  bigint,   // vestingDurationMonths
+  bigint    // tgeUnlockPercentage (bps)
+];
 
 async function readRoundInfoByKey(key: RoundKey): Promise<RoundInfoTuple> {
   switch (key) {
@@ -54,47 +62,53 @@ async function readRoundInfoByKey(key: RoundKey): Promise<RoundInfoTuple> {
   }
 }
 
-export type ActiveVestingSummary = {
-  round: RoundKey | null;
+export type PerRoundVesting = {
+  round: RoundKey;
   label: string;
-  tgeUnlockPct: number | null;
-  cliffMonths: number | null;
-  durationMonths: number | null;
-  releaseFrequency: "Monthly" | "Linear" | "Unknown";
+  tgeUnlockBps: number;     // e.g. 1200 = 12%
+  cliffMonths: number;      // months
+  durationMonths: number;   // months
+  releaseFrequency: "Monthly" | "Unknown";
 };
 
-export async function readActiveRoundVestingSummary(): Promise<ActiveVestingSummary> {
-  const rounds: RoundKey[] = ["strategic", "seed", "private", "institutional", "community"];
+/**
+ * Returns vesting info **only for rounds the user actually purchased in**.
+ * A round is considered participated if getUserPurchases(user, round) contains any non-zero amount.
+ */
+export async function readUserVestingSummaries(user: `0x${string}`): Promise<PerRoundVesting[]> {
+  const all: RoundKey[] = ["strategic", "seed", "private", "institutional", "community"];
 
-  const infos = await Promise.all(rounds.map((r) => readRoundInfoByKey(r)));
+  // 1) Detect participation via purchases
+  const participated: RoundKey[] = [];
+  for (const rk of all) {
+    const [amounts] = (await readContract({
+      contract: presale,
+      method: "getUserPurchases",
+      params: [user, ROUND_ENUM_INDEX[rk]],
+    })) as readonly [bigint[], bigint[], bigint[], bigint[]];
 
-  const idx = infos.findIndex((info) => info[0] === true);
-  if (idx === -1) {
-    return {
-      round: null,
-      label: "—",
-      tgeUnlockPct: null,
-      cliffMonths: null,
-      durationMonths: null,
-      releaseFrequency: "Unknown",
-    };
+    const sum = amounts.reduce((acc, v) => acc + v, 0n);
+    if (sum > 0n) participated.push(rk);
   }
 
-  const info = infos[idx]!;
-  const round = rounds[idx]!;
-  const tgeUnlockPct = Number(info[12]);
-  const cliffMonths = Number(info[10]);
-  const durationMonths = Number(info[11]);
+  if (participated.length === 0) return [];
 
-  const releaseFrequency: ActiveVestingSummary["releaseFrequency"] =
-    durationMonths > 0 ? "Monthly" : "Unknown";
+  // 2) Load vesting params for each participated round
+  const infos = await Promise.all(participated.map((rk) => readRoundInfoByKey(rk)));
 
-  return {
-    round,
-    label: ROUND_LABEL[round],
-    tgeUnlockPct,
-    cliffMonths,
-    durationMonths,
-    releaseFrequency,
-  };
+  return participated.map((rk, i) => {
+    const info = infos[i]!;
+    const cliffMonths = Number(info[10]);
+    const durationMonths = Number(info[11]);
+    const tgeUnlockBps = Number(info[12]);
+
+    return {
+      round: rk,
+      label: ROUND_LABEL[rk],
+      tgeUnlockBps,
+      cliffMonths,
+      durationMonths,
+      releaseFrequency: durationMonths > 0 ? "Monthly" : "Unknown",
+    };
+  });
 }

@@ -1,23 +1,26 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Stack, Typography, useTheme } from "@mui/material";
+import { useActiveAccount } from "thirdweb/react";
 import { toast } from "react-toastify";
+
 import {
-  readActiveRoundVestingSummary,
-  type ActiveVestingSummary,
+  readUserVestingSummaries,
+  type PerRoundVesting,
 } from "@/utils/profile/roundVesting";
 
 export default function VestingAndCliffSummary() {
   const theme = useTheme();
+  const account = useActiveAccount();
+
+  const address = useMemo(
+    () => account?.address as `0x${string}` | undefined,
+    [account?.address]
+  );
 
   const [loading, setLoading] = useState(false);
-
-  const [roundLabel, setRoundLabel] = useState<string>("—");
-  const [tgeBps, setTgeBps] = useState<number | null>(null); // store BASIS POINTS as number
-  const [cliffM, setCliffM] = useState<string>("—");
-  const [durationM, setDurationM] = useState<string>("—");
-  const [releaseFreq, setReleaseFreq] = useState<string>("Unknown");
+  const [rows, setRows] = useState<PerRoundVesting[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -25,17 +28,12 @@ export default function VestingAndCliffSummary() {
     const run = async () => {
       setLoading(true);
       try {
-        const res: ActiveVestingSummary = await readActiveRoundVestingSummary();
-        if (cancelled) return;
-
-        setRoundLabel(res.label);
-
-        // res.tgeUnlockPct is in bps (e.g. 1200 for 12%)
-        setTgeBps(res.tgeUnlockPct !== null ? Number(res.tgeUnlockPct) : null);
-
-        setCliffM(res.cliffMonths !== null ? `${Number(res.cliffMonths)} months` : "—");
-        setDurationM(res.durationMonths !== null ? `${Number(res.durationMonths)} months` : "—");
-        setReleaseFreq(res.releaseFrequency);
+        if (!address) {
+          if (!cancelled) setRows([]);
+          return;
+        }
+        const res = await readUserVestingSummaries(address);
+        if (!cancelled) setRows(res);
       } catch (e) {
         console.error(e);
         if (!cancelled) toast.error("Failed to load vesting summary.");
@@ -48,10 +46,106 @@ export default function VestingAndCliffSummary() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [address]);
 
-  // Pretty display: convert bps → % (e.g., 1200 → "12%")
-  const tgeDisplay = tgeBps !== null ? `${(tgeBps / 100).toFixed(0)}%` : "—";
+  // Helpers to render the four cards’ contents
+  const noData = rows.length === 0;
+
+  const renderTge = () => {
+    if (noData) return "no participations yet";
+    return (
+      <Stack display="grid" gridTemplateColumns="1fr 1fr" gap={0.75}>
+        {rows.map((r) => (
+          <Stack key={r.round} gap={0.25}>
+            <Typography
+              variant="body2"
+              sx={{ color: theme.palette.text.secondary }}
+            >
+              {r.label}
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{ fontSize: "1.25rem", fontWeight: 500, color: theme.palette.text.primary }}
+            >
+              {(r.tgeUnlockBps / 100).toFixed(0)}%
+            </Typography>
+          </Stack>
+        ))}
+      </Stack>
+    );
+  };
+
+  const renderDuration = () => {
+    if (noData) return "no participations yet";
+    return (
+      <Stack display="grid" gridTemplateColumns="1fr 1fr" gap={0.75}>
+        {rows.map((r) => (
+          <Stack key={r.round} gap={0.25}>
+            <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+              {r.label}
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{ fontSize: "1.25rem", fontWeight: 500, color: theme.palette.text.primary }}
+            >
+              {r.durationMonths} months
+            </Typography>
+          </Stack>
+        ))}
+      </Stack>
+    );
+  };
+
+  const renderCliff = () => {
+    if (noData) return "no participations yet";
+    return (
+      <Stack display="grid" gridTemplateColumns="1fr 1fr" gap={0.75}>
+        {rows.map((r) => (
+          <Stack key={r.round} gap={0.25}>
+            <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+              {r.label}
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{ fontSize: "1.25rem", fontWeight: 500, color: theme.palette.text.primary }}
+            >
+              {r.cliffMonths} months
+            </Typography>
+          </Stack>
+        ))}
+      </Stack>
+    );
+  };
+
+  const renderFrequency = () => {
+    if (noData) return "no participations yet";
+    return (
+      <Stack display="grid" gridTemplateColumns="1fr 1fr" gap={0.75}>
+        {rows.map((r) => (
+          <Stack key={r.round} gap={0.25}>
+            <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+              {r.label}
+            </Typography>
+            <Typography
+              variant="h6"
+              sx={{ fontSize: "1.25rem", fontWeight: 500, color: theme.palette.text.primary }}
+            >
+              {r.releaseFrequency}
+            </Typography>
+          </Stack>
+        ))}
+      </Stack>
+    );
+  };
+
+  const cardSx = {
+    background: theme.palette.transparentPaper.main,
+    border: `1px solid ${theme.palette.headerBorder.main}`,
+    borderRadius: 2,
+    px: 1.5,
+    py: 1.5,
+    width: { xs: "100%", lg: "50%" },
+  } as const;
 
   return (
     <Stack
@@ -70,122 +164,84 @@ export default function VestingAndCliffSummary() {
           variant="h6"
           sx={{ fontSize: "1rem", fontWeight: 500, color: theme.palette.text.primary }}
         >
-          Vesting + Cliff Summary
+          Vesting + Cliff Summary <span style={{ fontSize: "0.875rem", fontWeight: 400, color: theme.palette.text.secondary }}>(Only data of the rounds where you participated)</span>
         </Typography>
       </Stack>
 
+      {/* Row 1: TGE + Duration */}
       <Stack
         width="100%"
         direction={{ xs: "column", lg: "row" }}
-        alignItems="center"
+        alignItems="stretch"
         justifyContent="space-between"
         gap={{ xs: 1, lg: 2 }}
       >
-        <Stack
-          width={{ xs: "100%", lg: "50%" }}
-          gap={1}
-          sx={{
-            background: theme.palette.transparentPaper.main,
-            border: `1px solid ${theme.palette.headerBorder.main}`,
-            borderRadius: 2,
-            px: 1.5,
-            py: 1.5,
-          }}
-        >
+        <Stack sx={cardSx} gap={1}>
           <Typography
             variant="h6"
-            sx={{ fontSize: "0.875rem", fontWeight: 400, color: theme.palette.text.secondary }}
+            sx={{ fontSize: "0.955rem", fontWeight: 400, mb: 2 }}
           >
             TGE Release
           </Typography>
           <Typography
-            variant="h6"
-            sx={{ fontSize: "1.5rem", fontWeight: 500, color: theme.palette.text.primary }}
+            component="div"
+            sx={{ fontSize: "1rem", fontWeight: 400, color: theme.palette.text.primary }}
           >
-            {tgeDisplay}
+            {renderTge()}
           </Typography>
         </Stack>
 
-        <Stack
-          width={{ xs: "100%", lg: "50%" }}
-          gap={1}
-          sx={{
-            background: theme.palette.transparentPaper.main,
-            border: `1px solid ${theme.palette.headerBorder.main}`,
-            borderRadius: 2,
-            px: 1.5,
-            py: 1.5,
-          }}
-        >
+        <Stack sx={cardSx} gap={1}>
           <Typography
             variant="h6"
-            sx={{ fontSize: "0.875rem", fontWeight: 400, color: theme.palette.text.secondary }}
+            sx={{ fontSize: "0.955rem", fontWeight: 400, mb: 2 }}
           >
             Total Duration
           </Typography>
           <Typography
-            variant="h6"
-            sx={{ fontSize: "1.5rem", fontWeight: 500, color: theme.palette.text.primary }}
+            component="div"
+            sx={{ fontSize: "1rem", fontWeight: 400, color: theme.palette.text.primary }}
           >
-            {durationM}
+            {renderDuration()}
           </Typography>
         </Stack>
       </Stack>
 
+      {/* Row 2: Cliff + Frequency */}
       <Stack
         width="100%"
         direction={{ xs: "column", lg: "row" }}
-        alignItems="center"
+        alignItems="stretch"
         justifyContent="space-between"
         gap={{ xs: 1, lg: 2 }}
       >
-        <Stack
-          width={{ xs: "100%", lg: "50%" }}
-          gap={1}
-          sx={{
-            background: theme.palette.transparentPaper.main,
-            border: `1px solid ${theme.palette.headerBorder.main}`,
-            borderRadius: 2,
-            px: 1.5,
-            py: 1.5,
-          }}
-        >
+        <Stack sx={cardSx} gap={1}>
           <Typography
             variant="h6"
-            sx={{ fontSize: "0.875rem", fontWeight: 400, color: theme.palette.text.secondary }}
+            sx={{ fontSize: "0.955rem", fontWeight: 400, mb: 2 }}
           >
             Cliff Period
           </Typography>
           <Typography
-            variant="h6"
-            sx={{ fontSize: "1.5rem", fontWeight: 500, color: theme.palette.text.primary }}
+            component="div"
+            sx={{ fontSize: "1rem", fontWeight: 400, color: theme.palette.text.primary }}
           >
-            {cliffM}
+            {renderCliff()}
           </Typography>
         </Stack>
 
-        <Stack
-          width={{ xs: "100%", lg: "50%" }}
-          gap={1}
-          sx={{
-            background: theme.palette.transparentPaper.main,
-            border: `1px solid ${theme.palette.headerBorder.main}`,
-            borderRadius: 2,
-            px: 1.5,
-            py: 1.5,
-          }}
-        >
+        <Stack sx={cardSx} gap={1}>
           <Typography
             variant="h6"
-            sx={{ fontSize: "0.875rem", fontWeight: 400, color: theme.palette.text.secondary }}
+            sx={{ fontSize: "0.955rem", fontWeight: 400, mb: 2 }}
           >
             Release Frequency
           </Typography>
           <Typography
-            variant="h6"
-            sx={{ fontSize: "1.5rem", fontWeight: 500, color: theme.palette.text.primary }}
+            component="div"
+            sx={{ fontSize: "1rem", fontWeight: 400, color: theme.palette.text.primary }}
           >
-            {releaseFreq}
+            {renderFrequency()}
           </Typography>
         </Stack>
       </Stack>
