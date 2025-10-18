@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Box, Link, Stack, Typography, useTheme } from "@mui/material";
+import { Box, Link, Stack, Tooltip, Typography, useTheme, IconButton } from "@mui/material";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import { IoIosCheckmarkCircle } from "react-icons/io";
 import { toast } from "react-toastify";
 import { useActiveAccount } from "thirdweb/react";
@@ -11,6 +12,7 @@ import {
   readAllClaimSummary,
   prepareClaimAllTxs,
   formatTokenAmount,
+  formatTokenAmountFixed,
 } from "@/utils/profile/userClaimInfo";
 import { formatCompactDecimalString } from "@/utils/compactDecimal";
 
@@ -31,17 +33,33 @@ export default function UserClaimInfo({ addressOverride }: UserClaimInfoProps) {
   const [unclaimedAll, setUnclaimedAll] = useState<string>("0");
   const [claimedAll, setClaimedAll] = useState<string>("0");
 
+  // tooltip breakdown (formatted)
+  const [wlClaimableStr, setWlClaimableStr] = useState<string>("0");
+  const [purchasedClaimableStr, setPurchasedClaimableStr] = useState<string>("0");
+
   const refresh = async () => {
     if (!address) {
       setUnclaimedAll("0");
       setClaimedAll("0");
+      setWlClaimableStr("0");
+      setPurchasedClaimableStr("0");
       return;
     }
     setLoading(true);
     try {
       const all = await readAllClaimSummary(address);
+
+      // main numbers
       setUnclaimedAll(formatTokenAmount(all.unclaimedTotalRaw, all.tokenDecimals));
       setClaimedAll(formatTokenAmount(all.claimedTotalRaw, all.tokenDecimals));
+
+      // tooltip breakdown (rounded to 3 decimals)
+      setWlClaimableStr(
+        formatTokenAmountFixed(all.parts.wl.claimableRaw, all.tokenDecimals, 3)
+      );
+      setPurchasedClaimableStr(
+        formatTokenAmountFixed(all.parts.purchased.claimableRaw, all.tokenDecimals, 3)
+      );
     } catch (err) {
       console.error(err);
       toast.error(err instanceof Error ? err.message : "Failed to load claim data.");
@@ -107,9 +125,53 @@ export default function UserClaimInfo({ addressOverride }: UserClaimInfoProps) {
             borderRadius: 2, px: 2, py: 2, overflow: "hidden", position: "relative",
           }}
         >
-          <Typography variant="h6" sx={{ fontSize: "1rem", fontWeight: 400, color: theme.palette.text.primary }}>
-            Unclaimed (All)
-          </Typography>
+          <Stack direction="row" alignItems="center" gap={0.5}>
+            <Typography
+              variant="h6"
+              sx={{ fontSize: "1rem", fontWeight: 400, color: theme.palette.text.primary }}
+            >
+              Unclaimed (All)
+            </Typography>
+
+            {/* Info tooltip with breakdown */}
+            <Tooltip
+              arrow
+              placement="top"
+              title={
+                <Box sx={{ p: 0.5 }}>
+                  <Typography sx={{ fontSize: "0.75rem", fontWeight: 600, mb: 0.5 }}>
+                    Pre-assigned whitelist tokens
+                  </Typography>
+                  <Typography sx={{ fontSize: "0.85rem", mb: 1 }}>
+                    {wlClaimableStr} $URANO
+                  </Typography>
+                  <Typography sx={{ fontSize: "0.75rem", fontWeight: 600, mb: 0.5 }}>
+                    Purchased tokens
+                  </Typography>
+                  <Typography sx={{ fontSize: "0.85rem" }}>
+                    {purchasedClaimableStr} $URANO
+                  </Typography>
+                </Box>
+              }
+              slotProps={{
+                tooltip: {
+                  sx: {
+                    bgcolor: "#2B2B2B",
+                    color: "#FFFFFF",
+                    border: "1px solid #3A3A3A",
+                  },
+                },
+                arrow: {
+                  sx: { color: "#2B2B2B" },
+                },
+              }}
+            >
+              <IconButton size="small" sx={{ p: 0.25 }}>
+                <InfoOutlinedIcon fontSize="small" sx={{ color: theme.palette.text.secondary }} />
+              </IconButton>
+            </Tooltip>
+          </Stack>
+
           <Typography
             variant="h6"
             sx={{
@@ -164,8 +226,8 @@ export default function UserClaimInfo({ addressOverride }: UserClaimInfoProps) {
               {claimingAll
                 ? "Claiming…"
                 : address
-                  ? `Claim ${compactUnclaimed} $URANO`
-                  : "Connect Wallet"}
+                ? `Claim ${compactUnclaimed} $URANO`
+                : "Connect Wallet"}
             </Typography>
           </Box>
         </Link>

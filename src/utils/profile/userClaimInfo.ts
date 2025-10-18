@@ -49,37 +49,6 @@ type WhitelistObj = {
   whitelistRound: number;
 };
 
-type RoundStructTuple = readonly [
-  isActive: boolean,
-  tokenPrice: bigint,
-  minPurchase: bigint,
-  totalRaised: bigint,
-  startTime: bigint,
-  endTime: bigint,
-  totalTokensSold: bigint,
-  maxTokensToSell: bigint,
-  isPublic: boolean,
-  vestingEndTime: bigint,
-  cliffPeriodMonths: bigint,
-  vestingDurationMonths: bigint,
-  tgeUnlockPercentage: bigint
-];
-type RoundStructObj = {
-  isActive: boolean;
-  tokenPrice: bigint;
-  minPurchase: bigint;
-  totalRaised: bigint;
-  startTime: bigint;
-  endTime: bigint;
-  totalTokensSold: bigint;
-  maxTokensToSell: bigint;
-  isPublic: boolean;
-  vestingEndTime: bigint;
-  cliffPeriodMonths: bigint;
-  vestingDurationMonths: bigint;
-  tgeUnlockPercentage: bigint;
-};
-
 const ROUND_IDS = [0, 1, 2, 3, 4] as const;
 
 /* -------------------------- Type Guards & Utils -------------------------- */
@@ -106,28 +75,46 @@ function isWhitelistObj(x: unknown): x is WhitelistObj {
   );
 }
 
-function isRoundTuple(x: unknown): x is RoundStructTuple {
-  return (
-    Array.isArray(x) &&
-    x.length >= 13 &&
-    typeof x[0] === "boolean" &&
-    typeof x[1] === "bigint"
-  );
-}
-
-function isRoundObj(x: unknown): x is RoundStructObj {
-  if (x === null || typeof x !== "object") return false;
-  const r = x as Record<string, unknown>;
-  return typeof r.isActive === "boolean" && typeof r.tokenPrice === "bigint";
-}
-
+/** Format bigints with token decimals (full precision, trimmed trailing zeros). */
 export function formatTokenAmount(amountRaw: bigint, decimals: number): string {
   const base = 10n ** BigInt(decimals);
   const intPart = amountRaw / base;
   const frac = amountRaw % base;
-  if (frac === 0n) return intPart.toString();
+  if (frac === 0n) return intPart.toLocaleString();
   const fracStr = frac.toString().padStart(decimals, "0").replace(/0+$/, "");
-  return `${intPart}.${fracStr}`;
+  return `${intPart.toLocaleString()}.${fracStr}`;
+}
+
+/** Format bigints with fixed decimal places, rounded (e.g., dp=3). */
+export function formatTokenAmountFixed(
+  amountRaw: bigint,
+  decimals: number,
+  dp = 3
+): string {
+  if (dp <= 0) return formatTokenAmount(amountRaw, decimals);
+  if (amountRaw === 0n) return "0";
+
+  const base = 10n ** BigInt(decimals);
+  const intPart = amountRaw / base;
+  const frac = amountRaw % base;
+
+  // If we need fewer decimal places than token decimals, round:
+  if (decimals > dp) {
+    const keep = 10n ** BigInt(decimals - dp); // divider for rounding
+    // Round half up
+    const rounded = (frac + keep / 2n) / keep;
+    // If rounding carries into integer
+    if (rounded >= 10n ** BigInt(dp)) {
+      return `${(intPart + 1n).toLocaleString()}`;
+    }
+    const fracStr = rounded.toString().padStart(dp, "0").replace(/0+$/, "");
+    return fracStr.length
+      ? `${intPart.toLocaleString()}.${fracStr}`
+      : `${intPart.toLocaleString()}`;
+  }
+
+  // If token decimals <= dp, just format naturally (no extra zeros)
+  return formatTokenAmount(amountRaw, decimals);
 }
 
 async function getTokenDecimals(): Promise<number> {
@@ -158,14 +145,14 @@ async function getTokenDecimals(): Promise<number> {
 /* -------------------------- Whitelist (Pre-assign) -------------------------- */
 
 export async function readWhitelistClaimSummary(user: `0x${string}`): Promise<{
-  claimableRaw: bigint;
+  claimableRaw: bigint; // claimable NOW (uses contract's getWhitelistClaimable)
   claimedRaw: bigint;
   preAssignedRaw: bigint;
   tokenDecimals: number;
 }> {
   const tokenDecimals = await getTokenDecimals();
 
-  const wlRawUnknown: unknown = await readContract({
+  const wlUnknown: unknown = await readContract({
     contract: presale,
     method: "whitelist",
     params: [user],
@@ -175,14 +162,14 @@ export async function readWhitelistClaimSummary(user: `0x${string}`): Promise<{
   let preAssignedRaw = 0n;
   let claimedRaw = 0n;
 
-  if (isWhitelistTuple(wlRawUnknown)) {
-    isWhitelisted = wlRawUnknown[0];
-    preAssignedRaw = wlRawUnknown[1];
-    claimedRaw = wlRawUnknown[2];
-  } else if (isWhitelistObj(wlRawUnknown)) {
-    isWhitelisted = wlRawUnknown.isWhitelisted;
-    preAssignedRaw = wlRawUnknown.preAssignedTokens;
-    claimedRaw = wlRawUnknown.claimedTokens;
+  if (isWhitelistTuple(wlUnknown)) {
+    isWhitelisted = wlUnknown[0];
+    preAssignedRaw = wlUnknown[1];
+    claimedRaw = wlUnknown[2];
+  } else if (isWhitelistObj(wlUnknown)) {
+    isWhitelisted = wlUnknown.isWhitelisted;
+    preAssignedRaw = wlUnknown.preAssignedTokens;
+    claimedRaw = wlUnknown.claimedTokens;
   } else {
     log("Whitelist returned an unknown shape; treating as not whitelisted.");
   }
@@ -191,8 +178,18 @@ export async function readWhitelistClaimSummary(user: `0x${string}`): Promise<{
     return { claimableRaw: 0n, claimedRaw: 0n, preAssignedRaw: 0n, tokenDecimals };
   }
 
-  const diff = preAssignedRaw - claimedRaw;
-  const claimableRaw = diff > 0n ? diff : 0n;
+  // Ask the contract what is claimable NOW (respects vesting/TGE)
+  let claimableRaw = 0n;
+  try {
+    claimableRaw = (await readContract({
+      contract: presale,
+      method: "getWhitelistClaimable",
+      params: [user],
+    }));
+  } catch (e) {
+    log("getWhitelistClaimable failed:", e);
+  }
+
   return { claimableRaw, claimedRaw, preAssignedRaw, tokenDecimals };
 }
 
@@ -205,7 +202,7 @@ export function prepareWhitelistClaimTx(): PresalePreparedTx {
 }
 
 /* ----------------------------- Purchased vesting ----------------------------- */
-/** Claim summary across *all* rounds, not just the active one. */
+/** Claim summary across *all* rounds (only claimable NOW) */
 export async function readPurchasedClaimSummaryAllRounds(user: `0x${string}`): Promise<{
   roundIdsWithPurchases: number[];
   claimableRaw: bigint;
@@ -240,7 +237,7 @@ export async function readPurchasedClaimSummaryAllRounds(user: `0x${string}`): P
     const n = Math.min(amounts.length, claimables.length, claimed.length);
     if (n === 0) continue;
 
-    // Mark that this round has entries for the user
+    // This round has entries for the user
     roundIdsWithPurchases.push(roundId);
 
     for (let i = 0; i < n; i++) {
@@ -251,7 +248,6 @@ export async function readPurchasedClaimSummaryAllRounds(user: `0x${string}`): P
         items.push({ round: roundId, purchaseIndex: i, claimable: cNow });
         totalClaimable += cNow;
       }
-      // Sum all claimed so far for display
       totalClaimed += cl;
     }
   }
@@ -271,7 +267,7 @@ export async function preparePurchasedClaimTxs(
   const res = await readPurchasedClaimSummaryAllRounds(user);
   const txs: PresalePreparedTx[] = [];
   for (const it of res.items) {
-    // one tx per (round, purchaseIndex) that has something to claim
+    // one tx per (round, purchaseIndex) that has something to claim NOW
     txs.push(
       prepareContractCall({
         contract: presale,
@@ -287,14 +283,14 @@ export async function preparePurchasedClaimTxs(
 
 export async function readAllClaimSummary(user: `0x${string}`): Promise<{
   tokenDecimals: number;
-  unclaimedTotalRaw: bigint;
-  claimedTotalRaw: bigint;
+  unclaimedTotalRaw: bigint; // only claimable NOW
+  claimedTotalRaw: bigint;   // all-time claimed (whitelist + purchased)
   parts: {
-    wl: { claimableRaw: bigint; claimedRaw: bigint };
+    wl: { claimableRaw: bigint; claimedRaw: bigint; preAssignedRaw: bigint };
     purchased: {
       roundIdsWithPurchases: number[];
-      claimableRaw: bigint;
-      claimedRaw: bigint;
+      claimableRaw: bigint; // only claimable NOW (across all purchases)
+      claimedRaw: bigint;   // all-time claimed (across all purchases)
       items: { round: number; purchaseIndex: number; claimable: bigint }[];
     };
   };
@@ -314,7 +310,11 @@ export async function readAllClaimSummary(user: `0x${string}`): Promise<{
     unclaimedTotalRaw,
     claimedTotalRaw,
     parts: {
-      wl: { claimableRaw: wl.claimableRaw, claimedRaw: wl.claimedRaw },
+      wl: {
+        claimableRaw: wl.claimableRaw,
+        claimedRaw: wl.claimedRaw,
+        preAssignedRaw: wl.preAssignedRaw,
+      },
       purchased: {
         roundIdsWithPurchases: purchased.roundIdsWithPurchases,
         claimableRaw: purchased.claimableRaw,
@@ -325,7 +325,7 @@ export async function readAllClaimSummary(user: `0x${string}`): Promise<{
   };
 }
 
-/** Build all claim txs (whitelist + purchased across all rounds). */
+/** Build all claim txs (whitelist + purchased across all rounds) — only if claimable NOW. */
 export async function prepareClaimAllTxs(user: `0x${string}`): Promise<PresalePreparedTx[]> {
   const [wl, purchasedTxs] = await Promise.all([
     readWhitelistClaimSummary(user),
