@@ -43,14 +43,14 @@ export default function BoughtUrano({
     const run = async () => {
       setLoading(true);
       try {
-        // 1) Fetch user totals first (includes whitelist USD and a per-user price hint)
+        // 1) Get user totals (and per-user display price)
         let userTotals:
           | {
               totalTokensRaw: bigint;
               totalUsdRaw: bigint;
               tokenDecimals: number;
               usdcDecimals: number;
-              singleRoundPriceRaw: bigint | null;
+              displayPriceRaw: bigint | null;
             }
           | null = null;
 
@@ -68,12 +68,13 @@ export default function BoughtUrano({
           setTotalUsd("");
         }
 
-        // 2) Choose the price to display
-        //    - Prefer the user's single-round price (incl. whitelist)
-        //    - Fallback to currently active round price
+        // 2) Decide the price to show
+        //    Prefer the user's display price (single-round list price or multi-round weighted avg).
+        //    Fallback to the currently active round price.
         let priceHuman: string | null = null;
-        if (userTotals?.singleRoundPriceRaw) {
-          priceHuman = fromUnits(userTotals.singleRoundPriceRaw, userTotals.usdcDecimals);
+
+        if (userTotals?.displayPriceRaw != null) {
+          priceHuman = fromUnits(userTotals.displayPriceRaw, userTotals.usdcDecimals);
         } else {
           const { priceRaw, usdcDecimals } = await readActiveRoundPrice();
           priceHuman = priceRaw !== null ? fromUnits(priceRaw, usdcDecimals) : null;
@@ -162,7 +163,7 @@ export default function BoughtUrano({
           >
             {roundPriceUsd
               ? `Round price: $${Number(roundPriceUsd).toLocaleString(undefined, {
-                  maximumFractionDigits: 6,
+                  maximumFractionDigits: 2,
                 })}`
               : "Round price: —"}
           </Typography>

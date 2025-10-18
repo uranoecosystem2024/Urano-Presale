@@ -148,15 +148,20 @@ export async function readUserBoughtSummary(user: `0x${string}`): Promise<{
   totalUsdRaw: bigint;
   tokenDecimals: number;
   usdcDecimals: number;
-  /** If user participated in exactly one round (incl. whitelist), expose that round's price. */
-  singleRoundPriceRaw: bigint | null;
+  /**
+   * Price to display:
+   *  - single round → that round's list price
+   *  - multiple rounds → weighted average (totalUsd / totalTokens)
+   *  - none → null
+   */
+  displayPriceRaw: bigint | null;
 }> {
   const rounds: RoundKey[] = ["seed", "private", "institutional", "strategic", "community"];
   const [tokenDecimals, usdcDecimals] = await Promise.all([getTokenDecimals(), getUsdcDecimals()]);
 
-  let totalTokensRaw = 0n;
-  let totalUsdRaw = 0n;
-  const nonZeroRounds: RoundKey[] = [];
+  let totalTokensRaw = 0n; // URANO (18)
+  let totalUsdRaw = 0n;    // USDC (6)
+  const participatedRounds: Set<RoundKey> = new Set<RoundKey>();
 
   // Sum on-chain purchases (non-whitelist)
   for (const rk of rounds) {
@@ -176,7 +181,7 @@ export async function readUserBoughtSummary(user: `0x${string}`): Promise<{
     }));
 
     totalUsdRaw += spent;
-    if (roundTokens > 0n || spent > 0n) nonZeroRounds.push(rk);
+    if (roundTokens > 0n || spent > 0n) participatedRounds.add(rk);
   }
 
   // Include whitelist countervalue for Strategic/Seed
@@ -186,28 +191,33 @@ export async function readUserBoughtSummary(user: `0x${string}`): Promise<{
     params: [user],
   })) as [boolean, bigint, bigint, number]; // isWhitelisted, preAssigned, claimed, whitelistRound(uint8)
 
-  let whitelistPriceRaw: bigint | null = null;
   if (wl[0] && wl[1] > 0n) {
-    const preAssignedTokens = wl[1];
+    const preAssignedTokens = wl[1]; // 18
     totalTokensRaw += preAssignedTokens;
 
     const wlRound = (["strategic","seed","private","institutional","community"] as const)[wl[3]]!;
     const wlInfo = await readRoundInfoByKey(wlRound);
-    whitelistPriceRaw = wlInfo[1];
+    const whitelistPriceRaw = wlInfo[1]; // 6
 
-    // preAssigned(18) * price(USDC 6) / 1e18 = USDC raw
+    // preAssigned(18) * price(6) / 1e18 = USDC raw
     totalUsdRaw += (preAssignedTokens * whitelistPriceRaw) / (10n ** 18n);
-
-    if (!nonZeroRounds.includes(wlRound)) nonZeroRounds.push(wlRound);
+    participatedRounds.add(wlRound);
   }
 
-  // Determine "single round price" if user participated in exactly one round (incl. whitelist)
-  let singleRoundPriceRaw: bigint | null = null;
-  if (nonZeroRounds.length === 1) {
-    const info = await readRoundInfoByKey(nonZeroRounds[0]!);
-    singleRoundPriceRaw = info[1];
-  } else if (nonZeroRounds.length === 0 && whitelistPriceRaw) {
-    singleRoundPriceRaw = whitelistPriceRaw;
+  // Determine display price
+  let displayPriceRaw: bigint | null = null;
+
+  if (participatedRounds.size === 1) {
+    // exactly one round ⇒ show list price for that round
+    const onlyRound = [...participatedRounds][0]!;
+    const info = await readRoundInfoByKey(onlyRound);
+    displayPriceRaw = info[1]; // 6
+  } else if (participatedRounds.size > 1 && totalTokensRaw > 0n) {
+    // weighted average over tokens
+    // avgPrice(6) = totalUsd(6) / (tokens(18)/1e18) = (totalUsd * 1e18) / tokens
+    displayPriceRaw = (totalUsdRaw * (10n ** 18n)) / totalTokensRaw;
+  } else {
+    displayPriceRaw = null;
   }
 
   return {
@@ -215,6 +225,6 @@ export async function readUserBoughtSummary(user: `0x${string}`): Promise<{
     totalUsdRaw,
     tokenDecimals,
     usdcDecimals,
-    singleRoundPriceRaw,
+    displayPriceRaw,
   };
 }
