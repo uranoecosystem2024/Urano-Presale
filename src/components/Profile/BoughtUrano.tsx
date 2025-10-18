@@ -35,7 +35,7 @@ export default function BoughtUrano({
   const [loading, setLoading] = useState(false);
   const [totalTokens, setTotalTokens] = useState<string>("");
   const [totalUsd, setTotalUsd] = useState<string>("");
-  const [roundPriceUsd, setRoundPriceUsd] = useState<string | null>(null);
+  const [roundPriceText, setRoundPriceText] = useState<string>("Round price: —");
 
   useEffect(() => {
     let cancelled = false;
@@ -43,47 +43,64 @@ export default function BoughtUrano({
     const run = async () => {
       setLoading(true);
       try {
-        // 1) Get user totals (and per-user display price)
-        let userTotals:
-          | {
-              totalTokensRaw: bigint;
-              totalUsdRaw: bigint;
-              tokenDecimals: number;
-              usdcDecimals: number;
-              displayPriceRaw: bigint | null;
-            }
-          | null = null;
+        // 1) Fetch user totals (includes whitelist USD and a user-avg price)
+        let totalTokensHuman = "";
+        let totalUsdHuman = "";
+        let userPriceHuman: string | null = null;
+        let participationCount = 0;
 
         if (address) {
-          userTotals = await readUserBoughtSummary(address);
-          const totalTokensHuman = fromUnits(userTotals.totalTokensRaw, userTotals.tokenDecimals);
-          const totalUsdHuman = fromUnits(userTotals.totalUsdRaw, userTotals.usdcDecimals);
+          const userTotals = await readUserBoughtSummary(address);
+          totalTokensHuman = fromUnits(userTotals.totalTokensRaw, userTotals.tokenDecimals);
+          totalUsdHuman = fromUnits(userTotals.totalUsdRaw, userTotals.usdcDecimals);
+          participationCount = userTotals.participationCount;
 
-          if (!cancelled) {
-            setTotalTokens(totalTokensHuman);
-            setTotalUsd(totalUsdHuman);
+          if (userTotals.priceRawForUser !== null) {
+            userPriceHuman = fromUnits(userTotals.priceRawForUser, userTotals.usdcDecimals);
           }
-        } else if (!cancelled) {
-          setTotalTokens("");
-          setTotalUsd("");
-        }
-
-        // 2) Decide the price to show
-        //    Prefer the user's display price (single-round list price or multi-round weighted avg).
-        //    Fallback to the currently active round price.
-        let priceHuman: string | null = null;
-
-        if (userTotals?.displayPriceRaw != null) {
-          priceHuman = fromUnits(userTotals.displayPriceRaw, userTotals.usdcDecimals);
         } else {
-          const { priceRaw, usdcDecimals } = await readActiveRoundPrice();
-          priceHuman = priceRaw !== null ? fromUnits(priceRaw, usdcDecimals) : null;
+          totalTokensHuman = "";
+          totalUsdHuman = "";
         }
 
-        if (!cancelled) setRoundPriceUsd(priceHuman);
+        if (!cancelled) {
+          setTotalTokens(totalTokensHuman);
+          setTotalUsd(totalUsdHuman);
+        }
+
+        // 2) Decide what to show for "Round price"
+        //    - If user has NO participations → "no participations yet"
+        //    - Else show user's weighted average price
+        //    - (We no longer fall back to active round price here, per your request)
+        if (!cancelled) {
+          if (participationCount === 0) {
+            setRoundPriceText("Round price: no participations yet");
+          } else if (userPriceHuman) {
+            const pretty = Number(userPriceHuman).toLocaleString(undefined, {
+              maximumFractionDigits: 6,
+            });
+            setRoundPriceText(`Round price: $${pretty}`);
+          } else {
+            // Safety fallback if we somehow have participationCount>0 but no price:
+            // show active round price if available, otherwise keep "—"
+            const { priceRaw, usdcDecimals } = await readActiveRoundPrice();
+            if (priceRaw) {
+              const activePriceHuman = fromUnits(priceRaw, usdcDecimals);
+              const pretty = Number(activePriceHuman).toLocaleString(undefined, {
+                maximumFractionDigits: 6,
+              });
+              setRoundPriceText(`Round price: $${pretty}`);
+            } else {
+              setRoundPriceText("Round price: —");
+            }
+          }
+        }
       } catch (e) {
         console.error(e);
-        if (!cancelled) toast.error("Failed to load data from the contract.");
+        if (!cancelled) {
+          toast.error("Failed to load data from the contract.");
+          setRoundPriceText("Round price: —");
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -161,11 +178,7 @@ export default function BoughtUrano({
             variant="h6"
             sx={{ fontSize: "0.875rem", fontWeight: 400, color: theme.palette.text.secondary }}
           >
-            {roundPriceUsd
-              ? `Round price: $${Number(roundPriceUsd).toLocaleString(undefined, {
-                  maximumFractionDigits: 2,
-                })}`
-              : "Round price: —"}
+            {roundPriceText}
           </Typography>
         </Stack>
       </Stack>
