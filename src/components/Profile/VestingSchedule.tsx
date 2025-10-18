@@ -5,8 +5,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Stack, Typography, useTheme } from "@mui/material";
 import { useActiveAccount } from "thirdweb/react";
 import { toast } from "react-toastify";
+
 import {
-  readActiveRoundMonthlyVesting,
+  readAllParticipatedMonthlyVesting,
   formatTokenAmount,
   type MonthlyVestingItem,
 } from "@/utils/profile/vestingUnlocks";
@@ -38,7 +39,7 @@ export default function VestingSchedule({ addressOverride }: VestingScheduleProp
       }
       setLoading(true);
       try {
-        const res = await readActiveRoundMonthlyVesting(address);
+        const res = await readAllParticipatedMonthlyVesting(address);
         if (cancelled) return;
         setDecimals(res.tokenDecimals);
         setItems(res.items);
@@ -82,31 +83,30 @@ export default function VestingSchedule({ addressOverride }: VestingScheduleProp
             >
               <Typography
                 variant="h6"
-                sx={{ fontSize: "0.875rem", fontWeight: 300, color: theme.palette.text.primary }}
+                sx={{ fontSize: "0.9rem", fontWeight: 400, color: theme.palette.text.primary }}
+                title={it.firstUnlockDate.toLocaleDateString(undefined, {
+                  day: "2-digit",
+                  month: "long",
+                  year: "numeric",
+                })}
               >
-                {it.label}
+                {it.label /* e.g., "Nov 2025" */}
               </Typography>
               <Typography
                 variant="h6"
-                sx={{ fontSize: "0.875rem", fontWeight: 300, color: theme.palette.text.primary }}
+                sx={{ fontSize: "0.9rem", fontWeight: 500, color: theme.palette.text.primary }}
               >
                 {`${formatTokenAmount(it.amountRaw, decimals)} $URANO`}
               </Typography>
             </Stack>
           ))
         ) : (
-          <Typography
-            variant="body2"
-            sx={{ color: theme.palette.text.secondary }}
-          >
-            No scheduled unlocks for the active round.
+          <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
+            No upcoming unlocks for your participations yet.
           </Typography>
         )
       ) : (
-        <Typography
-          variant="body2"
-          sx={{ color: theme.palette.text.secondary }}
-        >
+        <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
           Connect your wallet to see your vesting schedule.
         </Typography>
       )}
